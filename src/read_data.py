@@ -1,21 +1,25 @@
-# TODO: Write the function to read the data from gesture capturing and return it to lstm
-import pandas as pd
-import numpy as np
 import ast
-from os.path import dirname, abspath
 import os
-from pathlib import Path
-from dataclass import Data
 import re
+from os.path import abspath, dirname
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+from dataclass import Data
 
 
-def read_data():
+def read_data() -> list:
     # From the current file get the parent directory and create a purepath to the Dataset folder
     parent_directory = Path(dirname(dirname(abspath(__file__))))
     path = parent_directory / "HandDataset"
-    # List all file names ending with .txt
-    file_names = [file for file in os.listdir(str(path)) if file.endswith(".txt")]
+    # List all file names ending with .txt sorted by size
+    file_names = [(file, os.path.getsize(path / file)) for file in os.listdir(str(path)) if file.endswith(".txt")]
+    file_names.sort(key=lambda file: file[1], reverse=True)
+    file_names = [file_name[0] for file_name in file_names]
     data_list = []
+    largest_frame_count = None
 
     for file_name in file_names:
         # open the file
@@ -25,12 +29,22 @@ def read_data():
             # Read all frames
             dataframes = file.readlines()
 
+        # storing the largest frame size
+        if not largest_frame_count:
+            largest_frame_count = len(dataframes)
+
         empty_list = []
         # Convert the str represented list to an actual list again
         for frame in dataframes:
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
+
             empty_list.append(df)
+
+        # pad all with zeros to the largest size
+        while len(empty_list) < largest_frame_count:
+            empty_list.append(pd.DataFrame(np.zeros((21, 3))))
+
         # Input into a NP array
         data_array = np.asarray(empty_list)
         # Create a data class combining data and label
@@ -38,4 +52,9 @@ def read_data():
 
         # save the list for each capture
         data_list.append(data_1)
+
     return data_list
+
+
+read_data()
+
