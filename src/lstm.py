@@ -17,17 +17,18 @@ The lstm and linear layer variables are used to create the LSTM and linear layer
 
 
 class LSTMNetwork(nn.Module):
-    def __init__(self, input_size=3, output_size=1, hidden_layer_size=10, drop_prob=0.5):
+    def __init__(self, input_size=21, output_size=3, hidden_layer_size=10, drop_prob=0.2):
         super(LSTMNetwork, self).__init__()
         self.output_size = output_size
         self.hidden_layer_size = hidden_layer_size
         self.lstm = nn.LSTM(input_size, hidden_layer_size)
         self.dropout = nn.Dropout(drop_prob)
         self.linear = nn.Linear(hidden_layer_size, output_size)
-        self.activation = nn.Sigmoid()
+        self.activation = nn.Softmax()
         self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size), torch.zeros(1, 1, self.hidden_layer_size))
 
     def forward(self, input_seq):
+        print(type(input_seq))
         input_seq = torch.Tensor(input_seq)
         lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq), batch_size, -1), self.hidden_cell)
         lstm_out = lstm_out.contiguous().view(-1, self.hidden_layer_size)
@@ -43,7 +44,7 @@ class LSTMNetwork(nn.Module):
 
 model = LSTMNetwork(hidden_layer_size=10, drop_prob=0.5)
 model = model.float()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adamax(model.parameters(), lr=0.001)
 loss_function_1 = nn.CrossEntropyLoss()
 loss_function_2 = nn.MSELoss()
 gesture_data = read_data()
@@ -61,7 +62,7 @@ for i in range(epochs):
         # labels = torch.reshape(labels, -1)
         labels = float(labels)
         labels = torch.tensor([[labels]])
-        single_loss = loss_function_2(y_pred, labels)
+        single_loss = loss_function_1(y_pred, labels)
         single_loss.backward()
         optimizer.step()
     if i % 10 == 1:
