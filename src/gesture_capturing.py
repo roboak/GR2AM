@@ -26,6 +26,7 @@ class GestureCapture:
             self.gesture_dict[self.gestureMetaData.gestureName]["trials"] + 1) + '.txt'
         self.gesture_path = self.folder_location + '/' + self.gesture_name
         self.update_meta_data(self.gesture_dict, self.gesture_name)
+        self.data_file = open(self.gesture_path, "w")
 
     def gesture_extraction(self, previous_frame, current_frame):
         current_frame_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
@@ -50,7 +51,7 @@ class GestureCapture:
             return results
 
     def get_frame(self):
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1) # FIXME input source!!!!
         # Capture the video frame by frame
         success, current_frame = cap.read()
         while not success:
@@ -91,12 +92,14 @@ class GestureCapture:
         cv2.destroyAllWindows()
 
     def write_file(self, key_points):
-        file = open(self.gesture_path, "w")
-        file.write(str(key_points) + "\n")
-        file.close()
+        if key_points:
+            self.data_file.write(str(key_points) + "\n")
 
     def update_meta_data(self, gesture_dictionary, gesture_file):
         gesture_dictionary[self.gestureMetaData.gestureName]["trials"] += 1
         gesture_dictionary[self.gestureMetaData.gestureName]["files"].append(gesture_file)
         with open(self.meta_data_file, "w") as outfile:
             json.dump(gesture_dictionary, outfile)
+
+    def __del__(self):
+        self.data_file.close()

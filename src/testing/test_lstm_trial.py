@@ -50,7 +50,7 @@ epochs = 100
 single_loss = None
 
 for i in range(epochs):
-    for seq, labels in Train_Data_Loader:
+    for seq, labels in Train_Data_Loader: # TODO
         optimizer.zero_grad()
         model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size), torch.zeros(1, 1, model.hidden_layer_size))
         y_pred = model(seq.float())
