@@ -27,6 +27,7 @@ class GestureCapture:
         self.gesture_path = self.folder_location + '/' + self.gesture_name
         self.update_meta_data(self.gesture_dict, self.gesture_name)
         self.data_file = open(self.gesture_path, "w")
+        self.all_keypoints =[]
 
     def gesture_extraction(self, previous_frame, current_frame):
         current_frame_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
@@ -51,7 +52,7 @@ class GestureCapture:
             return results
 
     def get_frame(self):
-        cap = cv2.VideoCapture(1) # FIXME input source!!!!
+        cap = cv2.VideoCapture(0) # FIXME input source!!!!
         # Capture the video frame by frame
         success, current_frame = cap.read()
         while not success:
@@ -73,27 +74,29 @@ class GestureCapture:
                     self.mp_drawing.draw_landmarks(image, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
             # print(results.multi_hand_landmarks)  # one frame of 21 landmarks
             # print(dir(results.multi_hand_landmarks[0]))
-            keypoints = []
+            keypoints_per_frame = []
             if results.multi_hand_landmarks:
                 for data_point in results.multi_hand_landmarks[0].landmark:
-                    keypoints.append({
-                        'X': data_point.x,
-                        'Y': data_point.y,
-                        'Z': data_point.z,
-                    })
-            print(keypoints)
-            self.write_file(key_points=keypoints)
+                    if data_point:
+                        keypoints_per_frame.append({
+                            'X': data_point.x,
+                            'Y': data_point.y,
+                            'Z': data_point.z,
+                        })
             cv2.imshow('MediaPipe Hands', image)
+            if keypoints_per_frame:
+                self.all_keypoints.append(keypoints_per_frame)
             if cv2.waitKey(2) & 0xFF == ord('q'):  # close on key q
                 break
         # After the loop release the cap object
         cap.release()
         # Destroy all the windows
         cv2.destroyAllWindows()
+        self.write_file(key_points= self.all_keypoints)
 
     def write_file(self, key_points):
-        if key_points:
-            self.data_file.write(str(key_points) + "\n")
+        for item in key_points:
+            self.data_file.write(str(item) + "\n")
 
     def update_meta_data(self, gesture_dictionary, gesture_file):
         gesture_dictionary[self.gestureMetaData.gestureName]["trials"] += 1
