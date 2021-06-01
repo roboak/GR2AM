@@ -9,41 +9,33 @@ from read_data import read_data
 
 device = torch.device("cpu")
 sequence_length = 21
-batch_size = 72
-
-"""
-LSTM algorithm accepts three inputs: previous hidden state, previous cell state and current input. 
-The hidden_cell variable contains the previous hidden and cell state. 
-The lstm and linear layer variables are used to create the LSTM and linear layers.
-"""
+batch_size = 3
 
 
+# We want to input each capture row by row, i.e. each frame into the model, thus we have as the input the 21x3 matrix
+# which we possibly need to reshape/flatten into 63x1, as X Y Z are all important for each landmark
 class LSTMNetwork(nn.Module):
     def __init__(self, input_size=21, output_size=3, hidden_layer_size=10, drop_prob=0.2):
         super(LSTMNetwork, self).__init__()
         self.output_size = output_size
         self.hidden_layer_size = hidden_layer_size
-        self.lstm = nn.LSTM(input_size, hidden_layer_size)
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, bidirectional=True)
         self.dropout = nn.Dropout(drop_prob)
-        self.linear = nn.Linear(hidden_layer_size, 63)
-        self.linear_2 = nn.Linear(63, output_size)
+        self.fc = nn.Linear(hidden_layer_size, output_size)
         self.activation = nn.Softmax()
-        self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size), torch.zeros(1, 1, self.hidden_layer_size))
+        # (h0, c0) => num_layers, input_size, hidden_size
+        self.hidden_cell = (torch.zeros(1, 21, self.hidden_layer_size), torch.zeros(1, 21, self.hidden_layer_size))
 
     def forward(self, input_seq):
-        # input_seq = np.reshape(input_seq, (63, 72))
         input_seq = torch.Tensor(input_seq)
-        # lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq), batch_size, -1), self.hidden_cell)
-        lstm_out, self.hidden_cell = self.lstm(input_seq.view(3, batch_size, -1), self.hidden_cell)
+        input_seq = input_seq.view(len(input_seq), batch_size, -1)  # ✅ Here we now got a tensor containing 21 pairs of 3, so X Y Z
+
+        lstm_out, _ = self.lstm(input_seq, self.hidden_cell)
+
         lstm_out = lstm_out.contiguous().view(-1, self.hidden_layer_size)
         out = self.dropout(lstm_out)
         out = self.activation(out)
-        out = self.linear(out)
-        out = self.linear_2(out)
-
-        # out = out.reshape(-1)
-
-        # out = self.linear(lstm_out.view(len(input_seq), -1))[-1]
+        out = self.fc(out)
         return out
 
 
@@ -60,27 +52,30 @@ single_loss = None
 for i in range(epochs):
     for file in gesture_data:  # for each capture
         seq, labels = file.data, file.label
-        optimizer.zero_grad()
-        model.hidden_cell = (torch.zeros(1, 1, model.hidden_layer_size), torch.zeros(1, 1, model.hidden_layer_size))
-        y_pred = model(seq)
-        # labels = torch.reshape(labels, -1)
-        print(y_pred.shape)
 
-        ###
-        x = int(labels)
-        labels = torch.empty(1, 3)  # 3 = input_size  -> tensor([0., 0., 0.])
-        labels[0][x] = 1.
-        labels = torch.tensor([0.0, 1.0, 0.0])  # -> tensor([0., 1., 0.])
-        print(labels)
-        ###
+        for frame in seq:
+            optimizer.zero_grad()
+            model.hidden_cell = (torch.zeros(1, 3, model.hidden_layer_size), torch.zeros(1, 3, model.hidden_layer_size))
+            y_pred = model(frame)
+            # labels = torch.reshape(labels, -1)
+            print(y_pred.shape)
 
-        # gesture1 -> tensor([1., 0., 0.])
-        # gesture2 -> tensor([0., 1., 0.])
-        # gesture3 -> tensor([0., 0., 1.])
+            # FIXME below should rather be indexing the probability
+            ###
+            x = int(labels)
+            labels = torch.empty(1, 3)  # 3 = input_size  -> tensor([0., 0., 0.])
+            labels[0][x] = 1.
+            labels = torch.tensor([0.0, 1.0, 0.0])  # -> tensor([0., 1., 0.])
+            print(labels)
+            ###
 
-        single_loss = loss_function(y_pred, labels)  # pred = no classes, target is simply the index
-        single_loss.backward()
-        optimizer.step()
+            # gesture1 -> tensor([1., 0., 0.])
+            # gesture2 -> tensor([0., 1., 0.])
+            # gesture3 -> tensor([0., 0., 1.])
+
+            single_loss = loss_function(y_pred, labels)  # pred = no classes, target is simply the index
+            single_loss.backward()
+            optimizer.step()
     if i % 10 == 1:
         print(f'epoch: {i} loss: {single_loss.item()}')
 
