@@ -1,11 +1,14 @@
 import numpy as np
-import read_data
-from sklearn.model_selection import train_test_split
-from torch.utils.data import TensorDataset, DataLoader
 import torch
 import torch.nn as nn
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, TensorDataset
+import matplotlib.pyplot as plt
+from sklearn.metrics import multilabel_confusion_matrix
+import read_data
 
-def format_data(dataset): #read data in the format of [total_data_size, sequence length, feature_size, feature_dim]
+
+def format_data(dataset):  # read data in the format of [total_data_size, sequence length, feature_size, feature_dim]
     seq_len = dataset[0].data.shape[0]
     num_features = dataset[0].data.shape[1]
     feature_dim = dataset[0].data.shape[2]
@@ -17,14 +20,16 @@ def format_data(dataset): #read data in the format of [total_data_size, sequence
         labels[idx] = data.label
     # Return all data stacked together
     # Shape of data changes from [batch_size,seq_len,input_dim,feature_dims] -> [batch_size,seq_len,input_dim*feature_dims]
-    data_dict["data"] = data_array.reshape(len(data_array), seq_len, num_features*feature_dim).astype(np.float)
+    data_dict["data"] = data_array.reshape(len(data_array), seq_len, num_features * feature_dim).astype(np.float)
     data_dict["labels"] = labels.astype(int)
     num_classes = len(np.unique(data_dict["labels"]))
     return num_classes, data_dict
 
+
 def hot_encoding(y, num_classes):
     """ 1-hot encodes a tensor """
-    return np.eye(num_classes, dtype='uint8')[y-1]
+    return np.eye(num_classes, dtype='uint8')[y - 1]
+
 
 def to_categorical(labels, num_classes):
     new_labels = np.zeros((len(labels), num_classes))
@@ -32,13 +37,16 @@ def to_categorical(labels, num_classes):
         new_labels[idx] = hot_encoding(label, num_classes)
     return new_labels
 
+
 def split_training_test_valid(data_dict, num_labels):
     data_dict["labels"] = to_categorical(data_dict["labels"], num_labels)
-    X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,
+                                                        random_state=42)
     split_frac = 0.5
     split_id = int(split_frac * len(X_test))
     X_val, X_test = X_test[:split_id], X_test[split_id:]
     y_val, y_test = y_test[:split_id], y_test[split_id:]
+    print(y_train, y_test)
     return X_train, X_test, X_val, y_train, y_test, y_val
 
 
@@ -51,6 +59,7 @@ def get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size)
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
     return train_loader, val_loader, test_loader
 
+
 def get_device():
     is_cuda = torch.cuda.is_available()
     # If we have a GPU available, we'll set our device to GPU. We'll use this device variable later in our code.
@@ -62,8 +71,9 @@ def get_device():
         print("GPU not available, CPU used")
     return device
 
+
 class LSTMNetwork(nn.Module):
-    def __init__(self, device, input_size=63, hidden_dim=100, output_size=3, n_layer=1, drop_prob=0.2):
+    def __init__(self, device, input_size=63, hidden_dim=10, output_size=3, n_layer=1, drop_prob=0.2):
         super(LSTMNetwork, self).__init__()
         self.device = device
         # torch.cuda.is_available() checks and returns a Boolean True if a GPU is available, else it'll return False
@@ -99,9 +109,14 @@ class LSTMNetwork(nn.Module):
         return out, hidden
 
     def init_hidden(self, batch_size):
-        hidden = (torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device),
-                  torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
+        weight = next(self.parameters()).data
+        hidden = (weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device),
+                  weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device))
+
+        # hidden = (torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device),
+        #          torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
         return hidden
+
 
 class train_neural_network:
     def __init__(self, model, device, batch_size, lr, epochs, train_loader, test_loader, val_loader):
@@ -115,7 +130,6 @@ class train_neural_network:
         self.criterion = nn.BCELoss()
         self.model = model
         self.optimiser = torch.optim.Adam(model.parameters(), lr=self.lr)
-
 
     def train_model(self):
         counter = 0
@@ -133,7 +147,7 @@ class train_neural_network:
                 h = tuple([e.data for e in h])
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 self.model.zero_grad()
-                output, h = self.model.forward(inputs.type(torch.cuda.FloatTensor), h)
+                output, h = self.model.forward(inputs.type(torch.FloatTensor), h)
                 #         print (output.shape)
                 #         print (h[0].shape)
                 # loss = criterion(output.squeeze(), labels.float())
@@ -149,7 +163,7 @@ class train_neural_network:
                     for inp, lab in self.val_loader:
                         val_h = tuple([each.data for each in val_h])
                         inp, lab = inp.to(self.device), lab.to(self.device)
-                        out, val_h = self.model.forward(inputs.type(torch.cuda.FloatTensor), val_h)  # model(inp, val_h)
+                        out, val_h = self.model.forward(inputs.type(torch.FloatTensor), val_h)  # model(inp, val_h)
                         # val_loss = criterion(out.squeeze(), lab.float())
                         val_loss = self.criterion(out, lab.float())
                         val_losses.append(val_loss.item())
@@ -160,7 +174,7 @@ class train_neural_network:
                           "Loss: {:.6f}...".format(loss.item()),
                           "Val Loss: {:.6f}".format(np.mean(val_losses)))
                     if np.mean(val_losses) <= valid_loss_min:
-                        torch.save(self.model.state_dict(), './state_dict.pt')
+                        torch.save(self.model.state_dict(), 'state_dict.pt')
                         print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_loss_min,
                                                                                                         np.mean(
                                                                                                             val_losses)))
@@ -172,20 +186,28 @@ class train_neural_network:
         num_correct = 0
         h = model.init_hidden(batch_size)
         model.eval()
+        confusion_matrix = None
         for inputs, labels in test_loader:
             h = tuple([each.data for each in h])
             inputs, labels = inputs.to(device), labels.to(device)
-            output, h = model.forward(inputs.type(torch.cuda.FloatTensor), h)
+            output, h = model.forward(inputs.type(torch.FloatTensor), h)
             test_loss = self.criterion(output, labels.float())
             test_losses.append(test_loss.item())
             pred = torch.round(output)  # rounds the output to 0/1
             correct_tensor = pred - labels  # pred.eq(labels.float().view_as(pred))
             print(correct_tensor)
-            if (not (-1 in correct_tensor)):
+            if not (-1 in correct_tensor):
                 num_correct += 1
+
+            confusion_matrix = multilabel_confusion_matrix(labels.detach().numpy(), pred.detach().numpy())
+            print("confusion_matrix:", confusion_matrix)
+
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / len(test_loader.dataset)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
+        plt.plot(test_losses)
+        plt.ylabel('losses')
+        plt.show()
 
 
 batch_size = 1
@@ -194,11 +216,14 @@ num_classes, data_dict = format_data(dataset=dataset)
 X_train, X_test, X_val, y_train, y_test, y_val = split_training_test_valid(data_dict=data_dict, num_labels=num_classes)
 train_loader, val_loader, test_loader = get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size)
 device = get_device()
-#device = "cpu"
+device = "cpu"
 model = LSTMNetwork(device)
 model.to(device)
-#print(model)
-nn_train = train_neural_network(model=model, device=device, batch_size= batch_size,
-                                lr=0.005, epochs = 10, train_loader = train_loader, test_loader = test_loader, val_loader = val_loader)
-nn_train.train_model()
+# print(model)
+nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
+                                lr=0.005, epochs=25, train_loader=train_loader, test_loader=test_loader,
+                                val_loader=val_loader)
+#nn_train.train_model()
+
+model.load_state_dict(torch.load('state_dict.pt'))
 nn_train.evaluate_model()

@@ -48,8 +48,10 @@ def read_data() -> list:
         for frame in dataframes:
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
-            df["X"] = normalize_data(df["X"]*width)
-            df["Y"] = normalize_data(df["Y"]*height)
+            # df["X"] = normalize_data(df["X"]*width)
+            # df["Y"] = normalize_data(df["Y"]*height)
+            df["X"] = df["X"] - df["X"][0]
+            df["Y"] = df["Y"] - df["Y"][0]
             empty_list.append(df)
 
         # pad all with zeros to the largest size
