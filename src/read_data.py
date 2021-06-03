@@ -8,10 +8,20 @@ import numpy as np
 import pandas as pd
 
 from dataclass import Data
+import cv2
+
+
+def normalize_data(column):
+    # Different Normalization Methods https://www.originlab.com/doc/X-Function/ref/rnormalize#Algorithm
+    minimum = column.min()
+    maximum = column.max()
+    column = (column - minimum) / (maximum - minimum)
+    return column
 
 
 def read_data() -> list:
     # From the current file get the parent directory and create a purepath to the Dataset folder
+    height, width, channels = cv2.imread("sample.jpg").shape
     parent_directory = Path(dirname(dirname(abspath(__file__))))
     path = parent_directory / "HandDataset"
     # List all file names ending with .txt sorted by size
@@ -38,7 +48,8 @@ def read_data() -> list:
         for frame in dataframes:
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
-
+            df["X"] = normalize_data(df["X"]*width)
+            df["Y"] = normalize_data(df["Y"]*height)
             empty_list.append(df)
 
         # pad all with zeros to the largest size
@@ -54,7 +65,3 @@ def read_data() -> list:
         data_list.append(data_1)
 
     return data_list
-
-
-read_data()
-

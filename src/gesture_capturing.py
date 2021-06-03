@@ -8,8 +8,9 @@ from meta_data_class import GestureMetaData
 
 
 class GestureCapture:
-    def __init__(self, folder_location: str, gesture_meta_data: GestureMetaData):
+    def __init__(self, folder_location: str, gesture_meta_data: GestureMetaData, camera_input_value: int):
         self.gestureMetaData = gesture_meta_data
+        self.camera_input_value = camera_input_value
         self.folder_location = folder_location
         self.meta_data_file = str(Path(self.folder_location) / "MetaData.json")
         self.mp_drawing = mp.solutions.drawing_utils
@@ -52,9 +53,10 @@ class GestureCapture:
             return results
 
     def get_frame(self):
-        cap = cv2.VideoCapture(0) # FIXME input source!!!!
+        cap = cv2.VideoCapture(self.camera_input_value)
         # Capture the video frame by frame
         success, current_frame = cap.read()
+        image = None
         while not success:
             success, current_frame = cap.read()
         previous_frame = cv2.flip(current_frame, 1)
@@ -89,10 +91,11 @@ class GestureCapture:
             if cv2.waitKey(2) & 0xFF == ord('q'):  # close on key q
                 break
         # After the loop release the cap object
+        cv2.imwrite("sample.jpg", image)
         cap.release()
         # Destroy all the windows
         cv2.destroyAllWindows()
-        self.write_file(key_points= self.all_keypoints)
+        self.write_file(key_points=self.all_keypoints)
 
     def write_file(self, key_points):
         for item in key_points:
