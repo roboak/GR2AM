@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from statistical_feature_extraction import FeatureExtraction
 from sklearn.metrics import confusion_matrix, accuracy_score, ConfusionMatrixDisplay, plot_confusion_matrix
 import matplotlib.pyplot as plt
+from joblib import dump
 from read_data import read_data
 
 data_files = read_data()
@@ -36,3 +37,5 @@ display_2 = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_2, display_
 display_1.plot()
 display_2.plot()
 plt.show()
+dump(classifier_1, 'linearSVMClassifier.joblib')
+dump(classifier_2, 'RandomForest.joblib')
