@@ -8,77 +8,22 @@ from sklearn.metrics import multilabel_confusion_matrix
 import read_data
 
 
-def format_data(dataset):  # read data in the format of [total_data_size, sequence length, feature_size, feature_dim]
-    seq_len = dataset[0].data.shape[0]
-    num_features = dataset[0].data.shape[1]
-    feature_dim = dataset[0].data.shape[2]
-    data_array = np.zeros((len(dataset), seq_len, num_features, feature_dim))
-    labels = np.zeros(len(dataset))
-    data_dict = {}
-    for idx, data in enumerate(dataset):
-        data_array[idx] = data.data
-        labels[idx] = data.label
-    # Return all data stacked together
-    # Shape of data changes from [batch_size,seq_len,input_dim,feature_dims] -> [batch_size,seq_len,input_dim*feature_dims]
-    data_dict["data"] = data_array.reshape(len(data_array), seq_len, num_features * feature_dim).astype(np.float)
-    data_dict["labels"] = labels.astype(int)
-    num_classes = len(np.unique(data_dict["labels"]))
-    return num_classes, data_dict
-
-
-def hot_encoding(y, num_classes):
-    """ 1-hot encodes a tensor """
-    return np.eye(num_classes, dtype='uint8')[y - 1]
-
-
-def to_categorical(labels, num_classes):
-    new_labels = np.zeros((len(labels), num_classes))
-    for idx, label in enumerate(labels):
-        new_labels[idx] = hot_encoding(label, num_classes)
-    return new_labels
-
-
-def split_training_test_valid(data_dict, num_labels):
-    data_dict["labels"] = to_categorical(data_dict["labels"], num_labels)
-    X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,
-                                                        random_state=42)
-    split_frac = 0.5
-    split_id = int(split_frac * len(X_test))
-    X_val, X_test = X_test[:split_id], X_test[split_id:]
-    y_val, y_test = y_test[:split_id], y_test[split_id:]
-    print(y_train, y_test)
-    return X_train, X_test, X_val, y_train, y_test, y_val
-
-
-def get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size):
-    train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
-    val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
-    test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
-    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
-    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
-    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
-    return train_loader, val_loader, test_loader
-
-
-def get_device():
-    is_cuda = torch.cuda.is_available()
-    # If we have a GPU available, we'll set our device to GPU. We'll use this device variable later in our code.
-    if is_cuda:
-        device = torch.device("cuda")
-        print("GPU is available")
-    else:
-        device = torch.device("cpu")
-        print("GPU not available, CPU used")
-    return device
-
 
 class LSTMNetwork(nn.Module):
-    def __init__(self, device, input_size=63, hidden_dim=10, output_size=3, n_layer=1, drop_prob=0.2):
+    def __init__(self, device, input_size=63, hidden_dim=128, output_size=3, n_layer=64, drop_prob=0.1):
         super(LSTMNetwork, self).__init__()
         self.device = device
         # torch.cuda.is_available() checks and returns a Boolean True if a GPU is available, else it'll return False
         self.hidden_dim = hidden_dim
         self.n_layers = n_layer
+
+        # #Converting (batch_size,seq_len,63) ->
+        # self.embedding_dim = 64
+        # self.embedding_layer = nn.Embedding(
+        #     num_embeddings=output_size,
+        #     embedding_dim=self.embedding_dim,
+        #     padding_idx=0
+        # )
         # If your input data is of shape (batch_size, seq_len, features)
         # then you need batch_first=True and your LSTM will give output of shape (batch_size, seq_len, hidden_size).
         self.lstm = nn.LSTM(input_size, self.hidden_dim, self.n_layers,
@@ -87,11 +32,12 @@ class LSTMNetwork(nn.Module):
         self.linear = nn.Linear(hidden_dim, output_size)
         # self.linear_2 = nn.Linear(63, output_size)
         self.activation = nn.Softmax()
-        # self.hidden_cell = (torch.zeros(1, 1, self.hidden_layer_size), torch.zeros(1, 1, self.hidden_layer_size))
 
     def forward(self, x, hidden):
         batch_size = x.size(0)
-        # x = x.long()
+
+        #converting (batch_size, seq_len, 63) -> (batch_size, seq_len, 128)
+        # embedding_out = self.embedding_layer(x)
         lstm_out, hidden = self.lstm(x, hidden)
         # https://stackoverflow.com/questions/54749665/stacking-up-of-lstm-outputs-in-pytorch
         #   print ("lstm_out_ before reshaping", lstm_out.shape)
@@ -110,11 +56,11 @@ class LSTMNetwork(nn.Module):
 
     def init_hidden(self, batch_size):
         weight = next(self.parameters()).data
-        hidden = (weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device),
-                  weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device))
+        # hidden = (weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device),
+        #           weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device))
 
-        # hidden = (torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device),
-        #          torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
+        hidden = (torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device),
+                 torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
         return hidden
 
 
@@ -127,13 +73,13 @@ class train_neural_network:
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.val_loader = val_loader
-        self.criterion = nn.BCELoss()
+        self.criterion = nn.CrossEntropyLoss()
         self.model = model
         self.optimiser = torch.optim.Adam(model.parameters(), lr=self.lr)
 
     def train_model(self):
         counter = 0
-        print_every = 2
+        print_every = 10
         clip = 5
         valid_loss_min = np.Inf
         # model.train() tells your model that you are training the model. So effectively layers like dropout, batchnorm etc.
@@ -141,19 +87,21 @@ class train_neural_network:
         self.model.train()
         for i in range(self.epochs):
             h = self.model.init_hidden(self.batch_size)
-
+            train_losses =[]
             for inputs, labels in self.train_loader:
                 counter += 1
                 h = tuple([e.data for e in h])
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                self.model.zero_grad()
-                output, h = self.model.forward(inputs.type(torch.FloatTensor), h)
+                #self.model.zero_grad() #manually setting all the gradients to zero
+                self.optimiser.zero_grad()
+                output, h = self.model.forward(inputs.float(), h)
                 #         print (output.shape)
                 #         print (h[0].shape)
                 # loss = criterion(output.squeeze(), labels.float())
-                loss = self.criterion(output, labels.float())
+                loss = self.criterion(output, labels.long())#float())
+                train_losses.append(loss)
                 loss.backward()
-                nn.utils.clip_grad_norm_(self.model.parameters(), clip)
+                #nn.utils.clip_grad_norm_(self.model.parameters(), clip)
                 self.optimiser.step()
 
                 if counter % print_every == 0:
@@ -163,9 +111,9 @@ class train_neural_network:
                     for inp, lab in self.val_loader:
                         val_h = tuple([each.data for each in val_h])
                         inp, lab = inp.to(self.device), lab.to(self.device)
-                        out, val_h = self.model.forward(inputs.type(torch.FloatTensor), val_h)  # model(inp, val_h)
+                        out, val_h = self.model.forward(inp.float(), val_h)  # model(inp, val_h)
                         # val_loss = criterion(out.squeeze(), lab.float())
-                        val_loss = self.criterion(out, lab.float())
+                        val_loss = self.criterion(out, lab.long())#float())
                         val_losses.append(val_loss.item())
 
                     self.model.train()
@@ -179,6 +127,9 @@ class train_neural_network:
                                                                                                         np.mean(
                                                                                                             val_losses)))
                         valid_loss_min = np.mean(val_losses)
+            # plt.plot(train_losses)
+            # plt.ylabel('losses')
+            # plt.show()
         # return self.model
 
     def evaluate_model(self):
@@ -190,40 +141,44 @@ class train_neural_network:
         for inputs, labels in test_loader:
             h = tuple([each.data for each in h])
             inputs, labels = inputs.to(device), labels.to(device)
-            output, h = model.forward(inputs.type(torch.FloatTensor), h)
-            test_loss = self.criterion(output, labels.float())
+            output, h = model.forward(inputs.float(), h)
+            test_loss = self.criterion(output, labels.long())#float())
             test_losses.append(test_loss.item())
-            pred = torch.round(output)  # rounds the output to 0/1
-            correct_tensor = pred - labels  # pred.eq(labels.float().view_as(pred))
-            print(correct_tensor)
-            if not (-1 in correct_tensor):
-                num_correct += 1
+            #pred = torch.round(output)  # rounds the output to 0/1
+            print(output)
+            print(labels)
+            # pred = torch.where(output>0.75, 1.0, 0.0)
+            # correct_tensor = pred - labels  # pred.eq(labels.float().view_as(pred))
+            # print(correct_tensor)
+            # if not (-1 in correct_tensor):
+            #     num_correct += 1
+            #
+            # confusion_matrix = multilabel_confusion_matrix(labels.detach().numpy(), pred.detach().numpy())
+            # print("confusion_matrix:", confusion_matrix)
 
-            confusion_matrix = multilabel_confusion_matrix(labels.detach().numpy(), pred.detach().numpy())
-            print("confusion_matrix:", confusion_matrix)
+        # print("Test loss: {:.3f}".format(np.mean(test_losses)))
+        # test_acc = num_correct / len(test_loader.dataset)
+        # print("Test accuracy: {:.3f}%".format(test_acc * 100))
 
-        print("Test loss: {:.3f}".format(np.mean(test_losses)))
-        test_acc = num_correct / len(test_loader.dataset)
-        print("Test accuracy: {:.3f}%".format(test_acc * 100))
-        plt.plot(test_losses)
-        plt.ylabel('losses')
-        plt.show()
+        # plt.plot(test_losses)
+        # plt.ylabel('losses')
+        # plt.show()
 
-
-batch_size = 1
-dataset = read_data.read_data()
-num_classes, data_dict = format_data(dataset=dataset)
-X_train, X_test, X_val, y_train, y_test, y_val = split_training_test_valid(data_dict=data_dict, num_labels=num_classes)
-train_loader, val_loader, test_loader = get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size)
-device = get_device()
-device = "cpu"
-model = LSTMNetwork(device)
-model.to(device)
-# print(model)
-nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
-                                lr=0.005, epochs=25, train_loader=train_loader, test_loader=test_loader,
-                                val_loader=val_loader)
-#nn_train.train_model()
-
-model.load_state_dict(torch.load('state_dict.pt'))
-nn_train.evaluate_model()
+#
+# batch_size = 4
+# dataset = read_data.read_data()
+# num_classes, data_dict = format_data(dataset=dataset)
+# X_train, X_test, X_val, y_train, y_test, y_val = split_training_test_valid(data_dict=data_dict, num_labels=num_classes)
+# train_loader, val_loader, test_loader = get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size)
+# device = get_device()
+# # device = "cpu"
+# model = LSTMNetwork(device)
+# model.to(device)
+# # print(model)
+# nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
+#                                 lr=0.001, epochs=10, train_loader=train_loader, test_loader=test_loader,
+#                                 val_loader=val_loader)
+# nn_train.train_model()
+#
+# # model.load_state_dict(torch.load('state_dict.pt'))
+# nn_train.evaluate_model()
