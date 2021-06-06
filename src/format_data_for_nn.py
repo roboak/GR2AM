@@ -48,13 +48,13 @@ def split_training_test_valid(data_dict, num_labels):
     return X_train, X_test, X_val, y_train, y_test, y_val
 
 
-def get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size):
+def get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size, test_batch_size):
     train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
     val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
     test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
-    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
+    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
     return train_loader, val_loader, test_loader
 
 

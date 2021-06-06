@@ -20,7 +20,7 @@ class CNN_LSTM(nn.Module):
         super(CNN_LSTM, self).__init__()
         self.device = device
         self.seq_len = seq_len
-        self.gru_hidden_dim = 128
+        self.gru_hidden_dim = hidden_dim
         self.n_layers = n_layers
         self.cnn_layers = Sequential(
             # out_channel = number of filters in the CNN
@@ -33,15 +33,15 @@ class CNN_LSTM(nn.Module):
             Conv1d(in_channels=64, out_channels=64, kernel_size=1, stride=1),
             BatchNorm1d(64),
             Tanh(),
-            Dropout(0.27),
+            Dropout(0.2),
             MaxPool1d(2),
         )
         self.gru_layer = GRU(input_size=15, hidden_size=self.gru_hidden_dim, num_layers=self.n_layers, batch_first=True,
-                             bidirectional=False)
-        self.gru_dropout = Dropout(0.1)
+                             bidirectional=True)
+        self.gru_dropout = Dropout(0.2)
 
         self.dense_layers = Sequential(
-            Linear(hidden_dim, output_size),
+            Linear(2*self.gru_hidden_dim, output_size),
             Softmax()
         )
 
@@ -52,16 +52,16 @@ class CNN_LSTM(nn.Module):
         #print(out.shape)
         gru_out, hidden_out = self.gru_layer(cnn_out, hidden)
         #print(out.shape)
-        out = self.gru_dropout(gru_out)
+        gru_out = self.gru_dropout(gru_out)
         # [batch_size, seq_len, 63] - > [batch_size*seq_len, hidden_dim=128]
-        flat_out = gru_out.contiguous().view(-1, self.gru_hidden_dim)
+        flat_out = gru_out.contiguous().view(-1, 2*self.gru_hidden_dim)
         dense_out = self.dense_layers(flat_out)
         reshaped_out = dense_out.view(dense_out.shape[0]//64, 64, 3)
         out = reshaped_out[:, -1:, :].squeeze()
         return out, hidden_out
 
     def init_hidden(self, batch_size):
-        hidden = torch.zeros(self.n_layers, batch_size, self.gru_hidden_dim).to(self.device)
+        hidden = torch.zeros(2*self.n_layers, batch_size, self.gru_hidden_dim).to(self.device)
         return hidden
 
 
@@ -141,10 +141,10 @@ class train_neural_network:
             # plt.ylabel('losses')
             # plt.show()
         # return self.model
-    def evaluate_model(self):
+    def evaluate_model(self, test_batch_size):
         test_losses = []
         num_correct = 0
-        h = self.model.init_hidden(self.batch_size)
+        h = self.model.init_hidden(test_batch_size)
         self.model.eval()
         confusion_matrix = None
         num_test_mini_batches=0
@@ -153,19 +153,20 @@ class train_neural_network:
             #h = tuple([each.data for each in h])  // Required while training lstm
             inputs, labels = inputs.to(self.device), labels.to(self.device)
             output, h = self.model.forward(inputs.float(), h)
+            output = output.view(test_batch_size, -1)
             test_loss = self.criterion(output, labels.long())#float())
             test_losses.append(test_loss.item())
-            print("raw out",output)
+            # print("raw out",output)
             pred = torch.argmax(output, dim = 1)
-            print("pred1:", pred)
-            print("labels:", labels)
+            # print("pred1:", pred)
+            # print("labels:", labels)
             num_correct += torch.sum((pred == labels))
 
             # confusion_matrix = multilabel_confusion_matrix(labels.detach().numpy(), pred.detach().numpy())
             # print("confusion_matrix:", confusion_matrix)
 
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
-        test_acc = num_correct / (self.batch_size * num_test_mini_batches)
+        test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
 
         # plt.plot(test_losses)
@@ -178,6 +179,7 @@ class train_neural_network:
 # log_path = parent_directory / "logs"
 # writer = SummaryWriter(log_path)
 batch_size = 4
+test_batch_size = 1
 seq_len = 50
 device = format_data_for_nn.get_device()
 # device = "cpu"
@@ -186,13 +188,13 @@ num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
 X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(data_dict=data_dict,
                                                                                               num_labels=num_classes)
 train_loader, val_loader, test_loader = format_data_for_nn.get_mini_batches(X_train, X_test, X_val, y_train, y_test,
-                                                                            y_val, batch_size)
+                                                                            y_val, batch_size, test_batch_size= test_batch_size)
 model = CNN_LSTM(seq_len, device).to(device)
 # print(model)
 nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
                                 lr=0.003, epochs=100, train_loader=train_loader, test_loader=test_loader,
                                 val_loader=val_loader)
 nn_train.train_model()
-#
-# model.load_state_dict(torch.load('state_dict.pt'))
-nn_train.evaluate_model()
+
+#model.load_state_dict(torch.load('state_dict2_100.pt'))
+nn_train.evaluate_model(test_batch_size)
