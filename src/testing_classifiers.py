@@ -1,17 +1,17 @@
-from joblib import load
 import ast
 import os
 import re
 from os.path import abspath, dirname
 from pathlib import Path
+
+import cv2
 import numpy as np
 import pandas as pd
-from dataclass import Data
-import cv2
-from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, ShuffleSplit
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+from dataclass import Data
 from statistical_feature_extraction import FeatureExtraction
 
 

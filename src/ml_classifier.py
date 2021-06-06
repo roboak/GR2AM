@@ -1,10 +1,11 @@
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
-from statistical_feature_extraction import FeatureExtraction
-from sklearn.metrics import confusion_matrix, accuracy_score, ConfusionMatrixDisplay, plot_confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import train_test_split
+
 from read_data import read_data
+from statistical_feature_extraction import FeatureExtraction
 
 data_files = read_data()
 feature_class = FeatureExtraction()
