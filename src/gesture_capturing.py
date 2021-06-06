@@ -1,10 +1,11 @@
 import io
 import json
 import os
+from pathlib import Path
+
 import cv2
 import mediapipe as mp
-from pathlib import Path
-from meta_data_class import GestureMetaData
+from dataclass import GestureMetaData
 
 
 class GestureCapture:
@@ -28,7 +29,8 @@ class GestureCapture:
         self.gesture_path = self.folder_location + '/' + self.gesture_name
         self.update_meta_data(self.gesture_dict, self.gesture_name)
         self.data_file = open(self.gesture_path, "w")
-        self.all_keypoints =[]
+        self.all_keypoints = []
+
     #
     # def gesture_extraction(self, previous_frame, current_frame):
     #     current_frame_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)

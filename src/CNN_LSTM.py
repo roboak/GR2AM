@@ -1,18 +1,13 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv1d, MaxPool1d, Softmax, BatchNorm1d, Dropout, Tanh, \
-    GRU
-import lstm_classifier
-from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
-from sklearn.metrics import multilabel_confusion_matrix
-import read_data
+from torch.nn import BatchNorm1d, Conv1d, Dropout, GRU, Linear, MaxPool1d, Sequential, Softmax, Tanh
+
 import format_data_for_nn
+import read_data
+
+
 # from torch.utils.tensorboard import SummaryWriter
-from os.path import dirname, abspath
-from pathlib import Path
 
 # torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
 class CNN_LSTM(nn.Module):
@@ -49,14 +44,14 @@ class CNN_LSTM(nn.Module):
         # [batch_size, seq_len, 63] - > [batch_size, seq_len, 64]
         cnn_out = self.cnn_layers(input).clone()
         # [batch_size, 64, 15] - > [batch_size, seq_len, hidden_dim=128]
-        #print(out.shape)
+        # print(out.shape)
         gru_out, hidden_out = self.gru_layer(cnn_out, hidden)
-        #print(out.shape)
+        # print(out.shape)
         out = self.gru_dropout(gru_out)
         # [batch_size, seq_len, 63] - > [batch_size*seq_len, hidden_dim=128]
         flat_out = gru_out.contiguous().view(-1, self.gru_hidden_dim)
         dense_out = self.dense_layers(flat_out)
-        reshaped_out = dense_out.view(dense_out.shape[0]//64, 64, 3)
+        reshaped_out = dense_out.view(dense_out.shape[0] // 64, 64, 3)
         out = reshaped_out[:, -1:, :].squeeze()
         return out, hidden_out
 
@@ -77,6 +72,7 @@ def debug():
     print(out.shape)
     # out = out[:, -1:, :].squeeze()
     print(out.shape)
+
 
 class train_neural_network:
     def __init__(self, model, device, batch_size, lr, epochs, train_loader, test_loader, val_loader):
@@ -101,18 +97,18 @@ class train_neural_network:
         self.model.train()
         for i in range(self.epochs):
             h = self.model.init_hidden(self.batch_size)
-            train_losses =[]
+            train_losses = []
             for inputs, labels in self.train_loader:
                 with torch.autograd.set_detect_anomaly(True):
                     counter += 1
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
-                    self.model.zero_grad() #manually setting all the gradients to zero
-                    #self.optimiser.zero_grad()
+                    self.model.zero_grad()  # manually setting all the gradients to zero
+                    # self.optimiser.zero_grad()
                     output, h = self.model.forward(inputs.float(), h)
                     h.detach_()
-                    loss = self.criterion(output, labels.long())#float())
+                    loss = self.criterion(output, labels.long())  # float())
                     train_losses.append(loss)
-                    loss.backward()#retain_graph=True)
+                    loss.backward()  # retain_graph=True)
                     nn.utils.clip_grad_norm_(self.model.parameters(), clip)
                     self.optimiser.step()
 
@@ -123,7 +119,7 @@ class train_neural_network:
                         for inp, lab in self.val_loader:
                             inp, lab = inp.to(self.device), lab.to(self.device)
                             out, val_h = self.model.forward(inp.float(), val_h)  # model(inp, val_h)
-                            val_loss = self.criterion(out, lab.long())#float())
+                            val_loss = self.criterion(out, lab.long())  # float())
                             val_losses.append(val_loss.item())
 
                         self.model.train()
@@ -132,31 +128,33 @@ class train_neural_network:
                               "Loss: {:.6f}...".format(loss.item()),
                               "Val Loss: {:.6f}".format(np.mean(val_losses)))
                         if np.mean(val_losses) <= valid_loss_min:
-                            torch.save(self.model.state_dict(), 'state_dict.pt')
-                            print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_loss_min,
-                                                                                                            np.mean(
-                                                                                                                val_losses)))
+                            torch.save(self.model.state_dict(), 'model_save/state_dict.pt')
+                            print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+                                valid_loss_min,
+                                np.mean(
+                                    val_losses)))
                             valid_loss_min = np.mean(val_losses)
             # plt.plot(train_losses)
             # plt.ylabel('losses')
             # plt.show()
         # return self.model
+
     def evaluate_model(self):
         test_losses = []
         num_correct = 0
         h = self.model.init_hidden(self.batch_size)
         self.model.eval()
         confusion_matrix = None
-        num_test_mini_batches=0
+        num_test_mini_batches = 0
         for inputs, labels in self.test_loader:
             num_test_mini_batches += 1
-            #h = tuple([each.data for each in h])  // Required while training lstm
+            # h = tuple([each.data for each in h])  // Required while training lstm
             inputs, labels = inputs.to(self.device), labels.to(self.device)
             output, h = self.model.forward(inputs.float(), h)
-            test_loss = self.criterion(output, labels.long())#float())
+            test_loss = self.criterion(output, labels.long())  # float())
             test_losses.append(test_loss.item())
-            print("raw out",output)
-            pred = torch.argmax(output, dim = 1)
+            print("raw out", output)
+            pred = torch.argmax(output, dim=1)
             print("pred1:", pred)
             print("labels:", labels)
             num_correct += torch.sum((pred == labels))
@@ -171,12 +169,15 @@ class train_neural_network:
         # plt.plot(test_losses)
         # plt.ylabel('losses')
         # plt.show()
+
+
 # debug()
 
 # parent_directory = dirname(dirname(abspath(__file__)))
 # parent_directory = Path(parent_directory)
 # log_path = parent_directory / "logs"
 # writer = SummaryWriter(log_path)
+
 batch_size = 4
 seq_len = 50
 device = format_data_for_nn.get_device()

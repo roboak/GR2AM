@@ -1,7 +1,8 @@
-from gesture_capturing import GestureCapture
-from os.path import dirname, abspath
+from os.path import abspath, dirname
 from pathlib import Path
-from meta_data_class import GestureMetaData
+
+from dataclass import GestureMetaData
+from gesture_capturing import GestureCapture
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

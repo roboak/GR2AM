@@ -122,7 +122,7 @@ class train_neural_network:
                           "Loss: {:.6f}...".format(loss.item()),
                           "Val Loss: {:.6f}".format(np.mean(val_losses)))
                     if np.mean(val_losses) <= valid_loss_min:
-                        torch.save(self.model.state_dict(), 'state_dict.pt')
+                        torch.save(self.model.state_dict(), 'model_save/state_dict.pt')
                         print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_loss_min,
                                                                                                         np.mean(
                                                                                                             val_losses)))
