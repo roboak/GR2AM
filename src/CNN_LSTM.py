@@ -1,14 +1,13 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv1d, MaxPool1d, Softmax, BatchNorm1d, Dropout, Tanh, \
-    GRU
+from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv1d, MaxPool1d, Softmax, BatchNorm1d, Dropout, Tanh, GRU
 import lstm_classifier
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 from sklearn.metrics import multilabel_confusion_matrix
-import read_data
+from utils import read_data
 import format_data_for_nn
 # from torch.utils.tensorboard import SummaryWriter
 from os.path import dirname, abspath
@@ -180,10 +179,9 @@ class train_neural_network:
 # writer = SummaryWriter(log_path)
 batch_size = 4
 test_batch_size = 1
-seq_len = 50
 device = format_data_for_nn.get_device()
 # device = "cpu"
-dataset = read_data.read_data()
+dataset, seq_len = read_data.read_data()
 num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
 X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(data_dict=data_dict,
                                                                                               num_labels=num_classes)
