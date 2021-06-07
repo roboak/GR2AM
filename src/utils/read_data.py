@@ -7,22 +7,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from dataclass import Data
+from utils.dataclass import Data
 import cv2
 
 
-def normalize_data(column):
-    # Different Normalization Methods https://www.originlab.com/doc/X-Function/ref/rnormalize#Algorithm
-    minimum = column.min()
-    maximum = column.max()
-    column = (column - minimum) / (maximum - minimum)
-    return column
-
-
-def read_data() -> list:
+def read_data() -> tuple[list, int]:
     # From the current file get the parent directory and create a purepath to the Dataset folder
-    height, width, channels = cv2.imread("sample.jpg").shape
-    parent_directory = Path(dirname(dirname(abspath(__file__))))
+    #height, width, channels = cv2.imread("../sample.jpg").shape
+    parent_directory = Path(dirname(dirname(dirname(abspath(__file__)))))
     path = parent_directory / "HandDataset"
     # List all file names ending with .txt sorted by size
     file_names = [(file, os.path.getsize(path / file)) for file in os.listdir(str(path)) if file.endswith(".txt")]
@@ -48,16 +40,19 @@ def read_data() -> list:
         for frame in dataframes:
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
-            # df["X"] = normalize_data(df["X"]*width)
-            # df["Y"] = normalize_data(df["Y"]*height)
+
             df["X"] = df["X"] - df["X"][0]
+            df["X"] = df["X"] - df["X"].mean()
             df["Y"] = df["Y"] - df["Y"][0]
+            df["Y"] = df["Y"] - df["Y"].mean()
+            df["Z"] = df["Z"] - df["Z"][0]
+            df["Z"] = df["Z"] - df["Z"].mean()
             empty_list.append(df)
 
         # pad all with zeros to the largest size
-        while len(empty_list) < largest_frame_count:
+        while len(empty_list) <= largest_frame_count:
             empty_list.append(pd.DataFrame(np.zeros((21, 3))))
-
+        empty_list = empty_list[0: largest_frame_count]
         # Input into a NP array
         data_array = np.asarray(empty_list)
         # Create a data class combining data and label
@@ -66,4 +61,4 @@ def read_data() -> list:
         # save the list for each capture
         data_list.append(data_1)
 
-    return data_list
+    return data_list, largest_frame_count

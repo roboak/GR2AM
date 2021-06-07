@@ -11,7 +11,7 @@ from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 
-from dataclass import Data
+from src.utils.dataclass import Data
 from statistical_feature_extraction import FeatureExtraction
 
 
