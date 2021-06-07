@@ -19,7 +19,6 @@ class CNN_LSTM(nn.Module):
         self.device = device
         self.output_size = output_size
         self.seq_len = seq_len
-        self.gru_hidden_dim = hidden_dim
         self.n_layers = n_layers
         self.cnn_layers = Sequential(
             # out_channel = number of filters in the CNN
@@ -35,35 +34,18 @@ class CNN_LSTM(nn.Module):
             Dropout(0.2),
             MaxPool1d(2),
         )
-
         self.flatten = Flatten()
-        self.gru_layer = GRU(input_size=15, hidden_size=self.gru_hidden_dim, num_layers=self.n_layers, batch_first=True,
-                             bidirectional=True)
-        self.gru_dropout = Dropout(0.2)
-
         self.dense_layers = Sequential(
-            # Linear(2*self.gru_hidden_dim, self.output_size),
             Linear(64*15, self.output_size),
             Softmax()
         )
 
-    def forward(self, input, hidden):
-        # [batch_size, seq_len, 63] - > [batch_size, seq_len, 64]
+    def forward(self, input):
         cnn_out = self.cnn_layers(input).clone()
-        # [batch_size, 64, 15] - > [batch_size, seq_len, hidden_dim=128]
-        # gru_out, hidden = self.gru_layer(cnn_out, hidden)
-        # gru_out = self.gru_dropout(gru_out)
-        # # [batch_size, seq_len, 63] - > [batch_size*seq_len, hidden_dim=128]
-        # flat_out = gru_out.contiguous().view(-1, 2*self.gru_hidden_dim)
         flat_out = self.flatten(cnn_out)
         dense_out = self.dense_layers(flat_out)
-        # reshaped_out = dense_out.view(dense_out.shape[0]//64, 64, self.output_size)
-        # out = reshaped_out[:, -1:, :].squeeze()
-        return dense_out, hidden
+        return dense_out
 
-    def init_hidden(self, batch_size):
-        hidden = torch.zeros(2*self.n_layers, batch_size, self.gru_hidden_dim).to(self.device)
-        return hidden
 
 
 def debug():
@@ -101,7 +83,6 @@ class train_neural_network:
         # which behave different on the train and test procedures know what is going on and hence can behave accordingly.
         self.model.train()
         for i in range(self.epochs):
-            h = self.model.init_hidden(self.batch_size)
             train_losses =[]
             for inputs, labels in self.train_loader:
                 with torch.autograd.set_detect_anomaly(True):
@@ -109,8 +90,7 @@ class train_neural_network:
                     inputs, labels = inputs.to(self.device), labels.to(self.device)
                     self.model.zero_grad() #manually setting all the gradients to zero
                     #self.optimiser.zero_grad()
-                    output, h = self.model.forward(inputs.float(), h)
-                    h.detach_()
+                    output = self.model.forward(inputs.float())
                     loss = self.criterion(output, labels.long())#float())
                     train_losses.append(loss)
                     loss.backward()#retain_graph=True)
@@ -118,12 +98,11 @@ class train_neural_network:
                     self.optimiser.step()
 
                     if counter % print_every == 0:
-                        val_h = self.model.init_hidden(self.batch_size)
                         val_losses = []
                         self.model.eval()
                         for inp, lab in self.val_loader:
                             inp, lab = inp.to(self.device), lab.to(self.device)
-                            out, val_h = self.model.forward(inp.float(), val_h)  # model(inp, val_h)
+                            out = self.model.forward(inp.float())  # model(inp, val_h)
                             val_loss = self.criterion(out, lab.long())#float())
                             val_losses.append(val_loss.item())
 
@@ -145,15 +124,13 @@ class train_neural_network:
     def evaluate_model(self, test_batch_size):
         test_losses = []
         num_correct = 0
-        h = self.model.init_hidden(test_batch_size)
         self.model.eval()
         confusion_matrix = None
         num_test_mini_batches=0
         for inputs, labels in self.test_loader:
             num_test_mini_batches += 1
-            #h = tuple([each.data for each in h])  // Required while training lstm
             inputs, labels = inputs.to(self.device), labels.to(self.device)
-            output, h = self.model.forward(inputs.float(), h)
+            output = self.model.forward(inputs.float())
             output = output.view(test_batch_size, -1)
             test_loss = self.criterion(output, labels.long())#float())
             test_losses.append(test_loss.item())
