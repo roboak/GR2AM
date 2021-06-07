@@ -1,63 +1,37 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv1d, MaxPool1d, Softmax, BatchNorm1d, Dropout, Tanh, GRU
-import lstm_classifier
-from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
-from sklearn.metrics import multilabel_confusion_matrix
+from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv1d, MaxPool1d, Softmax, BatchNorm1d, Dropout, Tanh, GRU, Flatten
+
 from utils import read_data
 import format_data_for_nn
-# from torch.utils.tensorboard import SummaryWriter
-from os.path import dirname, abspath
-from pathlib import Path
+
 
 # torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
 class CNN_LSTM(nn.Module):
     def __init__(self, seq_len, device, n_layers=2, hidden_dim=128, output_size=3):
         super(CNN_LSTM, self).__init__()
         self.device = device
+        self.output_size = output_size
         self.seq_len = seq_len
         self.gru_hidden_dim = hidden_dim
         self.n_layers = n_layers
-        self.cnn_layers = Sequential(
-            # out_channel = number of filters in the CNN
-            Conv1d(in_channels=self.seq_len, out_channels=64, kernel_size=1, stride=1),
-            BatchNorm1d(64),
-            Tanh(),
-            Dropout(0.12),
-            MaxPool1d(2),
-
-            Conv1d(in_channels=64, out_channels=64, kernel_size=1, stride=1),
-            BatchNorm1d(64),
-            Tanh(),
-            Dropout(0.2),
-            MaxPool1d(2),
-        )
-        self.gru_layer = GRU(input_size=15, hidden_size=self.gru_hidden_dim, num_layers=self.n_layers, batch_first=True,
+        self.gru_layer = GRU(input_size=63, hidden_size=self.gru_hidden_dim, num_layers=self.n_layers, batch_first=True,
                              bidirectional=True)
         self.gru_dropout = Dropout(0.2)
-
         self.dense_layers = Sequential(
-            Linear(2*self.gru_hidden_dim, output_size),
+            Linear(2*self.gru_hidden_dim, self.output_size),
             Softmax()
         )
 
     def forward(self, input, hidden):
-        # [batch_size, seq_len, 63] - > [batch_size, seq_len, 64]
-        cnn_out = self.cnn_layers(input).clone()
-        # [batch_size, 64, 15] - > [batch_size, seq_len, hidden_dim=128]
-        #print(out.shape)
-        gru_out, hidden_out = self.gru_layer(cnn_out, hidden)
-        #print(out.shape)
+        gru_out, hidden = self.gru_layer(input, hidden)
         gru_out = self.gru_dropout(gru_out)
-        # [batch_size, seq_len, 63] - > [batch_size*seq_len, hidden_dim=128]
         flat_out = gru_out.contiguous().view(-1, 2*self.gru_hidden_dim)
         dense_out = self.dense_layers(flat_out)
-        reshaped_out = dense_out.view(dense_out.shape[0]//64, 64, 3)
+        reshaped_out = dense_out.view(dense_out.shape[0]//64, 64, self.output_size)
         out = reshaped_out[:, -1:, :].squeeze()
-        return out, hidden_out
+        return out, hidden
 
     def init_hidden(self, batch_size):
         hidden = torch.zeros(2*self.n_layers, batch_size, self.gru_hidden_dim).to(self.device)
@@ -155,10 +129,10 @@ class train_neural_network:
             output = output.view(test_batch_size, -1)
             test_loss = self.criterion(output, labels.long())#float())
             test_losses.append(test_loss.item())
-            # print("raw out",output)
+            print("raw out",output)
             pred = torch.argmax(output, dim = 1)
             # print("pred1:", pred)
-            # print("labels:", labels)
+            print("labels:", labels)
             num_correct += torch.sum((pred == labels))
 
             # confusion_matrix = multilabel_confusion_matrix(labels.detach().numpy(), pred.detach().numpy())
@@ -172,11 +146,6 @@ class train_neural_network:
         # plt.ylabel('losses')
         # plt.show()
 # debug()
-
-# parent_directory = dirname(dirname(abspath(__file__)))
-# parent_directory = Path(parent_directory)
-# log_path = parent_directory / "logs"
-# writer = SummaryWriter(log_path)
 batch_size = 4
 test_batch_size = 1
 device = format_data_for_nn.get_device()
@@ -187,12 +156,12 @@ X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_traini
                                                                                               num_labels=num_classes)
 train_loader, val_loader, test_loader = format_data_for_nn.get_mini_batches(X_train, X_test, X_val, y_train, y_test,
                                                                             y_val, batch_size, test_batch_size= test_batch_size)
-model = CNN_LSTM(seq_len, device).to(device)
+model = CNN_LSTM(seq_len, device, output_size=num_classes).to(device)
 # print(model)
 nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
-                                lr=0.003, epochs=100, train_loader=train_loader, test_loader=test_loader,
+                                lr=0.002, epochs=100, train_loader=train_loader, test_loader=test_loader,
                                 val_loader=val_loader)
 nn_train.train_model()
 
-#model.load_state_dict(torch.load('state_dict2_100.pt'))
+# model.load_state_dict(torch.load('state_dict.pt'))
 nn_train.evaluate_model(test_batch_size)
