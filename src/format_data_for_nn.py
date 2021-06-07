@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 
 
-
-def format_data(dataset):  # read data in the format of [total_data_size, sequence length, feature_size, feature_dim]
+def format_data(dataset):
+    """ read data in the format of [total_data_size, sequence length, feature_size, feature_dim] """
     seq_len = dataset[0].data.shape[0]
     num_features = dataset[0].data.shape[1]
     feature_dim = dataset[0].data.shape[2]
@@ -37,7 +37,7 @@ def to_categorical(labels, num_classes):
 
 def split_training_test_valid(data_dict, num_labels):
     data_dict["labels"] = data_dict["labels"] - 1
-    #data_dict["labels"] = to_categorical(data_dict["labels"], num_labels)
+    # data_dict["labels"] = to_categorical(data_dict["labels"], num_labels)
     X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,
                                                         random_state=42)
     split_frac = 0.5

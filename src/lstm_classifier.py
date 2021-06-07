@@ -1,13 +1,30 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
+from sklearn.metrics import multilabel_confusion_matrix
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
-from sklearn.metrics import multilabel_confusion_matrix
-import read_data
+
+from src.utils import read_data
 
 
+def format_data(dataset):  # read data in the format of [total_data_size, sequence length, feature_size, feature_dim]
+    seq_len = dataset[0].data.shape[0]
+    num_features = dataset[0].data.shape[1]
+    feature_dim = dataset[0].data.shape[2]
+    data_array = np.zeros((len(dataset), seq_len, num_features, feature_dim))
+    labels = np.zeros(len(dataset))
+    data_dict = {}
+    for idx, data in enumerate(dataset):
+        data_array[idx] = data.data
+        labels[idx] = data.label
+    # Return all data stacked together
+    # Shape of data changes from [batch_size,seq_len,input_dim,feature_dims] -> [batch_size,seq_len,input_dim*feature_dims]
+    data_dict["data"] = data_array.reshape(len(data_array), seq_len, num_features * feature_dim).astype(np.float)
+    data_dict["labels"] = labels.astype(int)
+    num_classes = len(np.unique(data_dict["labels"]))
+    return num_classes, data_dict
 
 class LSTMNetwork(nn.Module):
     def __init__(self, device, input_size=63, hidden_dim=128, output_size=3, n_layer=64, drop_prob=0.1):
@@ -182,3 +199,21 @@ class train_neural_network:
 #
 # # model.load_state_dict(torch.load('state_dict.pt'))
 # nn_train.evaluate_model()
+
+batch_size = 1
+dataset, _ = read_data.read_data()
+num_classes, data_dict = format_data(dataset=dataset)
+X_train, X_test, X_val, y_train, y_test, y_val = split_training_test_valid(data_dict=data_dict, num_labels=num_classes)
+train_loader, val_loader, test_loader = get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size)
+device = get_device()
+device = "cpu"
+model = LSTMNetwork(device)
+model.to(device)
+# print(model)
+nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
+                                lr=0.005, epochs=25, train_loader=train_loader, test_loader=test_loader,
+                                val_loader=val_loader)
+# nn_train.train_model()
+
+model.load_state_dict(torch.load('state_dict.pt'))
+nn_train.evaluate_model()
