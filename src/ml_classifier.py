@@ -4,10 +4,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 
-from read_data import read_data
+from src.utils.read_data import read_data
 from statistical_feature_extraction import FeatureExtraction
 
-data_files = read_data()
+data_files, _ = read_data()
 feature_class = FeatureExtraction()
 point_wise_features = np.asarray([feature_class.point_wise_extraction(file) for file in data_files])
 frame_wise_features = np.asarray([feature_class.frame_wise_extraction(file) for file in data_files])

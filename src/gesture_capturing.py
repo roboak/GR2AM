@@ -5,7 +5,7 @@ from pathlib import Path
 
 import cv2
 import mediapipe as mp
-from dataclass import GestureMetaData
+from src.utils.dataclass import GestureMetaData
 
 
 class GestureCapture:

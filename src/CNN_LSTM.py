@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.nn import BatchNorm1d, Conv1d, Dropout, GRU, Linear, MaxPool1d, Sequential, Softmax, Tanh
 
 import format_data_for_nn
-import read_data
+from utils import read_data
 
 
 # from torch.utils.tensorboard import SummaryWriter
@@ -179,10 +179,11 @@ class train_neural_network:
 # writer = SummaryWriter(log_path)
 
 batch_size = 4
-seq_len = 50
+#seq_len = 50
 device = format_data_for_nn.get_device()
 # device = "cpu"
-dataset = read_data.read_data()
+dataset, seq_len = read_data.read_data()
+print(seq_len)
 num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
 X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(data_dict=data_dict,
                                                                                               num_labels=num_classes)
