@@ -8,7 +8,7 @@ from utils import format_data_for_nn, read_data
 
 # torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
 class CNN_LSTM(nn.Module):
-    def __init__(self, seq_len, device, n_layers=2, hidden_dim=128, output_size=3):
+    def __init__(self, seq_len, device, n_layers=3, hidden_dim=128, output_size=3):
         super(CNN_LSTM, self).__init__()
         self.device = device
         self.output_size = output_size
@@ -28,7 +28,7 @@ class CNN_LSTM(nn.Module):
         gru_out = self.gru_dropout(gru_out)
         flat_out = gru_out.contiguous().view(-1, 2 * self.gru_hidden_dim)
         dense_out = self.dense_layers(flat_out)
-        reshaped_out = dense_out.view(dense_out.shape[0] // 64, 64, self.output_size)
+        reshaped_out = dense_out.view(dense_out.shape[0]//self.seq_len, self.seq_len, self.output_size)
         out = reshaped_out[:, -1:, :].squeeze()
         return out, hidden
 
@@ -164,7 +164,7 @@ class train_neural_network:
 # model = CNN_LSTM(seq_len, device, output_size=num_classes).to(device)
 # # print(model)
 # nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
-#                                 lr=0.002, epochs=100, train_loader=train_loader, test_loader=test_loader,
+#                                 lr=0.005, epochs=100, train_loader=train_loader, test_loader=test_loader,
 #                                 val_loader=val_loader)
 # nn_train.train_model()
 #

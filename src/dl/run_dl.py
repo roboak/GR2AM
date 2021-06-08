@@ -51,5 +51,5 @@ if __name__ == '__main__':
 
     print("RUNNING GRU")
     run.setupDL(GRU)
-    run.trainDL(GRU, lr=0.002, epochs=100)
+    run.trainDL(GRU, lr=0.005, epochs=100)
     run.evalDL()
