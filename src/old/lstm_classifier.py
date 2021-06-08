@@ -1,10 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.metrics import multilabel_confusion_matrix
-from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, TensorDataset
 
 from src.utils import read_data
 
@@ -25,6 +21,7 @@ def format_data(dataset):  # read data in the format of [total_data_size, sequen
     data_dict["labels"] = labels.astype(int)
     num_classes = len(np.unique(data_dict["labels"]))
     return num_classes, data_dict
+
 
 class LSTMNetwork(nn.Module):
     def __init__(self, device, input_size=63, hidden_dim=128, output_size=3, n_layer=64, drop_prob=0.1):
@@ -53,7 +50,7 @@ class LSTMNetwork(nn.Module):
     def forward(self, x, hidden):
         batch_size = x.size(0)
 
-        #converting (batch_size, seq_len, 63) -> (batch_size, seq_len, 128)
+        # converting (batch_size, seq_len, 63) -> (batch_size, seq_len, 128)
         # embedding_out = self.embedding_layer(x)
         lstm_out, hidden = self.lstm(x, hidden)
         # https://stackoverflow.com/questions/54749665/stacking-up-of-lstm-outputs-in-pytorch
@@ -77,7 +74,7 @@ class LSTMNetwork(nn.Module):
         #           weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device))
 
         hidden = (torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device),
-                 torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
+                  torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
         return hidden
 
 
@@ -104,21 +101,21 @@ class train_neural_network:
         self.model.train()
         for i in range(self.epochs):
             h = self.model.init_hidden(self.batch_size)
-            train_losses =[]
+            train_losses = []
             for inputs, labels in self.train_loader:
                 counter += 1
                 h = tuple([e.data for e in h])
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                #self.model.zero_grad() #manually setting all the gradients to zero
+                # self.model.zero_grad() #manually setting all the gradients to zero
                 self.optimiser.zero_grad()
                 output, h = self.model.forward(inputs.float(), h)
                 #         print (output.shape)
                 #         print (h[0].shape)
                 # loss = criterion(output.squeeze(), labels.float())
-                loss = self.criterion(output, labels.long())#float())
+                loss = self.criterion(output, labels.long())  # float())
                 train_losses.append(loss)
                 loss.backward()
-                #nn.utils.clip_grad_norm_(self.model.parameters(), clip)
+                # nn.utils.clip_grad_norm_(self.model.parameters(), clip)
                 self.optimiser.step()
 
                 if counter % print_every == 0:
@@ -130,7 +127,7 @@ class train_neural_network:
                         inp, lab = inp.to(self.device), lab.to(self.device)
                         out, val_h = self.model.forward(inp.float(), val_h)  # model(inp, val_h)
                         # val_loss = criterion(out.squeeze(), lab.float())
-                        val_loss = self.criterion(out, lab.long())#float())
+                        val_loss = self.criterion(out, lab.long())  # float())
                         val_losses.append(val_loss.item())
 
                     self.model.train()
@@ -159,9 +156,9 @@ class train_neural_network:
             h = tuple([each.data for each in h])
             inputs, labels = inputs.to(device), labels.to(device)
             output, h = model.forward(inputs.float(), h)
-            test_loss = self.criterion(output, labels.long())#float())
+            test_loss = self.criterion(output, labels.long())  # float())
             test_losses.append(test_loss.item())
-            #pred = torch.round(output)  # rounds the output to 0/1
+            # pred = torch.round(output)  # rounds the output to 0/1
             print(output)
             print(labels)
             # pred = torch.where(output>0.75, 1.0, 0.0)
@@ -180,6 +177,7 @@ class train_neural_network:
         # plt.plot(test_losses)
         # plt.ylabel('losses')
         # plt.show()
+
 
 #
 # batch_size = 4
