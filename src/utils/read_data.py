@@ -41,12 +41,15 @@ def read_data() -> tuple[list, int]:
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
 
+            # FIXME are we normalising correctly here?
             df["X"] = df["X"] - df["X"][0]
             df["X"] = df["X"] - df["X"].mean()
             df["Y"] = df["Y"] - df["Y"][0]
             df["Y"] = df["Y"] - df["Y"].mean()
+            # FIXME we we need to normalise the Z coord even?
             df["Z"] = df["Z"] - df["Z"][0]
             df["Z"] = df["Z"] - df["Z"].mean()
+
             empty_list.append(df)
 
         # pad all with zeros to the largest size

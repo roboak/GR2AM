@@ -1,9 +1,9 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, Sequential, Softmax, Tanh
-
-from utils import format_data_for_nn, read_data
 
 
 # from torch.utils.tensorboard import SummaryWriter
@@ -123,7 +123,10 @@ class train_neural_network:
         test_losses = []
         num_correct = 0
         self.model.eval()
-        confusion_matrix = None
+
+        pred_list = []
+        label_list = []
+
         num_test_mini_batches = 0
         for inputs, labels in self.test_loader:
             num_test_mini_batches += 1
@@ -132,14 +135,20 @@ class train_neural_network:
             output = output.view(test_batch_size, -1)
             test_loss = self.criterion(output, labels.long())  # float())
             test_losses.append(test_loss.item())
-            print("raw out", output)
+            # print("raw out", output)
             pred = torch.argmax(output, dim=1)
-            # print("pred1:", pred)
-            print("labels:", labels)
             num_correct += torch.sum((pred == labels))
 
-            # confusion_matrix = multilabel_confusion_matrix(labels.detach().numpy(), pred.detach().numpy())
-            # print("confusion_matrix:", confusion_matrix)
+            label_list += labels.detach()
+            pred_list += pred.detach()
+
+        print(label_list + pred_list)
+
+        confusi = confusion_matrix(label_list, pred_list, labels=[0, 1, 2])
+        print("confusion_matrix:\n", confusi)
+        display_1 = ConfusionMatrixDisplay(confusion_matrix=confusi,
+                                           display_labels=["gesture1", "gesture2", "gesture3"]).plot()
+        plt.show()
 
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
@@ -148,7 +157,6 @@ class train_neural_network:
         # plt.plot(test_losses)
         # plt.ylabel('losses')
         # plt.show()
-
 
 # # debug()
 # batch_size = 4

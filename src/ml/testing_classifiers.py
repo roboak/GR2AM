@@ -17,8 +17,8 @@ from statistical_feature_extraction import FeatureExtraction
 
 def read_data(folder_name: str, sub_folder_name: str) -> list:
     # From the current file get the parent directory and create a pure path to the Dataset folder
-    height, width, channels = cv2.imread("sample.jpg").shape
-    parent_directory = Path(dirname(dirname(abspath(__file__))))
+    # height, width, channels = cv2.imread("sample.jpg").shape
+    parent_directory = Path(dirname(dirname(dirname(abspath(__file__)))))
     path = parent_directory / folder_name / sub_folder_name
     # List all file names ending with .txt sorted by size
     file_names = [(file, os.path.getsize(path / file)) for file in os.listdir(str(path)) if file.endswith(".txt")]
@@ -68,7 +68,7 @@ def read_data(folder_name: str, sub_folder_name: str) -> list:
 classifier_1 = svm.LinearSVC()  # One Vs. Rest
 classifier_2 = RandomForestClassifier(random_state=0)
 files_training = read_data(folder_name="OneParticipantDataSet", sub_folder_name="training")
-files_testing = read_data(folder_name="OneParticipantDataSet", sub_folder_name="testing")
+files_testing = read_data(folder_name="OneParticipantDataSet", sub_folder_name="testing")  # TODO here can do it
 feature_class = FeatureExtraction()
 features_training = np.asarray([feature_class.point_wise_extraction(file) for file in files_training])
 features_testing = np.asarray([feature_class.point_wise_extraction(file) for file in files_testing])
