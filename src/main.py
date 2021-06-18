@@ -1,3 +1,4 @@
+import platform
 from os.path import abspath, dirname
 from pathlib import Path
 
@@ -11,5 +12,11 @@ if __name__ == '__main__':
     parent_directory = Path(parent_directory)
     path = parent_directory / "HandDataset"
     gestureMetaData = GestureMetaData(gesture_name="gesture1")
-    gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0)
+
+    if platform.system() == "Darwin":  # for me on mac input 1 is the camera
+        gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=1)
+    else:
+        gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0)
+
     gesture.get_frame()
+

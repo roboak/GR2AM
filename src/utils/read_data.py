@@ -27,7 +27,7 @@ def read_data() -> tuple[list, int]:
         # open the file
         with open(str(path / file_name), 'r') as file:
             # Get the correct label based on the file name
-            label = re.search(r'gesture(\d+)_\d+.txt', file_name).group(1)
+            label = re.search(r'gesture_._\w+_(\d+)_\d+\.txt', file_name).group(1)
             # Read all frames
             dataframes = file.readlines()
 
