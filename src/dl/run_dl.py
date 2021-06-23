@@ -21,17 +21,17 @@ class DL_run:
     def setupDL(self, obj):
         dataset, seq_len = read_data.read_data()
         num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
-        #X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(
-        #    data_dict=data_dict,
-        #    num_labels=num_classes)
-        #self.train_loader, self.val_loader, self.test_loader = format_data_for_nn.get_mini_batches(X_train, X_test,
-        #                                                                                           X_val, y_train,
-        #                                                                                           y_test,
-        #                                                                                           y_val,
-        #                                                                                           self.batch_size,
-        #                                                                                           test_batch_size=self.test_batch_size)
+        X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(
+            data_dict=data_dict,
+            num_labels=num_classes)
+        self.train_loader, self.val_loader, self.test_loader = format_data_for_nn.get_mini_batches(X_train, X_test,
+                                                                                                   X_val, y_train,
+                                                                                                   y_test,
+                                                                                                   y_val,
+                                                                                                   self.batch_size,
+                                                                                                   test_batch_size=self.test_batch_size)
 
-        #self.model = obj.CNN_LSTM(seq_len, self.device, output_size=num_classes).to(self.device)
+        self.model = obj.CNN_LSTM(seq_len, self.device, output_size=num_classes).to(self.device)
         self.model = obj.CNN_LSTM(86, self.device, output_size=3).to(self.device)
 
         data_dict["labels"] = data_dict["labels"] - 1
@@ -43,7 +43,7 @@ class DL_run:
                                                  lr=lr, epochs=epochs, train_loader=self.train_loader,
                                                  test_loader=self.test_loader,
                                                  val_loader=self.val_loader)
-        #self.nn_train.train_model()
+        self.nn_train.train_model()
 
     def evalDL(self, obj):
         self.model.load_state_dict(torch.load('../model_save/cnn_state_dict.pt'))
