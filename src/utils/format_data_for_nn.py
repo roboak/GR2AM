@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
-
+from utils import read_data
 
 def format_data(dataset):
     """ read data in the format of [total_data_size, sequence length, feature_size, feature_dim] """
@@ -34,27 +34,40 @@ def to_categorical(labels, num_classes):
         new_labels[idx] = hot_encoding(label, num_classes)
     return new_labels
 
+def get_class_proportions(a):
+    distribution = {}
+    for item in a:
+        print((item))
+        if (str(item) in distribution.keys()):
+            distribution['{}'.format(item)] += 1 / len(a)
+        else:
+            distribution['{}'.format(item)] = 1 / len(a)
+    print(distribution)
+
 
 def split_training_test_valid(data_dict, num_labels):
     data_dict["labels"] = data_dict["labels"] - 1
     # data_dict["labels"] = to_categorical(data_dict["labels"], num_labels)
     X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,
-                                                        random_state=42)
-
-    split_frac = 0.5
-    split_id = int(split_frac * len(X_test))
-    X_val, X_test = X_test[:split_id], X_test[split_id:]
-    y_val, y_test = y_test[:split_id], y_test[split_id:]
+                                                        random_state=75, stratify= data_dict["labels"])
+    # get_class_proportions(y_train)
+    # split_frac = 0.5
+    # split_id = int(split_frac * len(X_test))
+    # X_val, X_test = X_test[:split_id], X_test[split_id:]
+    # y_val, y_test = y_test[:split_id], y_test[split_id:]
+    X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5,
+                                                        random_state=75, stratify= y_test)
     # print(y_train, y_test)
+
     return X_train, X_test, X_val, y_train, y_test, y_val
 
 
-def get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size, test_batch_size):
+def get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size, test_batch_size, val_batch_size):
     train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
     val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
     test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
-    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
+    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=val_batch_size, drop_last=True)
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
     return train_loader, val_loader, test_loader
 
@@ -69,3 +82,14 @@ def get_device():
         device = torch.device("cpu")
         print("GPU not available, CPU used")
     return device
+#
+# def get_all_data():
+#     train_dataset, train_seq_len = read_data.read_data("training")
+#     test_dataset, test_seq_len = read_data.read_data("test")
+#     train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
+#     val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
+#     test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
+#     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
+#     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=val_batch_size, drop_last=True)
+#     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
+#     return train_loader, val_loader, test_loader

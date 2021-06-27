@@ -3,36 +3,53 @@ import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
-from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, Sequential, Softmax, Tanh
+from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, Sequential, Softmax, Tanh, ReLU
 
 
 # from torch.utils.tensorboard import SummaryWriter
 
 # torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
-class CNN_LSTM(nn.Module):
+class CNN1D(nn.Module):
     def __init__(self, seq_len, device, n_layers=2, hidden_dim=128, output_size=3):
-        super(CNN_LSTM, self).__init__()
+        super(CNN1D, self).__init__()
         self.device = device
         self.output_size = output_size
         self.seq_len = seq_len
         self.n_layers = n_layers
+        self.n_cnn_filter_1 = 128
+        self.n_cnn_filter_2 = 64
+        self.cnn_kernel_size_1 = 1
+        self.cnn_kernel_size_2 = 1
+        self.cnn_stride_1 = 1
+        self.cnn_stride_2 = 1
+
         self.cnn_layers = Sequential(
             # out_channel = number of filters in the CNN
-            Conv1d(in_channels=self.seq_len, out_channels=64, kernel_size=1, stride=1),
-            BatchNorm1d(64),
+            Conv1d(in_channels=self.seq_len, out_channels=self.n_cnn_filter_1,
+                   kernel_size=self.cnn_kernel_size_1, stride=self.cnn_stride_1),
+            BatchNorm1d(self.n_cnn_filter_1),
+            # ReLU(),
             Tanh(),
-            Dropout(0.12),
-            MaxPool1d(2),
+            Dropout(0.15),
+            # MaxPool1d(2),
+            #len_output_features_per_frame = int((input_features_per_frame - kernel_size)/stride) + 1
+            Conv1d(in_channels=self.n_cnn_filter_1, out_channels=self.n_cnn_filter_2,
+                   kernel_size=self.cnn_kernel_size_2, stride=self.cnn_stride_2),
+            BatchNorm1d(self.n_cnn_filter_2),
+            # ReLU(),
+            Tanh(),
+            Dropout(0.3),
+            # MaxPool1d(2),
+            # len_output_features_per_frame_after_pooling = [int((input_features_per_frame - kernel_size)/stride) + 1]//2
 
-            Conv1d(in_channels=64, out_channels=64, kernel_size=1, stride=1),
-            BatchNorm1d(64),
-            Tanh(),
-            Dropout(0.2),
-            MaxPool1d(2),
         )
         self.flatten = Flatten()
+        cnn_output1 = (63-self.cnn_kernel_size_1)//self.cnn_stride_1 + 1
+        max_pool1 = cnn_output1//1
+        cnn_output2 = (max_pool1 - self.cnn_kernel_size_2)//self.cnn_stride_2 + 1
+        max_pool2 = cnn_output2//1
         self.dense_layers = Sequential(
-            Linear(64 * 15, self.output_size),
+            Linear(self.n_cnn_filter_2 * max_pool2, self.output_size),
             Softmax()
         )
 
@@ -48,7 +65,7 @@ def debug():
     seq_len = 50
     batch_size = 20
     inp = torch.randn(batch_size, seq_len, 63).to(device)
-    model = CNN_LSTM(seq_len, device).to(device)
+    model = CNN1D(seq_len, device).to(device)
     out, hidden = model.forward(inp, model.init_hidden(batch_size))
     print(out.shape)
     # out = out.view(20, 64, 3)
@@ -58,9 +75,8 @@ def debug():
 
 
 class train_neural_network:
-    def __init__(self, model, device, batch_size, lr, epochs, train_loader, test_loader, val_loader):
+    def __init__(self, model, device, lr, epochs, train_loader, test_loader, val_loader):
         self.device = device
-        self.batch_size = batch_size
         self.lr = lr
         self.epochs = epochs
         self.train_loader = train_loader
@@ -70,10 +86,11 @@ class train_neural_network:
         self.model = model
         self.optimiser = torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
+
     def train_model(self):
         counter = 0
         print_every = 10
-        clip = 5
+        clip = 15
         valid_loss_min = np.Inf
         # model.train() tells your model that you are training the model. So effectively layers like dropout, batchnorm etc.
         # which behave different on the train and test procedures know what is going on and hence can behave accordingly.
@@ -135,24 +152,25 @@ class train_neural_network:
             output = output.view(test_batch_size, -1)
             test_loss = self.criterion(output, labels.long())  # float())
             test_losses.append(test_loss.item())
-            # print("raw out", output)
+            print("raw out", output)
             pred = torch.argmax(output, dim=1)
             num_correct += torch.sum((pred == labels))
 
-            label_list += labels.detach()
-            pred_list += pred.detach()
+            label_list += labels.tolist()
+            pred_list += pred.tolist()
 
-        print(label_list + pred_list)
-
-        confusi = confusion_matrix(label_list, pred_list, labels=[0, 1, 2])
-        print("confusion_matrix:\n", confusi)
+        print("label_list_size: {}".format(label_list))
+        print("pred_list_size: {}".format(pred_list))
+        #
+        confusi = confusion_matrix(label_list, pred_list, labels=[x for x in range(15)])
+        # print("confusion_matrix:\n", confusi)
         display_1 = ConfusionMatrixDisplay(confusion_matrix=confusi,
-                                           display_labels=["gesture1", "gesture2", "gesture3"]).plot()
-        plt.show()
+                                           display_labels=["gesture" + str(x) for x in range(1,16)]).plot()
 
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
+        plt.show()
 
         # plt.plot(test_losses)
         # plt.ylabel('losses')
