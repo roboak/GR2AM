@@ -11,11 +11,11 @@ from utils.dataclass import Data
 import cv2
 
 
-def read_data() -> tuple[list, int]:
+def read_data():
     # From the current file get the parent directory and create a purepath to the Dataset folder
     #height, width, channels = cv2.imread("../sample.jpg").shape
     parent_directory = Path(dirname(dirname(dirname(abspath(__file__)))))
-    path = parent_directory / "HandDataset"
+    path = parent_directory / "Abdul"
     # List all file names ending with .txt sorted by size
     file_names = [(file, os.path.getsize(path / file)) for file in os.listdir(str(path)) if file.endswith(".txt")]
     file_names.sort(key=lambda file: file[1], reverse=True)
