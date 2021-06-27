@@ -3,6 +3,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 from utils import read_data
+import src.dl.read_data_testing_nn as read_data_nn
 
 def format_data(dataset):
     """ read data in the format of [total_data_size, sequence length, feature_size, feature_dim] """
@@ -78,14 +79,28 @@ def get_device():
         device = torch.device("cpu")
         print("GPU not available, CPU used")
     return device
+
+
 #
-# def get_all_data():
-#     train_dataset, train_seq_len = read_data.read_data("training")
-#     test_dataset, test_seq_len = read_data.read_data("test")
-#     train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
-#     val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
-#     test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
-#     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
-#     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=val_batch_size, drop_last=True)
-#     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
-#     return train_loader, val_loader, test_loader
+def get_all_data(batch_size, val_batch_size, test_batch_size):
+
+    train_data, seq_len = read_data_nn.read_data_nn_test("TrainingData", "Josh")
+    test_data, _ = read_data_nn.read_data_nn_test("TestingData", "Josh")
+    num_classes, train_data_dict = format_data(train_data)
+    _, test_data_dict = format_data(test_data)
+    train_data_dict["labels"] = train_data_dict["labels"] -1
+    test_data_dict["labels"] = test_data_dict["labels"] -1
+    train_dataset = TensorDataset(torch.from_numpy(train_data_dict["data"]), torch.from_numpy(train_data_dict["labels"]))
+    # X_val, X_test, y_val, y_test = train_test_split(test_data_dict["data"], test_data_dict["labels"], test_size=0.5,
+    #                                                 random_state=75, stratify=test_data_dict["labels"])
+    test_dataset = TensorDataset(torch.from_numpy(test_data_dict["data"]), torch.from_numpy(test_data_dict["labels"]))
+    val_dataset = test_dataset
+    # val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
+    # test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
+    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=val_batch_size, drop_last=True)
+    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
+    return train_loader, val_loader, test_loader, seq_len, num_classes
+
+train_loader, val_loader, test_loader, seq_len, num_classes = get_all_data(32, 16, 1)
+print("Hello")

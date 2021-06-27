@@ -13,26 +13,30 @@ class DL_run:
     def __init__(self):
         self.val_loader = None
         self.train_loader = None
-        self.batch_size = 32
+        self.batch_size = 64
         self.test_batch_size = 1
-        self.val_batch_size = 16
+        self.val_batch_size = 32
         self.device = format_data_for_nn.get_device()
         # device = "cpu"
 
     def setupDL(self, obj):
-        dataset, seq_len = read_data.read_data()
-        num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
-        X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(
-           data_dict=data_dict,
-           num_labels=num_classes)
-        self.train_loader, self.val_loader, self.test_loader = format_data_for_nn.get_mini_batches(X_train, X_test,
-                                                                                                  X_val, y_train,
-                                                                                                  y_test,
-                                                                                                  y_val,
-                                                                                                  self.batch_size,
-                                                                                                  test_batch_size=self.test_batch_size,
-                                                                                                   val_batch_size= self.val_batch_size)
+        # dataset, seq_len = read_data.read_data()
+        # num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
+        # X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(
+        #    data_dict=data_dict,
+        #    num_labels=num_classes)
+        # self.train_loader, self.val_loader, self.test_loader = format_data_for_nn.get_mini_batches(X_train, X_test,
+        #                                                                                           X_val, y_train,
+        #                                                                                           y_test,
+        #                                                                                           y_val,
+        #                                                                                           self.batch_size,
+        #                                                                                           test_batch_size=self.test_batch_size,
+        #                                                                                            val_batch_size= self.val_batch_size)
 
+        self.train_loader, self.val_loader, self.test_loader, seq_len, num_classes = format_data_for_nn.get_all_data(batch_size= self.batch_size,
+                                                                                               val_batch_size=self.val_batch_size,
+                                                                                               test_batch_size=self.test_batch_size
+                                                                                               )
         self.model = obj.CNN1D(seq_len, self.device, output_size=num_classes).to(self.device)
 
         #data_dict["labels"] = data_dict["labels"] - 1
