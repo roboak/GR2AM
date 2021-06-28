@@ -1,21 +1,16 @@
 import ast
 import os
 import re
-from os.path import abspath, dirname
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
-
-from utils.dataclass import Data
-import cv2
+from src.utils.dataclass import Data
 
 
-def read_data() : #-> tuple[list, int]:
-    # From the current file get the parent directory and create a purepath to the Dataset folder
-    #height, width, channels = cv2.imread("../sample.jpg").shape
-    parent_directory = Path(dirname(dirname(dirname(abspath(__file__)))))
-    path = parent_directory / "Abdul"
+def read_data(path: str, sub_path=""):
+    # From the current file get the parent directory and create a pure path to the Dataset folder
+    parent_directory = Path(path)
+    path = parent_directory / sub_path
     # List all file names ending with .txt sorted by size
     file_names = [(file, os.path.getsize(path / file)) for file in os.listdir(str(path)) if file.endswith(".txt")]
     file_names.sort(key=lambda file: file[1], reverse=True)
@@ -41,17 +36,15 @@ def read_data() : #-> tuple[list, int]:
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
             # Recording the wrist coordinate of the first frame of each sequence.
-            if i==0:
-                ref_X = df["X"][0]
-                ref_Y = df["Y"][0]
-                ref_Z = df["Z"][0]
-            # FIXME are we normalising correctly here?
-            df["X"] = df["X"] - ref_X
+            if i == 0:
+                reference_x = df["X"][0]
+                reference_y = df["Y"][0]
+                reference_z = df["Z"][0]
+            df["X"] = df["X"] - reference_x
             df["X"] = df["X"] - df["X"].mean()
-            df["Y"] = df["Y"] - ref_Y
+            df["Y"] = df["Y"] - reference_y
             df["Y"] = df["Y"] - df["Y"].mean()
-            # FIXME we we need to normalise the Z coord even?
-            df["Z"] = df["Z"] - ref_Z
+            df["Z"] = df["Z"] - reference_z
             df["Z"] = df["Z"] - df["Z"].mean()
 
             empty_list.append(df)
@@ -60,7 +53,6 @@ def read_data() : #-> tuple[list, int]:
         largest_frame_count = 80
         while len(empty_list) <= largest_frame_count:
             empty_list.append(pd.DataFrame(np.zeros((21, 3))))
-
 
         empty_list = empty_list[0: largest_frame_count]
         # Input into a NP array
