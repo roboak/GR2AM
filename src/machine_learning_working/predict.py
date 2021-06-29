@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.machine_learning_working.statistical_feature_extraction import FeatureExtraction
 
 
@@ -8,7 +10,10 @@ class Predict:
 
     def predict_data(self, file):
         features = self.feature_extraction.get_features(file)
+        features = np.reshape(features, (1, features.shape[0]))
+        print(features.shape)
         column_number = features.shape[1] - 1
+        # column_number = 756
         data = features[:, :column_number]
         actual_label = features[:, column_number]
         result = self.classifier.predict(data)
