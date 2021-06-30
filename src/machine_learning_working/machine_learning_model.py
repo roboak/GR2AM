@@ -7,14 +7,14 @@ from src.utils.read_data import read_data
 
 class MachineLearningClassifier:
     def __init__(self, training_data_path="", training_data_folder="", extracted_features_path="",
-                 features_already_extracted: bool = False, already_trained_classifier=None):
+                 already_trained_classifier=None):
         self.training_data_path = training_data_path
         self.training_data_folder = training_data_folder
         self.extracted_features_path = extracted_features_path
         self.feature_extraction = FeatureExtraction()
         self.classifier = already_trained_classifier
         self.features = 0
-        self.__fit_classifier(features_already_extracted)
+        self.__fit_classifier()
 
     def __get_features(self):
         """
@@ -46,19 +46,18 @@ class MachineLearningClassifier:
         training_labels = training_features[:, column_number]
         self.classifier.fit(training_data, training_labels)
 
-    def __fit_classifier(self, features_already_extracted):
+    def __fit_classifier(self):
         """
-        :param features_already_extracted: A boolean to either call and load already available features or to extract
-        the features from the start.
+        :param
         :return:
         """
         if self.classifier is None:
-            if features_already_extracted:
+            if self.extracted_features_path:
                 self.__get_features_loaded()
             else:
                 self.__get_features()
 
-    def predict_data(self, data):
+    def predict_data(self, data: np.array):
         """
         :param data: A numpy Array of the data to predict
         :return: The results of the classification
