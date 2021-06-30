@@ -53,7 +53,7 @@ class DL_run:
     def evalDL(self, obj):
         self.model.load_state_dict(torch.load('../model_save/cnn_state_dict.pt'))
         # self.model.load_state_dict(torch.load('../cnn_state_dict_abdul_95.pt'))
-        #self.model.load_state_dict(torch.load('../model_save/gru_state_dict.pt'))
+        # self.model.load_state_dict(torch.load('../model_save/gru_state_dict.pt'))
         self.nn_train.evaluate_model(self.test_batch_size)
 
 

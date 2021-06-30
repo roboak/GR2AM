@@ -7,7 +7,7 @@ import pandas as pd
 from src.utils.dataclass import Data
 
 
-def read_data(path: str, sub_path=""):
+def read_data(path: str, sub_path="", predef_size=0) -> tuple[list, int]:
     # From the current file get the parent directory and create a pure path to the Dataset folder
     parent_directory = Path(path)
     path = parent_directory / sub_path
@@ -50,11 +50,11 @@ def read_data(path: str, sub_path=""):
             empty_list.append(df)
 
         # pad all with zeros to the largest size
-        largest_frame_count = 80
-        while len(empty_list) <= largest_frame_count:
+        while len(empty_list) < largest_frame_count:
             empty_list.append(pd.DataFrame(np.zeros((21, 3))))
 
-        empty_list = empty_list[0: largest_frame_count]
+        empty_list = empty_list[0: largest_frame_count]  # FIXME shouldn't be need to ensure size
+
         # Input into a NP array
         data_array = np.asarray(empty_list)
         # Create a data class combining data and label
@@ -63,4 +63,4 @@ def read_data(path: str, sub_path=""):
         # save the list for each capture
         data_list.append(data_1)
 
-    return data_list, largest_frame_count
+    return data_list, (largest_frame_count if not predef_size else predef_size)

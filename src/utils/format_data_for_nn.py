@@ -1,9 +1,11 @@
+import sys
+from os.path import abspath, dirname
+
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
-from utils import read_data
-import src.dl.read_data_testing_nn as read_data_nn
+from src.utils.read_data import read_data
 
 def format_data(dataset):
     """ read data in the format of [total_data_size, sequence length, feature_size, feature_dim] """
@@ -84,8 +86,9 @@ def get_device():
 #
 def get_all_data(batch_size, val_batch_size, test_batch_size):
 
-    train_data, seq_len = read_data_nn.read_data_nn_test("TrainingData", "Josh")
-    test_data, _ = read_data_nn.read_data_nn_test("TestingData", "Josh")
+    path = dirname(dirname(dirname(abspath(__file__)))) + "/HandDataset"
+    train_data, seq_len = read_data(path + "/TrainingData", "Josh", 80)  # FIXME remove fixed size 80
+    test_data, _ = read_data(path + "/TestingData", "Josh", 80)  # FIXME remove fixe size 80
     num_classes, train_data_dict = format_data(train_data)
     _, test_data_dict = format_data(test_data)
     train_data_dict["labels"] = train_data_dict["labels"] -1
