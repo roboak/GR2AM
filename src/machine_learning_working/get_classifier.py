@@ -14,7 +14,7 @@ class Classifier:
 
     def get_classifier(self):
         training_files, _ = read_data(self.training_data_path, self.training_data_folder)
-        training_features = np.asarray([self.feature_extraction.get_features(file) for file in training_files])
+        training_features = np.asarray([self.feature_extraction.get_features_training(file) for file in training_files])
         column_number = training_features.shape[1] - 1
         training_data = training_features[:, :column_number]
         training_labels = training_features[:, column_number]

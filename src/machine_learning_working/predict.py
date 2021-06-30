@@ -9,7 +9,7 @@ class Predict:
         self.feature_extraction = FeatureExtraction()
 
     def predict_data(self, file):
-        features = self.feature_extraction.get_features(file)
+        features = self.feature_extraction.get_features_training(file)
         features = np.reshape(features, (1, features.shape[0]))
         print(features.shape)
         column_number = features.shape[1] - 1
