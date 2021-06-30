@@ -3,9 +3,10 @@ from sklearn.ensemble import RandomForestClassifier
 from joblib import load, dump
 from src.machine_learning_working.statistical_feature_extraction import FeatureExtraction
 from src.utils.read_data import read_data
+from src.learning_model_class import LearningModel
 
 
-class MachineLearningClassifier:
+class MachineLearningClassifier(LearningModel):
     def __init__(self, training_data_path="", training_data_folder="", extracted_features_path="",
                  already_trained_classifier=None):
         self.training_data_path = training_data_path
