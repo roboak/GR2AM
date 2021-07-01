@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 from src.utils.read_data import read_data
 
-def format_data(dataset):
+def format_batch_data(dataset):
     """ read data in the format of [total_data_size, sequence length, feature_size, feature_dim] """
     seq_len = dataset[0].data.shape[0]
     num_features = dataset[0].data.shape[1]
@@ -24,6 +24,18 @@ def format_data(dataset):
     data_dict["labels"] = labels.astype(int)
     num_classes = len(np.unique(data_dict["labels"]))
     return num_classes, data_dict
+
+def format_individual_data(dataset):
+    """ read data in the format of [sequence length, feature_size, feature_dim] """
+    """dataset has two data types - data and label"""
+    seq_len = dataset.data.shape[0]
+    num_features = dataset.data.shape[1]
+    feature_dim = dataset.data.shape[2]
+    data_dict = {}
+    data_dict["data"] = dataset.data.reshape(1, seq_len, num_features * feature_dim).astype(np.float)
+    data_dict["labels"] = np.array(int(dataset.label)) #.astype(int)
+    return data_dict
+
 
 
 def hot_encoding(y, num_classes):
@@ -89,15 +101,15 @@ def get_all_data(batch_size, val_batch_size, test_batch_size):
     path = dirname(dirname(dirname(abspath(__file__)))) + "/HandDataset"
     train_data, seq_len = read_data(path + "/TrainingData", "Josh", 80)  # FIXME remove fixed size 80
     test_data, _ = read_data(path + "/TestingData", "Josh", 80)  # FIXME remove fixe size 80
-    num_classes, train_data_dict = format_data(train_data)
-    _, test_data_dict = format_data(test_data)
+    num_classes, train_data_dict = format_batch_data(train_data)
+    _, test_data_dict = format_batch_data(test_data)
     train_data_dict["labels"] = train_data_dict["labels"] -1
     test_data_dict["labels"] = test_data_dict["labels"] -1
     train_dataset = TensorDataset(torch.from_numpy(train_data_dict["data"]), torch.from_numpy(train_data_dict["labels"]))
-    # X_val, X_test, y_val, y_test = train_test_split(test_data_dict["data"], test_data_dict["labels"], test_size=0.5,
-    #                                                 random_state=75, stratify=test_data_dict["labels"])
     test_dataset = TensorDataset(torch.from_numpy(test_data_dict["data"]), torch.from_numpy(test_data_dict["labels"]))
     val_dataset = test_dataset
+    # X_val, X_test, y_val, y_test = train_test_split(test_data_dict["data"], test_data_dict["labels"], test_size=0.5,
+    #                                                 random_state=75, stratify=test_data_dict["labels"])
     # val_dataset = TensorDataset(torch.from_numpy(X_val), torch.from_numpy(y_val))
     # test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)

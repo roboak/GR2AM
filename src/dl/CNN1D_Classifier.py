@@ -10,7 +10,7 @@ from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, S
 
 # torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros')
 class CNN1D(nn.Module):
-    def __init__(self, seq_len, device, n_layers=2, hidden_dim=128, output_size=3):
+    def __init__(self, seq_len, device, output_size, n_layers=2, hidden_dim=128, ):
         super(CNN1D, self).__init__()
         self.device = device
         self.output_size = output_size
@@ -30,7 +30,7 @@ class CNN1D(nn.Module):
             BatchNorm1d(self.n_cnn_filter_1),
             # ReLU(),
             Tanh(),
-            Dropout(0.15),
+            Dropout(0.17),
             # MaxPool1d(2),
             #len_output_features_per_frame = int((input_features_per_frame - kernel_size)/stride) + 1
             Conv1d(in_channels=self.n_cnn_filter_1, out_channels=self.n_cnn_filter_2,

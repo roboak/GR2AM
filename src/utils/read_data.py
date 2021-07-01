@@ -7,7 +7,7 @@ import pandas as pd
 from src.utils.dataclass import Data
 
 
-def read_data(path: str, sub_path="", predef_size=0) -> tuple[list, int]:
+def read_data(path: str, sub_path="", predef_size=0): # -> tuple[list, int]:
     # From the current file get the parent directory and create a pure path to the Dataset folder
     parent_directory = Path(path)
     path = parent_directory / sub_path
@@ -29,6 +29,8 @@ def read_data(path: str, sub_path="", predef_size=0) -> tuple[list, int]:
         # storing the largest frame size
         if not largest_frame_count:
             largest_frame_count = len(dataframes)
+
+        largest_frame_count = largest_frame_count if not predef_size else predef_size
 
         empty_list = []
         # Convert the str represented list to an actual list again
