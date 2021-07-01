@@ -29,6 +29,8 @@ def read_data(path: str, sub_path="", predef_size=0): # -> tuple[list, int]:
         # storing the largest frame size
         if not largest_frame_count:
             largest_frame_count = len(dataframes)
+        elif predef_size:
+            largest_frame_count = predef_size
 
         largest_frame_count = largest_frame_count if not predef_size else predef_size
 
@@ -65,4 +67,4 @@ def read_data(path: str, sub_path="", predef_size=0): # -> tuple[list, int]:
         # save the list for each capture
         data_list.append(data_1)
 
-    return data_list, (largest_frame_count if not predef_size else predef_size)
+    return data_list, largest_frame_count

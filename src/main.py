@@ -18,7 +18,7 @@ if __name__ == '__main__':
         parent_directory = dirname(dirname(abspath(__file__)))
         print(parent_directory)
         parent_directory = Path(parent_directory)
-        path = parent_directory / "HandDataset2"
+        path = parent_directory / "HandDataset"
         gestureMetaData = GestureMetaData(gesture_name="gesture_test_0")
 
         if platform.system() == "Darwin":  # for me on mac input 1 is the camera

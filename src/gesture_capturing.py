@@ -1,3 +1,4 @@
+import ast
 import io
 import json
 import os
@@ -6,7 +7,11 @@ from pathlib import Path
 
 import cv2
 import mediapipe as mp
+import numpy as np
+import pandas as pd
+
 from src.utils.dataclass import GestureMetaData
+from src.machine_learning_working.machine_learning_model import MachineLearningClassifier
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
@@ -49,7 +54,33 @@ class GestureCapture:
         print(self.gesture_name)
 
     def classify_capture(self, frames):
-        #print(frames[0])
+
+        empty_list = []
+        # Convert the str represented list to an actual list again
+        for i, frame in enumerate(frames):
+            df = pd.DataFrame(frame)
+            # Recording the wrist coordinate of the first frame of each sequence.
+            if i == 0:
+                reference_x = df["X"][0]
+                reference_y = df["Y"][0]
+                reference_z = df["Z"][0]
+            df["X"] = df["X"] - reference_x
+            df["X"] = df["X"] - df["X"].mean()
+            df["Y"] = df["Y"] - reference_y
+            df["Y"] = df["Y"] - df["Y"].mean()
+            df["Z"] = df["Z"] - reference_z
+            df["Z"] = df["Z"] - df["Z"].mean()
+
+            empty_list.append(df)
+
+        # TODO or check here for the length an pad if necessary
+
+        data_array = np.asarray(empty_list)
+
+        ml = MachineLearningClassifier(extracted_features_path="machine_learning_working/training_features_josh.joblib")
+        res = ml.predict_data(data_array)
+        print(res)
+
         # print(threading.get_ident())
         # time.sleep(7)
         return 1
@@ -71,6 +102,7 @@ class GestureCapture:
                 self.record_frame(image)
 
             if live and self.all_keypoints:
+                print(len(self.all_keypoints))
 
                 if len(self.all_keypoints) == 60:  # if 60 frames have been captured
 
@@ -82,6 +114,7 @@ class GestureCapture:
                 if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:  # check for time but with at least 21 entries!
                     print("There was no new capture but a timeout of 10 secs")
                     # TODO
+                    # TODO also pad it to the 60 frames!
                     self.all_keypoints = []
 
             cv2.imshow('MediaPipe Hands', image)
@@ -146,6 +179,7 @@ class GestureCapture:
             self.last_append = time.time()
 
     def write_file(self):
+        return
         if self.all_keypoints:  # only do smth when we have data to write
             with open(self.gesture_path, "w") as data_file:  # open file and save/close afterwards
                 for item in self.all_keypoints:  # write all frames

@@ -12,7 +12,7 @@ class FeatureExtraction:
             self.feature_config_file["statistical"].pop(key, None)
         return
 
-    def get_features(self, file) -> np.array:
+    def get_features_training(self, file) -> np.array:
         """
         :param file: A file a recording.
         For each file, we have a number of frames.
@@ -30,6 +30,23 @@ class FeatureExtraction:
         # The order is feature1 {(x,y,z) for point1, (x,y,z) for point2 .... (x,y,z) for point21}, feature2 and so on
         result = np.append(feature, label)
         return result
+
+    def get_features_prediction(self, data: np.array) -> np.array:
+        """
+        :param data: A numpy array of just 1 recording
+        For each file, we have a number of frames.
+        For each frame, we have 21 points, each point has 3 coordinates.
+        We want to extract the features for each frame for each finger joint by itself.
+        :return: A feature array for the file.
+        """
+        feature = np.apply_along_axis(self.__features, 0, data)
+        # We have the features calculated for each point
+        # The shape = (Number of features, Number of points, Number of coordinates)
+        features = feature.flatten()
+        # Will flatten the feature array to be a 1D array
+        # The order is feature1 {(x,y,z) for point1, (x,y,z) for point2 .... (x,y,z) for point21}, feature2 and so on
+        # result = np.append(feature)
+        return features
 
     def __features(self, array):
         """
