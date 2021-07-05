@@ -25,16 +25,16 @@ def format_batch_data(dataset):
     num_classes = len(np.unique(data_dict["labels"]))
     return num_classes, data_dict
 
-def format_individual_data(dataset):
+def format_individual_data(data):
     """ read data in the format of [sequence length, feature_size, feature_dim] """
     """dataset has two data types - data and label"""
-    seq_len = dataset.data.shape[0]
-    num_features = dataset.data.shape[1]
-    feature_dim = dataset.data.shape[2]
-    data_dict = {}
-    data_dict["data"] = dataset.data.reshape(1, seq_len, num_features * feature_dim).astype(np.float)
-    data_dict["labels"] = np.array(int(dataset.label)) #.astype(int)
-    return data_dict
+    seq_len = data.shape[0]
+    num_features = data.shape[1]
+    feature_dim = data.shape[2]
+    # data_dict = {}
+    # data_dict["data"] = dataset.data.reshape(1, seq_len, num_features * feature_dim).astype(np.float)
+    # data_dict["labels"] = np.array(int(dataset.label))
+    return data.reshape(1, seq_len, num_features * feature_dim).astype(np.float)
 
 
 
@@ -96,11 +96,11 @@ def get_device():
 
 
 #
-def get_all_data(batch_size, val_batch_size, test_batch_size):
+def get_data_for_training(batch_size, val_batch_size, test_batch_size, path_to_data, folder_name):
 
-    path = dirname(dirname(dirname(abspath(__file__)))) + "/HandDataset"
-    train_data, seq_len = read_data(path + "/TrainingData", "Josh", 80)  # FIXME remove fixed size 80
-    test_data, _ = read_data(path + "/TestingData", "Josh", 80)  # FIXME remove fixe size 80
+    # path = dirname(dirname(dirname(abspath(__file__)))) + "/HandDataset"
+    train_data, seq_len = read_data(path_to_data + "/TrainingData", folder_name, 80)  # FIXME remove fixed size 80
+    test_data, _ = read_data(path_to_data + "/TestingData", folder_name, 80)  # FIXME remove fixe size 80
     num_classes, train_data_dict = format_batch_data(train_data)
     _, test_data_dict = format_batch_data(test_data)
     train_data_dict["labels"] = train_data_dict["labels"] -1
@@ -117,5 +117,7 @@ def get_all_data(batch_size, val_batch_size, test_batch_size):
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
     return train_loader, val_loader, test_loader, seq_len, num_classes
 
-train_loader, val_loader, test_loader, seq_len, num_classes = get_all_data(32, 16, 1)
-print("Hello")
+
+if __name__ == '__main__':
+    train_loader, val_loader, test_loader, seq_len, num_classes = get_data_for_training(32, 16, 1)
+    print("Hello")

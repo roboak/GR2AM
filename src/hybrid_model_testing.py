@@ -34,7 +34,7 @@ def ml(classifier, file):
 if __name__ == '__main__':
 
     #read data
-    test_data, _ = rd.read_data("./../TestingData", "Josh")
+    test_data, _ = rd.read_data("HandDataset/TestingData", "Josh")
 
     #load dl model
     dl_model = CNN1D.CNN1D(80, "cpu", output_size=15)

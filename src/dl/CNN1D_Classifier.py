@@ -106,7 +106,7 @@ class train_neural_network:
                     output = self.model.forward(inputs.float())
                     loss = self.criterion(output, labels.long())  # float())
                     train_losses.append(loss)
-                    loss.backward()  # retain_graph=True)
+                    loss.backward()
                     nn.utils.clip_grad_norm_(self.model.parameters(), clip)
                     self.optimiser.step()
 

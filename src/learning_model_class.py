@@ -8,9 +8,6 @@ class LearningModel(ABC):
         pass
 
     @abstractmethod
-    def save_features(self):
+    def train_model(self): #path to the parent folder where the data is present
         pass
 
-    @abstractmethod
-    def save_model(self):
-        pass
