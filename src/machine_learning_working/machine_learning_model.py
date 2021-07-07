@@ -74,3 +74,6 @@ class MachineLearningClassifier(LearningModel):
 
     def save_model(self):
         dump(self.classifier, "trained_model.joblib")
+
+    def train_model(self):
+        pass

@@ -1,8 +1,9 @@
-import ast
+import copy
 import io
 import json
 import os
-import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import cv2
@@ -10,11 +11,10 @@ import mediapipe as mp
 import numpy as np
 import pandas as pd
 
-from src.utils.dataclass import GestureMetaData
+from dl.deep_learning_model import DeepLearningClassifier
+from hybrid_learning_model import HybridLearningClassifier
 from src.machine_learning_working.machine_learning_model import MachineLearningClassifier
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import time
+from src.utils.dataclass import Data, GestureMetaData
 
 
 class GestureCapture:
@@ -23,7 +23,8 @@ class GestureCapture:
         self.gesture_path = None
         self.all_keypoints = []
         self.last_append = 0
-        
+        self.live_framesize = 80
+
         self.gestureMetaData = gesture_meta_data
         self.folder_location = folder_location
         self.meta_data_file = str(Path(self.folder_location) / "MetaData.json")
@@ -40,9 +41,6 @@ class GestureCapture:
 
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.futures = []
-        # TODO to extract the results:
-        # for future in as_completed(self.futures):
-        #    print(future.result())
 
     def setup_cap(self):
         if not (self.gestureMetaData.gestureName in self.gesture_dict.keys()):
@@ -53,7 +51,7 @@ class GestureCapture:
 
         print(self.gesture_name)
 
-    def classify_capture(self, frames):
+    def classify_capture(self, frames):  # TODO  create function from normalisation part
 
         empty_list = []
         # Convert the str represented list to an actual list again
@@ -73,22 +71,25 @@ class GestureCapture:
 
             empty_list.append(df)
 
-        # TODO or check here for the length an pad if necessary
+        # pad all with zeros to the frame size 60
+        while len(empty_list) < self.live_framesize:
+            empty_list.append(pd.DataFrame(np.zeros((21, 3))))
 
         data_array = np.asarray(empty_list)
 
-        ml = MachineLearningClassifier(extracted_features_path="machine_learning_working/training_features_josh.joblib")
-        res = ml.predict_data(data_array)
-        print(res)
+        # Call learning model to predict class
+        #ml = MachineLearningClassifier(extracted_features_path="machine_learning_working/training_features_josh.joblib")
+        #dl = DeepLearningClassifier()
+        hl = HybridLearningClassifier()
 
-        # print(threading.get_ident())
-        # time.sleep(7)
-        return 1
+        return hl.predict_data(data_array)
 
     def get_frame(self):
         self.setup_cap()
 
         cap = cv2.VideoCapture(self.camera_input_value)
+
+        last_result = ""
 
         record, live, redo = False, False, False
         end = False
@@ -98,24 +99,38 @@ class GestureCapture:
             _, image = cap.read()
             image = cv2.flip(image, 1)  # mirror invert camera image
 
+            # Record frames to all_keypoints
             if record:
                 self.record_frame(image)
 
             if live and self.all_keypoints:
-                print(len(self.all_keypoints))
 
-                if len(self.all_keypoints) == 60:  # if 60 frames have been captured
+                # When 60 frames are captured create job to classify
+                if len(self.all_keypoints) == self.live_framesize:
 
-                    # TODO check if a copy of the list is needed ? due to datarace
-                    self.futures.append(self.executor.submit(self.classify_capture, frames=self.all_keypoints))
+                    self.futures.append(
+                        self.executor.submit(self.classify_capture, frames=copy.copy(self.all_keypoints)))
 
-                    self.all_keypoints = self.all_keypoints[:-20]  # save last 20 entries for next round
+                    # Record overlapping window
+                    self.all_keypoints = self.all_keypoints[:-20]  # save last 20 entries for next window
 
-                if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:  # check for time but with at least 21 entries!
-                    print("There was no new capture but a timeout of 10 secs")
-                    # TODO
-                    # TODO also pad it to the 60 frames!
+                # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
+                if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
+
+                    self.futures.append(
+                        self.executor.submit(self.classify_capture, frames=copy.copy(self.all_keypoints)))
+
+                    # empty out completely, no related movements
                     self.all_keypoints = []
+
+                # Collect results from workers
+                for future in as_completed(self.futures):
+                    last_result = str(future.result())
+                    self.futures.remove(future)
+
+            if live:  # In live mode always display text
+                cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
+                            (0, 0, 255, 255), 2)  # BGR of course
 
             cv2.imshow('MediaPipe Hands', image)
 
@@ -147,7 +162,7 @@ class GestureCapture:
         cv2.destroyAllWindows()
 
     def get_hand_points(self, image):
-        with self.mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
+        with self.mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # To improve performance, optionally mark the image as not writeable to pass by reference.
@@ -193,3 +208,17 @@ class GestureCapture:
         gesture_dictionary[self.gestureMetaData.gestureName]["files"].append(gesture_file)
         with open(self.meta_data_file, "w") as outfile:
             json.dump(gesture_dictionary, outfile)
+
+    @staticmethod
+    def translate_class(classid: str) -> str:
+        if not classid.isdigit():
+            return ''
+        classid = int(classid)
+
+        classes = {0: 'Thumb tap', 1: 'Thumb Swipe Up', 2: 'Thumb Swipe Down',
+                   3: 'Index tap', 4: 'Index Swipe Up', 5: 'Index Swipe Down',
+                   6: 'Middle tap', 7: 'Middle Swipe Up', 8: 'Middle Swipe Down',
+                   9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
+                   12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',}
+
+        return classes[classid]
