@@ -66,7 +66,7 @@ class MachineLearningClassifier(LearningModel):
         features = self.feature_extraction.get_features_prediction(data)
         features = np.reshape(features, (1, features.shape[0]))
         prediction_result = self.classifier.predict(features)
-        return prediction_result
+        return int(prediction_result[0]) - 1
 
     def save_features(self):
         if self.features != 0:

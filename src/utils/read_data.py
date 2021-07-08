@@ -58,7 +58,8 @@ def read_data(path: str, sub_path="", predef_size=0) -> Tuple[list, int]:
         while len(empty_list) < largest_frame_count:
             empty_list.append(pd.DataFrame(np.zeros((21, 3))))
 
-        empty_list = empty_list[0: largest_frame_count]  # FIXME shouldn't be need to ensure size
+        # This also makes sure longer files are cut down
+        empty_list = empty_list[0: largest_frame_count]
 
         # Input into a NP array
         data_array = np.asarray(empty_list)

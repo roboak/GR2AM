@@ -12,7 +12,7 @@ from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, S
 class CNN1D(nn.Module):
     def __init__(self, seq_len, device, output_size, n_layers=2, hidden_dim=128, ):
         super(CNN1D, self).__init__()
-        self.device = device
+        #self.device = device
         self.output_size = output_size
         self.seq_len = seq_len
         self.n_layers = n_layers
@@ -125,16 +125,13 @@ class train_neural_network:
                               "Loss: {:.6f}...".format(loss.item()),
                               "Val Loss: {:.6f}".format(np.mean(val_losses)))
                         if np.mean(val_losses) <= valid_loss_min:
-                            torch.save(self.model.state_dict(), '../model_save/cnn_state_dict.pt')
+                            torch.save(self.model.state_dict(), 'model_save/cnn_state_dict.pt')
                             print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
                                 valid_loss_min,
                                 np.mean(
                                     val_losses)))
                             valid_loss_min = np.mean(val_losses)
-            # plt.plot(train_losses)
-            # plt.ylabel('losses')
-            # plt.show()
-        # return self.model
+
 
     def evaluate_model(self, test_batch_size):
         test_losses = []
@@ -171,29 +168,3 @@ class train_neural_network:
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
         plt.show()
-
-        # plt.plot(test_losses)
-        # plt.ylabel('losses')
-        # plt.show()
-
-# # debug()
-# batch_size = 4
-# test_batch_size = 1
-# device = format_data_for_nn.get_device()
-# # device = "cpu"
-# dataset, seq_len = read_data.read_data()
-# num_classes, data_dict = format_data_for_nn.format_data(dataset=dataset)
-# X_train, X_test, X_val, y_train, y_test, y_val = format_data_for_nn.split_training_test_valid(data_dict=data_dict,
-#                                                                                               num_labels=num_classes)
-# train_loader, val_loader, test_loader = format_data_for_nn.get_mini_batches(X_train, X_test, X_val, y_train, y_test,
-#                                                                             y_val, batch_size,
-#                                                                             test_batch_size=test_batch_size)
-# model = CNN_LSTM(seq_len, device, output_size=num_classes).to(device)
-# # print(model)
-# nn_train = train_neural_network(model=model, device=device, batch_size=batch_size,
-#                                 lr=0.005, epochs=70, train_loader=train_loader, test_loader=test_loader,
-#                                 val_loader=val_loader)
-# nn_train.train_model()
-#
-# # model.load_state_dict(torch.load('../model_save/cnn_state_dict.pt'))
-# nn_train.evaluate_model(test_batch_size)

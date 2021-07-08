@@ -23,7 +23,7 @@ class GestureCapture:
         self.gesture_path = None
         self.all_keypoints = []
         self.last_append = 0
-        self.live_framesize = 80
+        self.live_framesize = 40
 
         self.gestureMetaData = gesture_meta_data
         self.folder_location = folder_location
@@ -78,8 +78,8 @@ class GestureCapture:
         data_array = np.asarray(empty_list)
 
         # Call learning model to predict class
-        #ml = MachineLearningClassifier(extracted_features_path="machine_learning_working/training_features_josh.joblib")
-        #dl = DeepLearningClassifier()
+        ml = MachineLearningClassifier(extracted_features_path="extracted_features.joblib")
+        dl = DeepLearningClassifier()
         hl = HybridLearningClassifier()
 
         return hl.predict_data(data_array)
@@ -94,6 +94,7 @@ class GestureCapture:
         record, live, redo = False, False, False
         end = False
         while cap.isOpened() and not end:
+            print("Stop\r", end='')
 
             # result stores the hand points extracted from mediapipe
             _, image = cap.read()
@@ -194,7 +195,7 @@ class GestureCapture:
             self.last_append = time.time()
 
     def write_file(self):
-        return
+        # return
         if self.all_keypoints:  # only do smth when we have data to write
             with open(self.gesture_path, "w") as data_file:  # open file and save/close afterwards
                 for item in self.all_keypoints:  # write all frames
@@ -212,6 +213,7 @@ class GestureCapture:
     @staticmethod
     def translate_class(classid: str) -> str:
         if not classid.isdigit():
+            print("wats dat?!")
             return ''
         classid = int(classid)
 
@@ -219,6 +221,7 @@ class GestureCapture:
                    3: 'Index tap', 4: 'Index Swipe Up', 5: 'Index Swipe Down',
                    6: 'Middle tap', 7: 'Middle Swipe Up', 8: 'Middle Swipe Down',
                    9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
-                   12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',}
+                   12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',
+                   15: 'Negative'}
 
         return classes[classid]
