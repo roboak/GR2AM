@@ -1,0 +1,8 @@
+{
+    "Application_1": "./static/img/control_light.png",
+    "Application_2": "./static/img/play.png",
+    "Application_3": "./static/img/pause.png",
+    "Application_4": "../static/img/increase_volume.png",
+    "Application_5": "./static/img/decrease_volume.png",
+    "Application_6": "./static/img/control_va.png"
+}

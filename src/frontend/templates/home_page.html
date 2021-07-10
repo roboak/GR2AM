@@ -42,16 +42,25 @@
 <div class="container-fluid">
   <h1>LumosNox</h1>
   <h3>Gesture Recognition & Mapping Application</h3>
-  <button class="btn btn-primary btn-block"><i class="fa fa-home"></i> Home</button>
-
   <div class="row">
+    <button type="button" class="btn btn-success btn-lg btn-block">Start Application</button>
+  </div>
+  <div class="row" > <br></br>  </div>
+
+  <div class="row row-height", style="height:100vh;">
+  <!--<div class="row flex-fill" style="min-height:0; max-height:150px;">-->
     <!---************************ First Column ************************-->
-    <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;" >
-      <h4>Available Gestures</h4>
+    <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;" >
+      <h4>Captured Gestures</h4>
+      <div class="row" id="myGestures" > </div>
+      <div class="row" > <br></br>  </div>
+      <div class="row">
+        <button type="button" class="btn btn-primary btn-lg btn-block">Add Gesture</button>
+      </div>
     </div>
     <!---Read available gestures from json file and show them along with the GIFs-->
     <script>
-        fetch("available_gestures.json")
+        fetch("./static/js/captured_gestures.json")
             .then(function (response) {
                 return response.json();
             })
@@ -91,36 +100,56 @@
     </script>
     <!---->
     <div class="col-sm-1" > </div>
+
     <!---************************ Second Column ************************-->
     <div class="col-sm-4" style="background-color:#d4e6f1;">
-      <h4> Input </h4>
+      <h4> Current Gesture Application Mapping </h4>
+      <div class="row" id="gestureApplicationMapping" > </div>
+      <div class="row" > <br></br>  </div>
       <div class="row">
-        <div class="progress">
-          <div class="progress-bar bg-info" role="progressbar" style="width: 0" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">%0</div>
-        </div>
-      </div>
-      <div class="row">
-        <img src="{{ url_for('video_feed') }}" width="100%" height="auto"/>
-      </div>
-      <div class="row">
-        <button type="button" class="btn btn-primary btn-lg btn-block">Start Recording</button>
-      </div>
-    </div>
-    <!---->
-    <div class="col-sm-1" > </div>
-    <!---************************ Third Column ************************-->
-    <div class="col-sm-3" style="background-color:#d4e6f1;">
-      <h4> Generate Model </h4>
-      <div class="row" id="generateModel" >
-        <p style="text-align:center;"><strong> Captured Data </strong><p>
-      </div>
-      <div class="row">
-        <button type="button" class="btn btn-primary btn-lg btn-block">Generate Model</button>
+        <button type="button" class="btn btn-primary btn-lg btn-block">Submit Mapping</button>
       </div>
     </div>
     <!---Read captured gestures from json file and show them-->
     <script>
-        fetch('captured_gestures.json')
+        fetch("./static/js/gesture_application_mapping.json")
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+              console.log("DATA", data)
+                gestureMap(data);
+            })
+            .catch(function (err) {
+                console.log('error: ' + err);
+            });
+        function gestureMap(data) {
+            var mainContainer = document.getElementById("gestureApplicationMapping");
+            var keys = Object.keys(data);
+            for (let i = 0; i < keys.length; i++) {
+              var div = document.createElement("div");
+              var newline = document.createElement('br');
+              let text = keys[i] + " : " + data[keys[i]];
+              div.innerHTML = text;
+              div.appendChild(newline);
+              mainContainer.appendChild(div);
+            }
+        }
+    </script>
+    <!---->
+
+    <!---->
+    <div class="col-sm-1" > </div>
+
+    <!---************************ Third Column ************************-->
+    <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
+      <h4> Available Applications </h4>
+      <div class="row" id="availableApplications" >
+      </div>
+    </div>
+    <!---Read captured gestures from json file and show them-->
+    <script>
+        fetch('./static/js/available_applications.json')
             .then(function (response) {
                 return response.json();
             })
@@ -131,18 +160,36 @@
                 console.log('error: ' + err);
             });
         function getCapturedData(data) {
-            var mainContainer = document.getElementById("generateModel");
+            var mainContainer = document.getElementById("availableApplications");
             var keys = Object.keys(data);
+            let string_radio_prefix = "radio_";
             for (let i = 0; i < keys.length; i++) {
               var div = document.createElement("div");
+              var image = document.createElement("img");
+              var radiobox = document.createElement('input');
+              var label = document.createElement('label');
               var newline = document.createElement('br');
-              div.innerHTML = data[keys[i]];
+              var description = document.createTextNode(keys[i]);
+              label.appendChild(description);
+              radiobox.type = 'radio';
+              radiobox.name="selectApplication";
+              radiobox.id = string_radio_prefix.concat(keys[i]);
+              radiobox.value = keys[i];
+              image.src = data[keys[i]];
+              image.class = "img-fluid";
+              image.style = "max-height:150px"
+              div.appendChild(radiobox);
+              div.appendChild(label);
+              div.appendChild(image);
               div.appendChild(newline);
               mainContainer.appendChild(div);
             }
         }
     </script>
+
+
   </div>
+  <div class="row" > <br></br></div>
 </div>
 
 </body>

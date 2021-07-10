@@ -42,15 +42,16 @@
 <div class="container-fluid">
   <h1>LumosNox</h1>
   <h3>Gesture Recognition & Mapping Application</h3>
+  <button class="btn btn-primary btn-block"><i class="fa fa-home"></i> Home</button>
 
   <div class="row">
     <!---************************ First Column ************************-->
-    <div id="myGestures" class="col-sm-5" style="background-color:#d4e6f1;" >
+    <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;" >
       <h4>Available Gestures</h4>
     </div>
     <!---Read available gestures from json file and show them along with the GIFs-->
     <script>
-        fetch("available_gestures.json")
+        fetch("./static/js/available_gestures.json")
             .then(function (response) {
                 return response.json();
             })
@@ -90,10 +91,25 @@
     </script>
     <!---->
     <div class="col-sm-1" > </div>
-
+    <!---************************ Second Column ************************-->
+    <div class="col-sm-4" style="background-color:#d4e6f1;">
+      <h4> Input </h4>
+      <div class="row">
+        <div class="progress">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 0" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">%0</div>
+        </div>
+      </div>
+      <div class="row">
+        <img src="{{ url_for('video_feed') }}" width="100%" height="auto"/>
+      </div>
+      <div class="row">
+        <button type="button" class="btn btn-primary btn-lg btn-block">Start Recording</button>
+      </div>
+    </div>
+    <!---->
     <div class="col-sm-1" > </div>
     <!---************************ Third Column ************************-->
-    <div class="col-sm-5" style="background-color:#d4e6f1;">
+    <div class="col-sm-3" style="background-color:#d4e6f1;">
       <h4> Generate Model </h4>
       <div class="row" id="generateModel" >
         <p style="text-align:center;"><strong> Captured Data </strong><p>
@@ -104,7 +120,7 @@
     </div>
     <!---Read captured gestures from json file and show them-->
     <script>
-        fetch('captured_gestures.json')
+        fetch('./static/js/captured_gestures.json')
             .then(function (response) {
                 return response.json();
             })
@@ -119,9 +135,14 @@
             var keys = Object.keys(data);
             for (let i = 0; i < keys.length; i++) {
               var div = document.createElement("div");
+              var image = document.createElement("img");
               var newline = document.createElement('br');
-              div.innerHTML = data[keys[i]];
+              image.src = data[keys[i]];
+              image.class = "img-fluid";
+              image.style = "max-height:150px"
+              div.innerHTML = keys[i];
               div.appendChild(newline);
+              div.appendChild(image);
               mainContainer.appendChild(div);
             }
         }
