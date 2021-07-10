@@ -3,7 +3,7 @@ import torch
 import dl.run_dl as dl
 from dl import CNN1D_Classifier as CNN1D
 from learning_model_class import LearningModel
-from utils import format_data_for_nn as ft
+from utils import format_data_for_nn as ft, read_data as rd
 
 
 class DeepLearningClassifier(LearningModel):
@@ -17,7 +17,6 @@ class DeepLearningClassifier(LearningModel):
         dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
         dl_model.eval()
         dl_model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))
-
         data = ft.format_individual_data(data)
         data = torch.from_numpy(data)
         pred = dl_model.forward(data.view(1, self.window_size, 63).float())
@@ -31,3 +30,11 @@ class DeepLearningClassifier(LearningModel):
         run.setupDL(CNN1D)
         run.trainDL(CNN1D, lr=0.002, epochs=800)
         run.evalDL(CNN1D)
+
+
+if __name__ == '__main__':
+    dl_model = DeepLearningClassifier()
+    # dl_model.train_model()
+    test_data = rd.read_data("./../../HandDataset/TrainingData", "Josh", predef_size=dl_model.window_size)
+    print("prediction: ", dl_model.predict_data(test_data[0][1].data))
+    print("label: ", test_data[0][1].label)
