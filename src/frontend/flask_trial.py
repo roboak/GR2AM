@@ -5,8 +5,8 @@ from os.path import abspath, dirname
 from pathlib import Path
 import json
 
-# from src.utils.dataclass import GestureMetaData
-# from src.gesture_capturing import GestureCapture
+from src.utils.dataclass import GestureMetaData
+from src.gesture_capturing_flask import GestureCapture
 
 app = Flask(__name__)
 
@@ -29,18 +29,17 @@ def start_recording():
 @app.route('/video_feed')
 def video_feed():
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
-    """if platform.system() == "Darwin":  # for mac input 1 is the camera
+    if platform.system() == "Darwin":  # for mac input 1 is the camera
         gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=1)
     else:
         gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0)
-    return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')"""
+    return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":
-    """
-    parent_directory = dirname(dirname(abspath(__file__)))
+    parent_directory = dirname(dirname(dirname(abspath(__file__))))
     print(parent_directory)
     parent_directory = Path(parent_directory)
-    path = parent_directory / "new_gestures_2"
-    gestureMetaData = GestureMetaData(gesture_name="gesture_1")"""
+    path = parent_directory / "flask_trial_gestures"
+    gestureMetaData = GestureMetaData(gesture_name="gesture_1")
     app.run(host="0.0.0.0", port="5000")

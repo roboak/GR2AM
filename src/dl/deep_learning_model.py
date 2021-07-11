@@ -1,9 +1,9 @@
 import torch
 
-import dl.run_dl as dl
-from dl import CNN1D_Classifier as CNN1D
-from learning_model_class import LearningModel
-from utils import format_data_for_nn as ft, read_data as rd
+import src.dl.run_dl as dl
+from src.dl import CNN1D_Classifier as CNN1D
+from src.learning_model_class import LearningModel
+from src.utils import format_data_for_nn as ft, read_data as rd
 
 
 class DeepLearningClassifier(LearningModel):

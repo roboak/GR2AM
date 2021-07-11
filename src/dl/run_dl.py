@@ -1,7 +1,7 @@
 import torch
 
-from dl import CNN1D_Classifier as CNN1D
-from utils import format_data_for_nn
+from src.dl import CNN1D_Classifier as CNN1D
+from src.utils import format_data_for_nn
 
 
 class DL_run:
