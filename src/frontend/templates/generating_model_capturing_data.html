@@ -42,8 +42,7 @@
 <div class="container-fluid">
   <h1>LumosNox</h1>
   <h3>Gesture Recognition & Mapping Application</h3>
-  <button class="btn btn-primary btn-block"><i class="fa fa-home"></i> Home</button>
-
+  <button onclick="window.location.href='{{url_for('index') }}';" class="btn btn-primary btn-block"><i class="fa fa-home"></i> Home</button>
   <div class="row">
     <!---************************ First Column ************************-->
     <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;" >
@@ -103,7 +102,13 @@
         <img src="{{ url_for('video_feed') }}" width="100%" height="auto"/>
       </div>
       <div class="row">
-        <button type="button" class="btn btn-primary btn-lg btn-block">Start Recording</button>
+        <h5><strong> Instructions: </strong></h5>
+        <ul>
+          <li> Press <strong>spacebar</strong> to start recording </li>
+          <li> Press <strong>q</strong> to stop the recording </li>
+          <li> Press <strong>n</strong> for next capture </li>
+          <li> Press <strong>r</strong> to redo capture </li>
+        </ul>
       </div>
     </div>
     <!---->
