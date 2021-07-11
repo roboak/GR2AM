@@ -22,7 +22,6 @@ if __name__ == '__main__':
     if sys.argv[1] == "--record" or sys.argv[1] == "-r":
 
         parent_directory = dirname(dirname(abspath(__file__)))
-        print(parent_directory)
         parent_directory = Path(parent_directory)
         path = parent_directory / "HandDataset"
         gestureMetaData = GestureMetaData(gesture_name="gesture_n_neg_16")
@@ -35,11 +34,16 @@ if __name__ == '__main__':
         gesture.get_frame()
 
     elif sys.argv[1] == "--live" or sys.argv[1] == "-l":
-        pass
+        if platform.system() == "Darwin":  # for me on mac input 1 is the camera
+            gesture = GestureCapture(camera_input_value=1)
+        else:
+            gesture = GestureCapture(camera_input_value=0)
+
+        gesture.get_frame()
 
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
-        ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh')
-        ml.save_features()  # TODO maybe save model instead?
+        #ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh')
+        #ml.save_features()  # TODO maybe save model instead?
 
         dl = DeepLearningClassifier()
         dl.train_model()

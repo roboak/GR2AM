@@ -13,7 +13,9 @@ class DeepLearningClassifier(LearningModel):
 
     def predict_data(self, data) -> any:
         """Ensure that data passed to this function is of the format as returned by read_data function
-        This function returns an integer representing the class of the gesture."""
+        This function returns an integer representing the class of the gesture.
+
+        :return: Tupel with predicted class from 0-15 and a confidence value"""
         dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
         dl_model.eval()
         dl_model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))
@@ -22,7 +24,7 @@ class DeepLearningClassifier(LearningModel):
         data = torch.from_numpy(data)
         pred = dl_model.forward(data.view(1, self.window_size, 63).float())
 
-        return torch.argmax(pred).item() + 1, torch.max(pred).item()  # pred_class, confid
+        return torch.argmax(pred).item(), torch.max(pred).item()  # pred_class, confid
 
     def train_model(self):
         """Assumption - Data is present in HandDataset"""

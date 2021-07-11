@@ -159,10 +159,10 @@ class train_neural_network:
         print("label_list_size: {}".format(label_list))
         print("pred_list_size: {}".format(pred_list))
         #
-        confusi = confusion_matrix(label_list, pred_list, labels=[x for x in range(15)])
+        confusi = confusion_matrix(label_list, pred_list, labels=[x for x in range(16)])
         # print("confusion_matrix:\n", confusi)
         display_1 = ConfusionMatrixDisplay(confusion_matrix=confusi,
-                                           display_labels=["gesture" + str(x) for x in range(1,16)]).plot()
+                                           display_labels=["gesture" + str(x) for x in range(1,17)]).plot()
 
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
