@@ -5,7 +5,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
+import threading
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -15,9 +15,11 @@ from dl.deep_learning_model import DeepLearningClassifier
 from hybrid_learning_model import HybridLearningClassifier
 from src.machine_learning_working.machine_learning_model import MachineLearningClassifier
 from src.utils.dataclass import Data, GestureMetaData
+from pynput import keyboard
 
 
 class GestureCapture:
+
     def __init__(self, folder_location: str, gesture_meta_data: GestureMetaData, camera_input_value: int):
         self.gesture_name = None
         self.gesture_path = None
@@ -41,6 +43,20 @@ class GestureCapture:
 
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.futures = []
+        self.key_capture = None
+
+        self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
+        self.keyboard_listener.start()
+    def on_press(self,key):
+        # print("thread id: ", threading.current_thread().name)
+        # print("process id: ", os.getpid())
+        # print("object id", self)
+        print('{0} pressed'.format(
+            key))
+        self.key_capture = key
+        if key == keyboard.Key.esc:
+            # Stop listener
+            return False
 
     def setup_cap(self):
         if not (self.gestureMetaData.gestureName in self.gesture_dict.keys()):
@@ -93,15 +109,16 @@ class GestureCapture:
 
         record, live, redo = False, False, False
         end = False
+        frame_count =0
         while cap.isOpened() and not end:
             print("Stop\r", end='')
-
+            frame_count+=1
             # result stores the hand points extracted from mediapipe
             _, image = cap.read()
             image = cv2.flip(image, 1)  # mirror invert camera image
 
             # Record frames to all_keypoints
-            if record:
+            if (record):
                 self.record_frame(image)
 
             if live and self.all_keypoints:
@@ -133,26 +150,39 @@ class GestureCapture:
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
 
+            ret, buffer = cv2.imencode('.jpg', image)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+
             cv2.imshow('MediaPipe Hands', image)
 
             ## Keyboard bindings ##
             k = cv2.waitKey(1)  # read key pressed event
-            if k % 256 == 32:  # spacebar to record
+            if (k % 256 == 32 or self.key_capture == keyboard.Key.space):  # spacebar to record
                 record = not record
                 print("Toggle Recording Mode")
-            if k & 0xFF == ord('q'):  # close on key q
-                record = False
-                self.write_file()
-                end = True
-            elif k & 0xFF == ord('n'):  # next capture
-                record = False
-                self.write_file()
-                self.setup_cap()
-            elif k & 0xFF == ord('r'):  # redo capture
-                record = False
-                self.all_keypoints = []
-                # self.setup_cap()
-            elif k & 0xFF == ord('l'):  # live capture mode
+                self.key_capture = None
+            try:
+                if ((k & 0xFF == ord('q')) or (self.key_capture.char == 'q')):#or frame_count == self.live_framesize)):  # close on key q
+                    record = False
+                    self.write_file()
+                    self.key_capture = None
+                    end = True
+                    print("Print Recording")
+                elif ((k & 0xFF == ord('n')) or (self.key_capture.char == 'n') or frame_count == self.live_framesize):  # next capture
+                    record = False
+                    self.write_file()
+                    self.setup_cap()
+                    self.key_capture = None
+                elif ((k & 0xFF == ord('r')) or (self.key_capture.char == 'r')) :  # redo capture
+                    record = False
+                    self.all_keypoints = []
+                    self.key_capture = None
+                    # self.setup_cap()
+            except AttributeError:
+                pass
+            if k & 0xFF == ord('l'):  # live capture mode
                 record = True
                 live = True
 
