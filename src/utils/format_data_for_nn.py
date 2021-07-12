@@ -100,7 +100,7 @@ def get_device():
 #
 def get_data_for_training(batch_size, val_batch_size, test_batch_size, path_to_data, folder_name, window_size):
     train_data, seq_len = read_data(path_to_data + "/TrainingData", folder_name, window_size)
-    test_data, _ = read_data(path_to_data + "/TestingData", folder_name, window_size)
+    test_data, _ = read_data(path_to_data + "/TestingData", folder_name + "2", window_size)
 
     num_classes, train_data_dict = format_batch_data(train_data)
     _, test_data_dict = format_batch_data(test_data)
