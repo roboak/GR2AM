@@ -21,11 +21,6 @@ def add_gesture():
     return render_template("generating_model_capturing_data.html")
 
 
-@app.route("/start_recording")
-def start_recording():
-    return render_template("generating_model_capturing_data.html")
-
-
 @app.route('/video_feed')
 def video_feed():
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
