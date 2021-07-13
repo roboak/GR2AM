@@ -3,8 +3,6 @@ import torch
 import torch.nn as nn
 from torch.nn import BatchNorm1d, Conv1d, Dropout, GRU, Linear, MaxPool1d, Sequential, Softmax, Tanh
 
-from utils import format_data_for_nn, read_data
-
 
 # from torch.utils.tensorboard import SummaryWriter
 
@@ -170,7 +168,6 @@ class train_neural_network:
         # plt.plot(test_losses)
         # plt.ylabel('losses')
         # plt.show()
-
 
 # # debug()
 # batch_size = 4

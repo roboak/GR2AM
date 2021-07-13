@@ -1,9 +1,10 @@
 import numpy as np
+from joblib import dump, load
 from sklearn.ensemble import RandomForestClassifier
-from joblib import load, dump
+
+from src.learning_model_class import LearningModel
 from src.machine_learning_working.statistical_feature_extraction import FeatureExtraction
 from src.utils.read_data import read_data
-from src.learning_model_class import LearningModel
 
 
 class MachineLearningClassifier(LearningModel):

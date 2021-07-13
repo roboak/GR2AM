@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
-from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, Sequential, Softmax, Tanh, ReLU
+from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, Sequential, Softmax, Tanh
 
 
 # from torch.utils.tensorboard import SummaryWriter
@@ -12,7 +12,7 @@ from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, MaxPool1d, S
 class CNN1D(nn.Module):
     def __init__(self, seq_len, device, output_size, n_layers=2, hidden_dim=128, ):
         super(CNN1D, self).__init__()
-        #self.device = device
+        # self.device = device
         self.output_size = output_size
         self.seq_len = seq_len
         self.n_layers = n_layers
@@ -32,7 +32,7 @@ class CNN1D(nn.Module):
             Tanh(),
             Dropout(0.17),
             # MaxPool1d(2),
-            #len_output_features_per_frame = int((input_features_per_frame - kernel_size)/stride) + 1
+            # len_output_features_per_frame = int((input_features_per_frame - kernel_size)/stride) + 1
             Conv1d(in_channels=self.n_cnn_filter_1, out_channels=self.n_cnn_filter_2,
                    kernel_size=self.cnn_kernel_size_2, stride=self.cnn_stride_2),
             BatchNorm1d(self.n_cnn_filter_2),
@@ -44,10 +44,10 @@ class CNN1D(nn.Module):
 
         )
         self.flatten = Flatten()
-        cnn_output1 = (63-self.cnn_kernel_size_1)//self.cnn_stride_1 + 1
-        max_pool1 = cnn_output1//1
-        cnn_output2 = (max_pool1 - self.cnn_kernel_size_2)//self.cnn_stride_2 + 1
-        max_pool2 = cnn_output2//1
+        cnn_output1 = (63 - self.cnn_kernel_size_1) // self.cnn_stride_1 + 1
+        max_pool1 = cnn_output1 // 1
+        cnn_output2 = (max_pool1 - self.cnn_kernel_size_2) // self.cnn_stride_2 + 1
+        max_pool2 = cnn_output2 // 1
         self.dense_layers = Sequential(
             Linear(self.n_cnn_filter_2 * max_pool2, self.output_size),
             Softmax()
@@ -85,7 +85,6 @@ class train_neural_network:
         self.criterion = nn.CrossEntropyLoss()
         self.model = model
         self.optimiser = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-
 
     def train_model(self):
         counter = 0
@@ -132,7 +131,6 @@ class train_neural_network:
                                     val_losses)))
                             valid_loss_min = np.mean(val_losses)
 
-
     def evaluate_model(self, test_batch_size):
         test_losses = []
         num_correct = 0
@@ -162,7 +160,7 @@ class train_neural_network:
         confusi = confusion_matrix(label_list, pred_list, labels=[x for x in range(16)])
         # print("confusion_matrix:\n", confusi)
         display_1 = ConfusionMatrixDisplay(confusion_matrix=confusi,
-                                           display_labels=["gesture" + str(x) for x in range(1,17)]).plot()
+                                           display_labels=["gesture" + str(x) for x in range(1, 17)]).plot()
 
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)

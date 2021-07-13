@@ -4,11 +4,13 @@ import platform
 import sys
 from os.path import abspath, dirname
 from pathlib import Path
+from queue import Queue
 
+from classifing import Classify
 from dl.deep_learning_model import DeepLearningClassifier
+from gesture_capturing import GestureCapture
 from machine_learning_working.machine_learning_model import MachineLearningClassifier
 from src.utils.dataclass import GestureMetaData
-from gesture_capturing import GestureCapture
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -34,20 +36,36 @@ if __name__ == '__main__':
         gesture.get_frame()
 
     elif sys.argv[1] == "--live" or sys.argv[1] == "-l":
-        if platform.system() == "Darwin":  # for me on mac input 1 is the camera
-            gesture = GestureCapture(camera_input_value=1)
-        else:
-            gesture = GestureCapture(camera_input_value=0)
+        aQueue = Queue()
+        bQueue = Queue()
 
-        gesture.get_frame()
+
+        def startCapture():
+            if platform.system() == "Darwin":  # for me on mac input 1 is the camera
+                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, bQueue=bQueue)
+            else:
+                gesture = GestureCapture(camera_input_value=0)
+
+            gesture.get_frame()
+
+
+        # t1 = threading.Thread(target=startCapture)
+        # t1.start()
+
+        t2 = Classify(aQueue, bQueue)
+        t2.start()
+
+        startCapture()
+
+        # t1.join()
+
 
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
         #ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh')
-        #ml.save_features()  # TODO maybe save model instead?
+        #ml.save_features()  # FIXME change to save_model and change inside hybrid model class!!
 
         dl = DeepLearningClassifier()
         dl.train_model()
 
     else:
         print("Please use -r to record or -l for live classification")
-

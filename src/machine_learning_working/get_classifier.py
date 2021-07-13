@@ -1,6 +1,7 @@
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 from joblib import load
+from sklearn.ensemble import RandomForestClassifier
+
 from src.machine_learning_working.statistical_feature_extraction import FeatureExtraction
 from src.utils.read_data import read_data
 

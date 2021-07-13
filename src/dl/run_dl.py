@@ -1,6 +1,5 @@
 import torch
 
-from dl import CNN1D_Classifier as CNN1D
 from utils import format_data_for_nn
 
 
@@ -25,7 +24,7 @@ class DL_run:
             path_to_data=self.path_to_data,
             folder_name=self.folder_name,
             window_size=self.window_size
-            )
+        )
         self.model = obj.CNN1D(seq_len, self.device, output_size=num_classes).to(self.device)
 
     def trainDL(self, obj, lr=0.002, epochs=100):

@@ -1,5 +1,3 @@
-import sys
-
 import matplotlib.pyplot as plt
 import torch
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_matrix
@@ -30,7 +28,7 @@ def ml(classifier, file):
 if __name__ == '__main__':
 
     # read data
-    test_data, _ = rd.read_data("../HandDataset/TestingData", "Josh", 80)
+    test_data, _ = rd.read_data("../../HandDataset/TestingData", "Josh", 80)
 
     # load dl model
     dl_model = CNN1D.CNN1D(80, "cpu", output_size=15)

@@ -4,7 +4,6 @@ import re
 from os.path import abspath, dirname
 from pathlib import Path
 
-import cv2
 import numpy as np
 import pandas as pd
 from sklearn import svm

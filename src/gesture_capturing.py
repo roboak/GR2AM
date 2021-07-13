@@ -3,24 +3,18 @@ import io
 import json
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from queue import Queue
 
 import cv2
 import mediapipe as mp
-import numpy as np
-import pandas as pd
 
-import keyboard
-
-from dl.deep_learning_model import DeepLearningClassifier
-from hybrid_learning_model import HybridLearningClassifier
-from src.machine_learning_working.machine_learning_model import MachineLearningClassifier
-from src.utils.dataclass import Data, GestureMetaData
+from src.utils.dataclass import GestureMetaData
 
 
 class GestureCapture:
-    def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None):
+    def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
+                 aQueue: Queue = None, bQueue: Queue = None):
         self.gesture_name = None
         self.gesture_path = None
         self.all_keypoints = []
@@ -45,8 +39,8 @@ class GestureCapture:
         else:
             self.live = True
 
-        self.executor = ThreadPoolExecutor(max_workers=4)
-        self.futures = []
+        self.aQueue = aQueue
+        self.bQueue = bQueue
 
     def setup_cap(self):
         if not (self.gestureMetaData.gestureName in self.gesture_dict.keys()):
@@ -56,39 +50,6 @@ class GestureCapture:
         self.gesture_path = self.folder_location + '/' + self.gesture_name
 
         print(self.gesture_name)
-
-    def classify_capture(self, frames):  # TODO  create function from normalisation part
-
-        empty_list = []
-        # Convert the str represented list to an actual list again
-        for i, frame in enumerate(frames):
-            df = pd.DataFrame(frame)
-            # Recording the wrist coordinate of the first frame of each sequence.
-            if i == 0:
-                reference_x = df["X"][0]
-                reference_y = df["Y"][0]
-                reference_z = df["Z"][0]
-            df["X"] = df["X"] - reference_x
-            df["X"] = df["X"] - df["X"].mean()
-            df["Y"] = df["Y"] - reference_y
-            df["Y"] = df["Y"] - df["Y"].mean()
-            df["Z"] = df["Z"] - reference_z
-            df["Z"] = df["Z"] - df["Z"].mean()
-
-            empty_list.append(df)
-
-        # pad all with zeros to the frame size 60
-        while len(empty_list) < self.live_framesize:
-            empty_list.append(pd.DataFrame(np.zeros((21, 3))))
-
-        data_array = np.asarray(empty_list)
-
-        # Call learning model to predict class
-        ml = MachineLearningClassifier(extracted_features_path="extracted_features.joblib")
-        dl = DeepLearningClassifier()
-        hl = HybridLearningClassifier()
-
-        return hl.predict_data(data_array)
 
     def get_frame(self):
         if not self.live:
@@ -114,26 +75,21 @@ class GestureCapture:
 
                 # When 60 frames are captured create job to classify
                 if len(self.all_keypoints) == self.live_framesize:
-
-                    self.futures.append(
-                        self.executor.submit(self.classify_capture, frames=copy.copy(self.all_keypoints)))
+                    self.aQueue.put(copy.copy(self.all_keypoints))
 
                     # Record overlapping window
                     self.all_keypoints = self.all_keypoints[:-20]  # save last 20 entries for next window
 
                 # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
                 if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
-
-                    self.futures.append(
-                        self.executor.submit(self.classify_capture, frames=copy.copy(self.all_keypoints)))
+                    self.aQueue.put(copy.copy(self.all_keypoints))
 
                     # empty out completely, no related movements
                     self.all_keypoints = []
 
-                # Collect results from workers
-                for future in as_completed(self.futures):
-                    last_result = str(future.result())
-                    self.futures.remove(future)
+                # Collect results
+                if not self.bQueue.empty():
+                    last_result = str(self.bQueue.get())
 
             if self.live and last_result:  # In live mode always display text
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
@@ -142,18 +98,19 @@ class GestureCapture:
             cv2.imshow('MediaPipe Hands', image)
 
             ## Keyboard bindings ##
-            if keyboard.is_pressed('space'):  # spacebar to record
+            k = cv2.waitKey(1)  # read key pressed event
+            if k % 256 == 32:  # spacebar to record
                 record = not record
                 print("Toggle Recording Mode")
-            if keyboard.is_pressed('q'):  # close on key q
+            if k & 0xFF == ord('q'):  # close on key q
                 record = False
                 self.write_file()
                 end = True
-            elif keyboard.is_pressed('n'):  # next capture
+            elif k & 0xFF == ord('n'):  # next capture
                 record = False
                 self.write_file()
                 self.setup_cap()
-            elif keyboard.is_pressed('r'):  # redo capture
+            elif k & 0xFF == ord('r'):  # redo capture
                 record = False
                 self.all_keypoints = []
 
@@ -164,7 +121,7 @@ class GestureCapture:
         cv2.destroyAllWindows()
 
     def get_hand_points(self, image):
-        with self.mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6) as hands:
+        with self.mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.4) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # To improve performance, optionally mark the image as not writeable to pass by reference.
