@@ -4,7 +4,7 @@ import platform
 import sys
 from os.path import abspath, dirname
 from pathlib import Path
-from queue import Queue
+from multiprocessing import Queue
 
 from classifing import Classify
 from dl.deep_learning_model import DeepLearningClassifier

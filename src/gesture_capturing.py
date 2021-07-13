@@ -4,7 +4,7 @@ import json
 import os
 import time
 from pathlib import Path
-from queue import Queue
+from multiprocessing import Queue
 
 import cv2
 import mediapipe as mp

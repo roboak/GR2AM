@@ -1,5 +1,6 @@
 import threading
-from queue import Queue
+import multiprocessing
+from multiprocessing import Queue
 
 import numpy as np
 import pandas as pd
@@ -7,7 +8,7 @@ import pandas as pd
 from hybrid_learning_model import HybridLearningClassifier
 
 
-class Classify(threading.Thread):
+class Classify(multiprocessing.Process):  #threading.Thread):
     def __init__(self, queue: Queue, anotherqueue: Queue):
         super().__init__()
         self.aQueue = queue
