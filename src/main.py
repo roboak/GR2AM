@@ -15,6 +15,8 @@ from src.utils.dataclass import GestureMetaData
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
+    WINDOW_SIZE = 30
+
     os.environ['GLOG_minloglevel'] = '2'
 
     logging.basicConfig(filename='log.log', level=logging.DEBUG)
@@ -42,9 +44,9 @@ if __name__ == '__main__':
 
         def startCapture():
             if platform.system() == "Darwin":  # for me on mac input 1 is the camera
-                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, bQueue=bQueue)
+                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, bQueue=bQueue, window_size=WINDOW_SIZE)
             else:
-                gesture = GestureCapture(camera_input_value=0)
+                gesture = GestureCapture(camera_input_value=0, aQueue=aQueue, bQueue=bQueue, window_size=WINDOW_SIZE)
 
             gesture.get_frame()
 
@@ -52,19 +54,16 @@ if __name__ == '__main__':
         # t1 = threading.Thread(target=startCapture)
         # t1.start()
 
-        t2 = Classify(aQueue, bQueue)
+        t2 = Classify(aQueue, bQueue, window_size=WINDOW_SIZE)
         t2.start()
 
         startCapture()
 
-        # t1.join()
-
-
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
-        #ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh')
-        #ml.save_features()  # FIXME change to save_model and change inside hybrid model class!!
+        #ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh', window_size=WINDOW_SIZE)
+        #ml.save_model()
 
-        dl = DeepLearningClassifier()
+        dl = DeepLearningClassifier(window_size=WINDOW_SIZE, model=None)
         dl.train_model()
 
     else:

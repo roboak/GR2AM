@@ -7,11 +7,11 @@ from machine_learning_working.machine_learning_model import MachineLearningClass
 
 class HybridLearningClassifier(LearningModel):
 
-    def __init__(self):
-        self.ml = MachineLearningClassifier(extracted_features_path="extracted_features.joblib")
-        # FIXME need to changes this!!
-        #self.ml = MachineLearningClassifier(already_trained_classifier="trained_model.joblib")
-        self.dl = DeepLearningClassifier()
+    def __init__(self, window_size=40):
+        self.window_size = window_size
+
+        self.ml = MachineLearningClassifier(already_trained_classifier="trained_model.joblib", window_size=self.window_size)
+        self.dl = DeepLearningClassifier(window_size=self.window_size)
 
     def predict_data(self, data):
         result_dl, acc_dl = self.dl.predict_data(data)

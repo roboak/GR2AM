@@ -6,16 +6,18 @@ import numpy as np
 import pandas as pd
 
 from hybrid_learning_model import HybridLearningClassifier
+from machine_learning_working.machine_learning_model import MachineLearningClassifier
 
 
 class Classify(multiprocessing.Process):  #threading.Thread):
-    def __init__(self, queue: Queue, anotherqueue: Queue):
+    def __init__(self, queue: Queue, anotherqueue: Queue, window_size):
         super().__init__()
         self.aQueue = queue
         self.bQueue = anotherqueue
+        self.window_size = window_size
 
         # Call learning model to predict class
-        self.hl = HybridLearningClassifier()
+        self.hl = HybridLearningClassifier(self.window_size)
 
     def run(self):
         while True:
@@ -42,7 +44,7 @@ class Classify(multiprocessing.Process):  #threading.Thread):
             empty_list.append(df)
 
         # pad all with zeros to the frame size 60
-        while len(empty_list) < 40:
+        while len(empty_list) < self.window_size:
             empty_list.append(pd.DataFrame(np.zeros((21, 3))))
 
         data_array = np.asarray(empty_list)

@@ -1,3 +1,4 @@
+import joblib
 import numpy as np
 from joblib import dump, load
 from sklearn.ensemble import RandomForestClassifier
@@ -9,13 +10,14 @@ from src.utils.read_data import read_data
 
 class MachineLearningClassifier(LearningModel):
     def __init__(self, training_data_path="", training_data_folder="", extracted_features_path="",
-                 already_trained_classifier=None):
+                 already_trained_classifier=None, window_size=40):
         self.training_data_path = training_data_path
         self.training_data_folder = training_data_folder
         self.extracted_features_path = extracted_features_path
         self.feature_extraction = FeatureExtraction()
-        self.classifier = already_trained_classifier
+        self.classifier = joblib.load(already_trained_classifier) if already_trained_classifier is not None else None
         self.features = 0
+        self.window_size = window_size
         self.__fit_classifier()
 
     def __get_features(self):
@@ -23,7 +25,7 @@ class MachineLearningClassifier(LearningModel):
         This is the function to extract the features for the first time.
         :return:
         """
-        training_files, _ = read_data(self.training_data_path, self.training_data_folder)
+        training_files, _ = read_data(self.training_data_path, self.training_data_folder, self.window_size)
         training_features = np.asarray([self.feature_extraction.get_features_training(file) for file in training_files])
         self.__train_classifier(training_features)
 

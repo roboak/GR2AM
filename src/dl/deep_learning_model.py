@@ -8,21 +8,23 @@ from utils import format_data_for_nn as ft
 
 class DeepLearningClassifier(LearningModel):
 
-    def __init__(self):
-        self.window_size = 40
+    def __init__(self, model='model_save/cnn_state_dict.pt', window_size=40):
+        self.window_size = window_size
+
+        self.dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
+        self.dl_model.eval()
+        if model:
+            self.dl_model.load_state_dict(torch.load(model))
 
     def predict_data(self, data) -> any:
         """Ensure that data passed to this function is of the format as returned by read_data function
         This function returns an integer representing the class of the gesture.
 
         :return: Tupel with predicted class from 0-15 and a confidence value"""
-        dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
-        dl_model.eval()
-        dl_model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))
 
         data = ft.format_individual_data(data)
         data = torch.from_numpy(data)
-        pred = dl_model.forward(data.view(1, self.window_size, 63).float())
+        pred = self.dl_model.forward(data.view(1, self.window_size, 63).float())
 
         return torch.argmax(pred).item(), torch.max(pred).item()  # pred_class, confid
 

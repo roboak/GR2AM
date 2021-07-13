@@ -14,12 +14,12 @@ from src.utils.dataclass import GestureMetaData
 
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
-                 aQueue: Queue = None, bQueue: Queue = None):
+                 aQueue: Queue = None, bQueue: Queue = None, window_size=40):
         self.gesture_name = None
         self.gesture_path = None
         self.all_keypoints = []
         self.last_append = 0
-        self.live_framesize = 40
+        self.live_framesize = window_size
 
         self.camera_input_value = camera_input_value
         self.mp_drawing = mp.solutions.drawing_utils
@@ -78,7 +78,9 @@ class GestureCapture:
                     self.aQueue.put(copy.copy(self.all_keypoints))
 
                     # Record overlapping window
-                    self.all_keypoints = self.all_keypoints[:-20]  # save last 20 entries for next window
+                    self.all_keypoints = self.all_keypoints[:-self.live_framesize//2]  # save last 20 entries for next window
+
+                    cv2.putText(image, ".", (150, 100), cv2.QT_FONT_NORMAL, 1, (0, 255, 0, 255), 2)
 
                 # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
                 if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
