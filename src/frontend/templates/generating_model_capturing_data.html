@@ -47,6 +47,8 @@
     <!---************************ First Column ************************-->
     <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;" >
       <h4>Available Gestures</h4>
+      <!--    Click this button to start the gesture recording for the selected radio button-->
+    <button type="button" onclick="changeImageURL()" class="btn btn-primary btn-lg btn-block">Start Recording </button>
     </div>
     <!---Read available gestures from json file and show them along with the GIFs-->
     <script>
@@ -88,6 +90,8 @@
             }
         }
     </script>
+
+
     <!---->
     <div class="col-sm-1" > </div>
     <!---************************ Second Column ************************-->
@@ -99,7 +103,7 @@
         </div>
       </div>
       <div class="row">
-        <img src="{{ url_for('video_feed') }}" width="100%" height="auto"/>
+        <img src="static/img/hand_gestures.jpg" id = "vid_display" width="100%" height="auto"/>
       </div>
       <div class="row">
         <h5><strong> Instructions: </strong></h5>
@@ -111,6 +115,25 @@
         </ul>
       </div>
     </div>
+    <script>
+      function changeImageURL() {
+            var image = document.getElementById('vid_display');
+            gesture_selected = get_gesture()
+            console.log(gesture_selected)
+            url= "{{ url_for('video_feed', gesture_name= "gesture_selected") }}";
+            console.log(url)
+            new_url = url.replace(/gesture_selected/, gesture_selected)
+            console.log(new_url)
+            image.src = new_url
+            }
+
+        function get_gesture(){
+            var checkRadio = document.querySelector('input[name="selectGesture"]:checked');
+            if(checkRadio != null) {
+                return checkRadio.value;
+            }
+        }
+    </script>
     <!---->
     <div class="col-sm-1" > </div>
     <!---************************ Third Column ************************-->

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+
+<html>
+  <head>
+    <title>Video Streaming Demonstration</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  </head>
+  <body>
+    <h1>Video Streaming Demonstration</h1>
+<!--    <img src="{{ url_for('pre_training.video_feed', gesture_name='gesture_data') }}" id = "vid_display">-->
+        <img src="static/img/decrease_volume.png" id = "vid_display" width="640" height="480">
+
+
+<!--    <form method="get" action="/test">-->
+<!--      <input type="submit" name="change_gesture" value="start_recording">-->
+<!--    </form>-->
+    <input type="radio" id="gesture_1" name="gesture" value="gesture_1" Gesture 1> Click this for gesture_1
+    <input type="radio" id="gesture_2" name="gesture" value="gesture_2" Gesture 2> Click this for gesture_2
+    <input type="radio" id="gesture_3" name="gesture" value="gesture_3" Gesture 3> Click this for gesture_2<br>
+
+    <input type="button" onclick="changeImage()" value="Change Gesture" />
+
+
+
+  <script>
+        function changeImage() {
+            var image = document.getElementById('vid_display');
+            gesture_selected = get_gesture()
+            console.log(gesture_selected)
+            url= "{{ url_for('pre_training.video_feed', gesture_name= "gesture_selected") }}";
+            console.log(url)
+            new_url = url.replace(/gesture_selected/, gesture_selected)
+            console.log(new_url)
+
+            image.src = new_url
+            }
+
+        function get_gesture(){
+            var checkRadio = document.querySelector('input[name="gesture"]:checked');
+            if(checkRadio != null) {
+                return checkRadio.value;
+            }
+        }
+  </script>
+
+  </body>
+
+</html>
