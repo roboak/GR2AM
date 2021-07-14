@@ -60,8 +60,8 @@ if __name__ == '__main__':
         startCapture()
 
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
-        #ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh', window_size=WINDOW_SIZE)
-        #ml.save_model()
+        # ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh', window_size=WINDOW_SIZE)
+        # ml.save_model()
 
         dl = DeepLearningClassifier(window_size=WINDOW_SIZE, model=None)
         dl.train_model()

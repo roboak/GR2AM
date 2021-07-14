@@ -8,7 +8,7 @@ from utils import format_data_for_nn as ft
 
 class DeepLearningClassifier(LearningModel):
 
-    def __init__(self, model='model_save/cnn_state_dict.pt', window_size=40):
+    def __init__(self,window_size, model='model_save/cnn_state_dict.pt', ):
         self.window_size = window_size
 
         self.dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)

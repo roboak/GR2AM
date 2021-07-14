@@ -56,7 +56,7 @@ class GestureCapture:
             self.setup_cap()
 
         cap = cv2.VideoCapture(self.camera_input_value)
-
+        # cap = cv2.VideoCapture('raw_recording.mov')
         last_result = ""
 
         record, redo = False, False
@@ -123,7 +123,7 @@ class GestureCapture:
         cv2.destroyAllWindows()
 
     def get_hand_points(self, image):
-        with self.mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.4) as hands:
+        with self.mp_hands.Hands(min_detection_confidence=0.4, min_tracking_confidence=0.4) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # To improve performance, optionally mark the image as not writeable to pass by reference.

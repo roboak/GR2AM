@@ -25,7 +25,7 @@ class DL_run:
             folder_name=self.folder_name,
             window_size=self.window_size
         )
-        self.model = obj.CNN1D(seq_len, self.device, output_size=num_classes).to(self.device)
+        self.model = obj.CNN1D(seq_len, self.device, output_size=16).to(self.device)
 
     def trainDL(self, obj, lr=0.002, epochs=100):
         self.nn_train = obj.train_neural_network(model=self.model, device=self.device,
