@@ -7,7 +7,7 @@ import GetHandPoints
 from scipy.spatial import distance
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
-base_scale = 65
+base_scale = 0.12
 
 
 def Normalise_Size(hand_data, scale):
@@ -19,9 +19,10 @@ def Normalise_Size(hand_data, scale):
 
 
 def normalize_scale(image, raw_points):
-    point_5 = return_scaled_hand_cordinates(image, raw_points.landmark[5])
-    point_17 = return_scaled_hand_cordinates(image, raw_points.landmark[17])
+    point_5 = return_scaled_hand_cordinates_1(image, raw_points.landmark[5])
+    point_17 = return_scaled_hand_cordinates_1(image, raw_points.landmark[17])
     distance_5_17 = distance.euclidean([point_5[0], point_5[1]], [point_17[0], point_17[1]])
+    print("distance: ", distance_5_17)
     scale_factor = base_scale / distance_5_17
     hand_data = raw_points.landmark
     hand_data_2 = [{"x": value.x * scale_factor, "y": value.y * scale_factor, "z": value.z * scale_factor}
@@ -54,6 +55,9 @@ def plot_landmarks(image, hand_landmarks, color):
 
 def return_scaled_hand_cordinates(image, point):
     return int(point.x*image.shape[1]), int(point.y*image.shape[0])
+
+def return_scaled_hand_cordinates_1(image, point):
+    return point.x*1, point.y*1
 
 
 def GetFrame():

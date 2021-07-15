@@ -5,48 +5,9 @@ import os
 import time
 from pathlib import Path
 from multiprocessing import Queue
-
 import cv2
 import mediapipe as mp
-from scipy.spatial import distance
-
 from src.utils.dataclass import GestureMetaData
-
-
-base_scale = 65
-
-
-def normalize_scale(image, raw_points):
-    point_5 = return_scaled_hand_cordinates(image, raw_points.landmark[5])
-    point_17 = return_scaled_hand_cordinates(image, raw_points.landmark[17])
-    distance_5_17 = distance.euclidean([point_5[0], point_5[1]], [point_17[0], point_17[1]])
-    scale_factor = base_scale / distance_5_17
-    hand_data = raw_points.landmark
-    hand_data_2 = [{"x": value.x * scale_factor, "y": value.y * scale_factor, "z": value.z * scale_factor}
-                   for value in hand_data]
-    reference_x = hand_data[0].x   # - 0.5  # (image.shape[1] / 2)
-    reference_y = hand_data[0].y   # - 0.5  # (image.shape[0] / 2)
-    for value in hand_data:
-        value.x = value.x * scale_factor
-        value.y = value.y * scale_factor
-        value.z = value.z * scale_factor
-    # TODO: Does it make sense here? I thought to normalize wrt the wrist then translate the whole hand to the middle
-        value.x = value.x - reference_x
-        value.y = value.y - reference_y
-    reference_x = hand_data[0].x - 0.5
-    reference_y = hand_data[0].y - 0.5
-    reference_z = hand_data[0].z - 0.5
-    for value in hand_data:
-        value.x = value.x - reference_x
-        value.y = value.y - reference_y
-        value.z = value.z - reference_z
-
-    return hand_data
-
-
-def return_scaled_hand_cordinates(image, point):
-    return int(point.x*image.shape[1]), int(point.y*image.shape[0])
-
 
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
@@ -182,8 +143,6 @@ class GestureCapture:
 
             landmark = results.multi_hand_landmarks[0].landmark
 
-            if self.live:
-                landmark = normalize_scale(image, results.multi_hand_landmarks[0])
 
             for data_point in landmark:
                 if data_point:
