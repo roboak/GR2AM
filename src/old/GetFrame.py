@@ -19,11 +19,11 @@ def Normalise_Size(hand_data, scale):
 
 
 def normalize_scale(image, raw_points):
-    point_5 = return_scaled_hand_cordinates(image, raw_points.multi_hand_landmarks[0].landmark[5])
-    point_17 = return_scaled_hand_cordinates(image, raw_points.multi_hand_landmarks[0].landmark[17])
+    point_5 = return_scaled_hand_cordinates(image, raw_points.landmark[5])
+    point_17 = return_scaled_hand_cordinates(image, raw_points.landmark[17])
     distance_5_17 = distance.euclidean([point_5[0], point_5[1]], [point_17[0], point_17[1]])
     scale_factor = base_scale / distance_5_17
-    hand_data = raw_points.multi_hand_landmarks[0].landmark
+    hand_data = raw_points.landmark
     hand_data_2 = [{"x": value.x * scale_factor, "y": value.y * scale_factor, "z": value.z * scale_factor}
                    for value in hand_data]
     reference_x = hand_data[0].x   # - 0.5  # (image.shape[1] / 2)
@@ -71,9 +71,9 @@ def GetFrame():
                 mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 mp_drawing.draw_landmarks(plot_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 plot_landmarks(plot_image, hand_landmarks.landmark, (255, 255, 255))
-            normalized_hand_data = normalize_scale(image, results)
-            pt_5 = return_scaled_hand_cordinates(image, results.multi_hand_landmarks[0].landmark[5])
-            pt_17 = return_scaled_hand_cordinates(image, results.multi_hand_landmarks[0].landmark[17])
+            normalized_hand_data = normalize_scale(image, results.multi_hand_landmarks[0])
+            # pt_5 = return_scaled_hand_cordinates(image, results.multi_hand_landmarks[0].landmark[5])
+            # pt_17 = return_scaled_hand_cordinates(image, results.multi_hand_landmarks[0].landmark[17])
             # distance_5_17 = math.dist([pt_5[0], pt_5[1]], [pt_17[0], pt_17[1]])
             # distance_5_17 = distance.euclidean([pt_5[0], pt_5[1]], [pt_17[0], pt_17[1]])
             # scale_factor = base_scale/distance_5_17

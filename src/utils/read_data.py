@@ -6,8 +6,42 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
+from scipy.spatial import distance
 
 from src.utils.dataclass import Data
+
+
+def return_scaled_hand_cordinates(x, y):
+    return int(x*1280), int(y*720)
+
+
+base_scale = 65
+def normalize_scale(hand_data):
+    # calculate distance between outer most metacarpals and scale with factor
+    point_5 = return_scaled_hand_cordinates(hand_data['X'][5], hand_data['Y'][5])  # Index_mcp
+    point_17 = return_scaled_hand_cordinates(hand_data['X'][17], hand_data['Y'][17])  # pinky_mcp
+    distance_5_17 = distance.euclidean([point_5[0], point_5[1]], [point_17[0], point_17[1]])
+    scale_factor = base_scale / distance_5_17
+
+    reference_x = hand_data['X'][0]   # - 0.5  # (image.shape[1] / 2)
+    reference_y = hand_data['Y'][0]   # - 0.5  # (image.shape[0] / 2)
+    for _, row in hand_data.iterrows():
+        row['X'] = row['X'] * scale_factor
+        row['Y'] = row['Y'] * scale_factor
+        row['Z'] = row['Z'] * scale_factor
+    # TODO: Does it make sense here? I thought to normalize wrt the wrist then translate the whole hand to the middle
+        row['X'] = row['X'] - reference_x
+        row['Y'] = row['Y'] - reference_y
+
+    reference_x = hand_data['X'][0] - 0.5
+    reference_y = hand_data['Y'][0] - 0.5
+    reference_z = hand_data['Z'][0] - 0.5
+    for _, row in hand_data.iterrows():
+        row['X'] = row['X'] - reference_x
+        row['Y'] = row['Y'] - reference_y
+        row['Z'] = row['Z'] - reference_z
+
+    return hand_data
 
 
 def read_data(path: str, sub_path="", predef_size=0) -> Tuple[list, int]:
@@ -40,17 +74,20 @@ def read_data(path: str, sub_path="", predef_size=0) -> Tuple[list, int]:
         for i, frame in enumerate(dataframes):
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
+
+            df = normalize_scale(df)
+
             # Recording the wrist coordinate of the first frame of each sequence.
-            if i == 0:
-                reference_x = df["X"][0]
-                reference_y = df["Y"][0]
-                reference_z = df["Z"][0]
-            df["X"] = df["X"] - reference_x
-            df["X"] = df["X"] - df["X"].mean()
-            df["Y"] = df["Y"] - reference_y
-            df["Y"] = df["Y"] - df["Y"].mean()
-            df["Z"] = df["Z"] - reference_z
-            df["Z"] = df["Z"] - df["Z"].mean()
+            # if i == 0:
+            #     reference_x = df["X"][0]
+            #     reference_y = df["Y"][0]
+            #     reference_z = df["Z"][0]
+            # df["X"] = df["X"] - reference_x
+            # df["X"] = df["X"] - df["X"].mean()
+            # df["Y"] = df["Y"] - reference_y
+            # df["Y"] = df["Y"] - df["Y"].mean()
+            # df["Z"] = df["Z"] - reference_z
+            # df["Z"] = df["Z"] - df["Z"].mean()
 
             empty_list.append(df)
 
