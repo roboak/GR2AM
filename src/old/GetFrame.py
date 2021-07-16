@@ -36,13 +36,31 @@ def normalize_scale(image, raw_points):
     # TODO: Does it make sense here? I thought to normalize wrt the wrist then translate the whole hand to the middle
         value.x = value.x - reference_x
         value.y = value.y - reference_y
+    counter = 0
+    sum_x = 0
+    sum_y = 0
+    sum_z = 0
+    for value in hand_data:
+        sum_x += value.x
+        sum_y += value.y
+        sum_z += value.z
+        counter += 1
+    print(counter)
+    mean_x = sum_x / counter
+    mean_y = sum_y / counter
+    mean_z = sum_z / counter
+    for value in hand_data:
+        value.x -= mean_x
+        value.y -= mean_y
+        value.z -= mean_z
+    """
     reference_x = hand_data[0].x - 0.5
     reference_y = hand_data[0].y - 0.5
     reference_z = hand_data[0].z - 0.5
     for value in hand_data:
         value.x = value.x - reference_x
         value.y = value.y - reference_y
-        value.z = value.z - reference_z
+        value.z = value.z - reference_z"""
 
     return hand_data
 

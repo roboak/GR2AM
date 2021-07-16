@@ -11,40 +11,33 @@ from machine_learning_working.statistical_feature_extraction import FeatureExtra
 
 
 def main():
+    window_size = 30
     parent_directory = dirname(dirname(abspath(__file__)))
     parent_directory = Path(parent_directory)
-    path = parent_directory / "HandDataset" / "TestingData"
+    path = parent_directory / "HandDataset"
     # extracted_features_path = "extracted_features.joblib"
     # training_features = load(extracted_features_path)
     feature_extraction = FeatureExtraction()
-    # train_data, _ = read_data(path=str(parent_directory / "HandDataset"), sub_path="Josh_noNegative")
-    # features_labels_training = np.asarray([feature_extraction.get_features_training(file) for file in train_data])
-    # dump(features_labels_training, "josh2_training.joblib")
-    features_labels_training = load("josh2_training.joblib")
+    train_data, _ = read_data(path=str(path), sub_path="Abdul", predef_size=window_size)
+    features_labels_training = np.asarray([feature_extraction.get_features_training(file) for file in train_data])
+    dump(features_labels_training, "abdul_training.joblib")
+    # features_labels_training = load("abdul_training.joblib")
     training_labels = features_labels_training[:, -1]
-    print(training_labels)
     training_features = features_labels_training[:, :-1]
     classifier = RandomForestClassifier(random_state=0, n_estimators=40)
     classifier.fit(training_features, training_labels)
-    classifier_2 = LinearSVC()
-    classifier_2.fit(training_features, training_labels)
-    # test_data, _ = read_data(path=str(path), sub_path="Josh2")
-    features_labels = load("josh2_testing.joblib")
-    # np.asarray([feature_extraction.get_features_training(file) for file in test_data])
+    test_data, _ = read_data(path=str(path / "TestingData"), sub_path="Abdul", predef_size=window_size)
+    features_labels = np.asarray([feature_extraction.get_features_training(file) for file in test_data])
+    dump(features_labels, "abdul_testing.joblib")
+    # features_labels = load("abdul_testing.joblib")
     labels = features_labels[:, -1]
     features = features_labels[:, :-1]
     predicted_labels = classifier.predict(features)
     confusion_matrix_1 = confusion_matrix(labels, predicted_labels)
     print(confusion_matrix_1)
     print(f"Accuracy {accuracy_score(labels, predicted_labels)} ")
-    predicted_labels_2 = classifier_2.predict(features)
-    confusion_matrix_2 = confusion_matrix(labels, predicted_labels_2)
-    print(confusion_matrix_2)
-    print(f"Accuracy {accuracy_score(labels, predicted_labels_2)} ")
     display_1 = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_1)
     display_1.plot()
-    display_2 = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_2)
-    display_2.plot()
     plt.show()
 
 
