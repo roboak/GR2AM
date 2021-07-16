@@ -35,27 +35,18 @@ class Normalisaion:
             row['Z'] -= row['Z'].mean()
         return hand_data
 
-    i = 0
-    reference_x = 0
-    reference_y = 0
-    reference_z = 0
     @staticmethod
-    def normalise_coordinates_1(df):
+    def normalise_coordinates_1(df, reference_coord):
         # Recording the wrist coordinate of the first frame of each sequence.
-        if Normalisaion.i == 0:
-            Normalisaion.reference_x = df["X"][0]
-            Normalisaion.reference_y = df["Y"][0]
-            Normalisaion.reference_z = df["Z"][0]
-        df["X"] = df["X"] - Normalisaion.reference_x
+        df["X"] = df["X"] - reference_coord[0]
         df["X"] = df["X"] - df["X"].mean()
-        df["Y"] = df["Y"] - Normalisaion.reference_y
+        df["Y"] = df["Y"] - reference_coord[1]
         df["Y"] = df["Y"] - df["Y"].mean()
-        df["Z"] = df["Z"] - Normalisaion.reference_z
+        df["Z"] = df["Z"] - reference_coord[2]
         df["Z"] = df["Z"] - df["Z"].mean()
-        Normalisaion.i +=1
         return df
 
 
     @staticmethod
-    def normalize_data(hand_data):
-        return Normalisaion.normalise_coordinates_1(Normalisaion.normalise_scale(hand_data))
+    def normalize_data(hand_data, reference_coord):
+        return Normalisaion.normalise_coordinates_1(Normalisaion.normalise_scale(hand_data), reference_coord)

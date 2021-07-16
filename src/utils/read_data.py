@@ -40,7 +40,11 @@ def read_data(path: str, sub_path="", predef_size=0) -> Tuple[list, int]:
         for i, frame in enumerate(dataframes):
             frame = ast.literal_eval(frame)
             df = pd.DataFrame(frame)
-            df = norm.normalize_data(df)
+            if i == 0:
+                reference_x = df["X"][0]
+                reference_y = df["Y"][0]
+                reference_z = df["Z"][0]
+            df = norm.normalize_data(df, (reference_x, reference_y, reference_z))
 
             # Recording the wrist coordinate of the first frame of each sequence.
             # if i == 0:
