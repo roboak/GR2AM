@@ -7,7 +7,7 @@ import GetHandPoints
 from scipy.spatial import distance
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
-base_scale = 0.12
+base_scale = 0.08
 
 
 def Normalise_Size(hand_data, scale):
@@ -55,6 +55,7 @@ def plot_landmarks(image, hand_landmarks, color):
 
 def return_scaled_hand_cordinates(image, point):
     return int(point.x*image.shape[1]), int(point.y*image.shape[0])
+
 
 def return_scaled_hand_cordinates_1(image, point):
     return point.x*1, point.y*1

@@ -6,7 +6,7 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
-from src.utils.normalisation import Normalisaion as norm
+from src.utils.normalisation import Normalisation as norm
 from src.utils.dataclass import Data
 
 

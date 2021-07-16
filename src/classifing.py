@@ -1,7 +1,7 @@
 import threading
 import multiprocessing
 from multiprocessing import Queue
-from utils.normalisation import Normalisaion as norm
+from utils.normalisation import Normalisation as norm
 import numpy as np
 import pandas as pd
 
