@@ -5,13 +5,15 @@ import os
 import time
 from pathlib import Path
 from multiprocessing import Queue
+from typing import NamedTuple
+
 import cv2
 import mediapipe as mp
 from src.utils.dataclass import GestureMetaData
 
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
-                 aQueue: Queue = None, bQueue: Queue = None, window_size=40):
+                 aQueue: Queue = None, bQueue: Queue = None, window_size=30):
         self.gesture_name = None
         self.gesture_path = None
         self.all_keypoints = []
@@ -68,6 +70,9 @@ class GestureCapture:
             if record or self.live:
                 self.record_frame(image)
 
+            if record and len(self.all_keypoints) >= self.live_framesize:
+                cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0,0, 255, 255), 2)
+
             if self.live and self.all_keypoints:
 
                 # When 60 frames are captured create job to classify
@@ -119,7 +124,7 @@ class GestureCapture:
         # Destroy all the windows
         cv2.destroyAllWindows()
 
-    def get_hand_points(self, image):
+    def get_hand_points(self, image) -> NamedTuple("res", [('multi_hand_landmarks', list), ('multi_handedness', list)]):
         with self.mp_hands.Hands(min_detection_confidence=0.4, min_tracking_confidence=0.4) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -140,11 +145,7 @@ class GestureCapture:
                 self.mp_drawing.draw_landmarks(image, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
         keypoints_per_frame = []
         if results.multi_hand_landmarks:
-
-            landmark = results.multi_hand_landmarks[0].landmark
-
-
-            for data_point in landmark:
+            for data_point in results.multi_hand_landmarks[0].landmark:
                 if data_point:
                     keypoints_per_frame.append({
                         'X': data_point.x,
@@ -158,6 +159,7 @@ class GestureCapture:
     def write_file(self):
         if self.all_keypoints and not self.live:  # only do smth when we have data to write
             with open(self.gesture_path, "w") as data_file:  # open file and save/close afterwards
+                # data_file.write(dimensions)
                 for item in self.all_keypoints:  # write all frames
                     data_file.write(str(item) + "\n")
 
