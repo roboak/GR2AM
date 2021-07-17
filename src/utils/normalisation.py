@@ -25,14 +25,12 @@ class Normalisation:
             row['Y'] = row['Y'] - reference_y
         reference_x = hand_data['X'][0] - 0.5
         reference_y = hand_data['Y'][0] - 0.5
-        reference_z = hand_data['Z'][0] - 0.5
         for _, row in hand_data.iterrows():
             row['X'] = row['X'] - reference_x
             row['Y'] = row['Y'] - reference_y
-            row['Z'] = row['Z'] - reference_z
-            row['X'] -= row['X'].mean()
-            row['Y'] -= row['Y'].mean()
-            row['Z'] -= row['Z'].mean()
+            row['X'] = row['X'] - row['X'].mean()
+            row['Y'] = row['Y'] - row['Y'].mean()
+            row['Z'] = row['Z'] - row['Z'].mean()
         return hand_data
 
     @staticmethod
@@ -49,4 +47,5 @@ class Normalisation:
 
     @staticmethod
     def normalize_data(hand_data, reference_coord):
-        return Normalisation.normalise_coordinates_1(Normalisation.normalise_scale(hand_data), reference_coord)
+        # return Normalisation.normalise_coordinates_1(Normalisation.normalise_scale(hand_data), reference_coord)
+        return Normalisation.normalise_coordinates(Normalisation.normalise_scale(hand_data))

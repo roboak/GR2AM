@@ -7,9 +7,9 @@ class DL_run:
     def __init__(self, path_to_data, folder_name, window_size):
         self.val_loader = None
         self.train_loader = None
-        self.batch_size = 32
+        self.batch_size = 16
         self.test_batch_size = 1
-        self.val_batch_size = 32
+        self.val_batch_size = 16
         self.device = format_data_for_nn.get_device()
         self.path_to_data = path_to_data
         self.folder_name = folder_name
