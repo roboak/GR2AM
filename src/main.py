@@ -9,6 +9,7 @@ from pathlib import Path
 from classifing import Classify
 from dl.deep_learning_model import DeepLearningClassifier
 from gesture_capturing import GestureCapture
+from machine_learning_working.machine_learning_model import MachineLearningClassifier
 from src.utils.dataclass import GestureMetaData
 
 # Press the green button in the gutter to run the script.
@@ -66,8 +67,8 @@ if __name__ == '__main__':
         startCapture()
 
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
-        # ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh', window_size=WINDOW_SIZE)
-        # ml.save_model()
+        ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Josh2', window_size=WINDOW_SIZE)
+        ml.save_model()
 
         dl = DeepLearningClassifier(window_size=WINDOW_SIZE, model=None)
         dl.train_model()

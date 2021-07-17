@@ -19,7 +19,7 @@ class HybridLearningClassifier(LearningModel):
 
         # TODO could we do a combined score instead?
         print(acc_dl)
-        logging.debug("DL: " + str(result_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_dl))
+        print("DL: " + str(result_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_dl))
         if acc_dl < 0.85:
             print("ML" + str(result_ml))
             return result_ml
