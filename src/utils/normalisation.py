@@ -2,14 +2,14 @@
 
 from scipy.spatial import distance
 
-class Normalisaion:
+class Normalisation:
     base_scale = 0.12
     @staticmethod
     def normalise_scale(hand_data):
         point_5 = (hand_data['X'][5], hand_data['Y'][5])  # Index_mcp
         point_17 = (hand_data['X'][17], hand_data['Y'][17])  # pinky_mcp
         distance_5_17 = distance.euclidean([point_5[0], point_5[1]], [point_17[0], point_17[1]])
-        scale_factor = Normalisaion.base_scale / distance_5_17
+        scale_factor = Normalisation.base_scale / distance_5_17
         for _, row in hand_data.iterrows():
             row['X'] = row['X'] * scale_factor
             row['Y'] = row['Y'] * scale_factor
@@ -49,4 +49,4 @@ class Normalisaion:
 
     @staticmethod
     def normalize_data(hand_data, reference_coord):
-        return Normalisaion.normalise_coordinates_1(Normalisaion.normalise_scale(hand_data), reference_coord)
+        return Normalisation.normalise_coordinates_1(Normalisation.normalise_scale(hand_data), reference_coord)
