@@ -11,7 +11,7 @@ class HybridLearningClassifier(LearningModel):
         self.window_size = window_size
 
         self.ml = MachineLearningClassifier(already_trained_classifier="trained_model.joblib", window_size=self.window_size)
-        self.dl = DeepLearningClassifier(window_size=self.window_size)
+        self.dl = DeepLearningClassifier(window_size=self.window_size, output_size=18)
 
     def predict_data(self, data):
         result_dl, acc_dl = self.dl.predict_data(data)

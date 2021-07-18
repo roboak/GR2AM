@@ -16,16 +16,16 @@ class DL_run:
         self.window_size = window_size
         # device = "cpu"
 
-    def setupDL(self, obj):
+    def setupDL(self, obj, output_size):
         self.train_loader, self.val_loader, self.test_loader, seq_len, num_classes = format_data_for_nn.get_data_for_training(
             batch_size=self.batch_size,
             val_batch_size=self.val_batch_size,
             test_batch_size=self.test_batch_size,
             path_to_data=self.path_to_data,
             folder_name=self.folder_name,
-            window_size=self.window_size
+            window_size=self.window_size,
         )
-        self.model = obj.CNN1D(seq_len, self.device, output_size=16).to(self.device)
+        self.model = obj.CNN1D(seq_len, self.device, output_size=output_size).to(self.device)
 
     def trainDL(self, obj, lr=0.002, epochs=100):
         self.nn_train = obj.train_neural_network(model=self.model, device=self.device,

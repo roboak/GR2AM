@@ -17,22 +17,7 @@ class Normalisation:
         return hand_data
 
     @staticmethod
-    def normalise_coordinates(hand_data):
-        hand_data['X'] -= hand_data['X'][0]  # - 0.5  # (image.shape[1] / 2)
-        hand_data['Y'] -= hand_data['Y'][0]  # - 0.5  # (image.shape[0] / 2)
-
-        hand_data["X"] -= hand_data['X'][0] - 0.5
-        hand_data["Y"] -= hand_data['Y'][0] - 0.5
-        #hand_data["Z"] -= hand_data['Z'][0] - 0.5
-
-        hand_data["X"] -= hand_data["X"].mean()
-        hand_data["Y"] -= hand_data["Y"].mean()
-        hand_data["Z"] -= hand_data["Z"].mean()
-
-        return hand_data
-
-    @staticmethod
-    def normalise_coordinates_1(hand_data, reference_coord):
+    def normalise_coordinates(hand_data, reference_coord):
         # Recording the wrist coordinate of the first frame of each sequence.
         hand_data["X"] = hand_data["X"] - reference_coord[0]
         hand_data["X"] = hand_data["X"] - hand_data["X"].mean()
@@ -44,5 +29,4 @@ class Normalisation:
 
     @staticmethod
     def normalize_data(hand_data, reference_coord):
-        return Normalisation.normalise_coordinates_1(Normalisation.normalise_scale(hand_data), reference_coord)
-        #return Normalisation.normalise_coordinates(Normalisation.normalise_scale(hand_data))
+        return Normalisation.normalise_coordinates(Normalisation.normalise_scale(hand_data), reference_coord)
