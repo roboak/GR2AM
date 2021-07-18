@@ -99,8 +99,9 @@ class GestureCapture:
                     self.live = False
 
             # Collect results
-            if not self.bQueue.empty():
-                last_result = str(self.bQueue.get())
+            if self.bQueue:
+                if not self.bQueue.empty():
+                    last_result = str(self.bQueue.get())
 
             if last_result:  # and self.live  # In live mode always display text
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
