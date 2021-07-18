@@ -21,7 +21,7 @@ class FeatureExtraction:
         :return: A feature array for the file.
         """
         data = file.data
-        label = file.label
+        label = int(file.label)
         feature = np.apply_along_axis(self.__features, 0, data)
         # We have the features calculated for each point
         # The shape = (Number of features, Number of points, Number of coordinates)

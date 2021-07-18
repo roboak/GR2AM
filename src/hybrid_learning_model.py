@@ -15,17 +15,16 @@ class HybridLearningClassifier(LearningModel):
 
     def predict_data(self, data):
         result_dl, acc_dl = self.dl.predict_data(data)
-        result_ml = self.ml.predict_data(data)
+        #result_ml = self.ml.predict_data(data)
 
-        # TODO could we do a combined score instead?
-        print(acc_dl)
-        print("DL: " + str(result_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_dl))
-        if acc_dl < 0.85:
-            print("ML" + str(result_ml))
-            return result_ml
-        else:
-            print("DL: " + str(result_dl))
-            return int(result_dl)
+        #print("RESULT--> DL: " + str(result_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_dl))
+        print("RESULT--> DL: " + str(result_dl) + ' Confi:' + str(acc_dl))
+        #if acc_dl < 0.85:
+        #    print("ML" + str(result_ml))
+        #    return result_ml
+        #else:
+        #    print("DL: " + str(result_dl))
+        return int(result_dl)
 
     def train_model(self):
         pass
