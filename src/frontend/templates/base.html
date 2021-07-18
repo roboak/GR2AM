@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- The title when added to bookmarks and shown in the tab title -->
+    <title>LumosNox Gesture Recognition</title>
+    <meta charset="utf-8">
+
+    <!-- The width=device-width part sets the width of the page to follow the screen-width of the device (which will vary depending on the device).-->
+    <!-- The initial-scale=1.0 part sets the initial zoom level when the page is first loaded by the browser.-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- To enable using CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <!-- Add icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- To enable using jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Calling bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/main.css') }}">
+
+</head>
+<body>
+<!--
+* Bootstrap requires a containing element to wrap site contents.
+* Containers are used to pad the content inside of them, and there are two container classes available:
+	  * The .container class provides a responsive fixed width container (We define a specific fixed size)
+    * The .container-fluid class provides a full width container, spanning the entire width of the viewport
+-->
+<div class="container-fluid">
+    <h1>LumosNox</h1>
+    <h3>Gesture Recognition & Mapping Application</h3>
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

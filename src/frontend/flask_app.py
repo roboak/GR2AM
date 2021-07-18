@@ -13,12 +13,33 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template("home_page.html")
+    with open("static/js/captured_gestures.json") as jsonFile:
+        gestures = json.load(jsonFile)
+        jsonFile.close()
+
+    with open("static/js/gesture_application_mapping.json") as jsonFile:
+        mappings = json.load(jsonFile)
+        jsonFile.close()
+
+    with open("static/js/available_applications.json") as jsonFile:
+        apps = json.load(jsonFile)
+        jsonFile.close()
+
+    return render_template("home_page.html", gestures=gestures, mappings=mappings, apps=apps)
 
 
 @app.route("/add_gesture")
 def add_gesture():
-    return render_template("generating_model_capturing_data.html")
+
+    with open("static/js/captured_gestures.json") as jsonFile:
+        captures = json.load(jsonFile)
+        jsonFile.close()
+
+    with open("static/js/available_gestures.json") as jsonFile:
+        gestures = json.load(jsonFile)
+        jsonFile.close()
+
+    return render_template("generating_model_capturing_data.html", captures=captures, gestures=gestures)
 
 
 @app.route('/video_feed/<gesture_name>')
@@ -37,5 +58,5 @@ if __name__ == "__main__":
     parent_directory = dirname(dirname(dirname(abspath(__file__))))
     print(parent_directory)
     parent_directory = Path(parent_directory)
-    path = parent_directory / "Akash"
+    path = parent_directory / "flask_trial_gestures"
     app.run(debug= True)

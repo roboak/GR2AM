@@ -1,182 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- The title when added to bookmarks and shown in the tab title -->
-  <title>LumosNox Gesture Recognition</title>
-  <meta charset="utf-8">
-
-<!-- The width=device-width part sets the width of the page to follow the screen-width of the device (which will vary depending on the device).-->
-<!-- The initial-scale=1.0 part sets the initial zoom level when the page is first loaded by the browser.-->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- To enable using CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<!-- Add icon library -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<!-- To enable using jQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<!-- Calling bootstrap -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <script  src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
-  <style>
-    body {background-color:   #a9cce3;}
-    h1 {color: black;}
-    h3 {color: grey;}
-    h4 {text-align: center;}
-    h4 {color: grey;}
-    p {color: black;}
-    img {height: auto;}
-    img {width:100%;}
-    img {object-fit:contain;}
-  </style>
-
-</head>
-<body>
-<!--
-* Bootstrap requires a containing element to wrap site contents.
-* Containers are used to pad the content inside of them, and there are two container classes available:
-	  * The .container class provides a responsive fixed width container (We define a specific fixed size)
-    * The .container-fluid class provides a full width container, spanning the entire width of the viewport
--->
-<div class="container-fluid">
-  <h1>LumosNox</h1>
-  <h3>Gesture Recognition & Mapping Application</h3>
-  <button onclick="window.location.href='{{url_for('index') }}';" class="btn btn-primary btn-block"><i class="fa fa-home"></i> Home</button>
-  <div class="row">
+{% extends 'base.html' %}
+{% block content %}
+<button onclick="window.location.href='{{url_for('index') }}';" class="btn btn-primary btn-block"><i
+        class="fa fa-home"></i> Home
+</button>
+<div class="row">
     <!---************************ First Column ************************-->
-    <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;" >
-      <h4>Available Gestures</h4>
-      <!--    Click this button to start the gesture recording for the selected radio button-->
-    <button type="button" onclick="changeImageURL()" class="btn btn-primary btn-lg btn-block">Start Recording </button>
+    <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;">
+        <h4>Available Gestures</h4>
+        <!--    Click this button to start the gesture recording for the selected radio button-->
+        <button type="button" onclick="changeImageURL()" class="btn btn-primary btn-lg btn-block">Start Recording
+        </button>
+        {% for k,v in gestures.items() %}
+        <div>
+            <input type="radio" name="selectGesture" id="radio_{{ k | lower }}" value="{{ k }}">
+            <label>{{ k }}</label>
+            <img src="{{ v }}" style="max-height: 150px;">
+            <br>
+        </div>
+        {% endfor %}
     </div>
-    <!---Read available gestures from json file and show them along with the GIFs-->
-    <script>
-        fetch("./static/js/available_gestures.json")
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-              console.log("DATA", data)
-                appendData(data);
-            })
-            .catch(function (err) {
-                console.log('error: ' + err);
-            });
-        function appendData(data) {
-            var mainContainer = document.getElementById("myGestures");
-            var keys = Object.keys(data);
-            let string_radio_prefix = "radio_";
-            for (let i = 0; i < keys.length; i++) {
-              var div = document.createElement("div");
-              var image = document.createElement("img");
-              var radiobox = document.createElement('input');
-              var label = document.createElement('label');
-              var newline = document.createElement('br');
-              var description = document.createTextNode(keys[i]);
-              label.appendChild(description);
-              radiobox.type = 'radio';
-              radiobox.name="selectGesture";
-              radiobox.id = string_radio_prefix.concat(keys[i]);
-              radiobox.value = keys[i];
-              image.src = data[keys[i]];
-              image.class = "img-fluid";
-              image.style = "max-height:150px"
-              div.appendChild(radiobox);
-              div.appendChild(label);
-              div.appendChild(image);
-              div.appendChild(newline);
-              mainContainer.appendChild(div);
-            }
-        }
-    </script>
 
-
-    <!---->
-    <div class="col-sm-1" > </div>
+    <div class="col-sm-1"></div>
     <!---************************ Second Column ************************-->
     <div class="col-sm-4" style="background-color:#d4e6f1;">
-      <h4> Input </h4>
-      <div class="row">
-        <div class="progress">
-          <div class="progress-bar bg-info" role="progressbar" style="width: 0" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">%0</div>
+        <h4> Input </h4>
+        <div class="row">
+            <div class="progress">
+                <div class="progress-bar bg-info" role="progressbar" style="width: 0" aria-valuenow="0"
+                     aria-valuemin="0" aria-valuemax="100">%0
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <img src="static/img/hand_gestures.jpg" id = "vid_display" width="100%" height="auto"/>
-      </div>
-      <div class="row">
-        <h5><strong> Instructions: </strong></h5>
-        <ul>
-          <li> Press <strong>spacebar</strong> to start recording </li>
-          <li> Press <strong>q</strong> to quit the recording </li>
-          <li> Press <strong>n</strong> for next capture </li>
-          <li> Press <strong>r</strong> to redo capture </li>
-        </ul>
-      </div>
+        <div class="row">
+            <img src="static/img/hand_gestures.jpg" id="vid_display" width="100%" height="auto"/>
+        </div>
+        <div class="row">
+            <h5><strong> Instructions: </strong></h5>
+            <ul>
+                <li> Press <strong>spacebar</strong> to start recording</li>
+                <li> Press <strong>q</strong> to quit the recording</li>
+                <li> Press <strong>n</strong> for next capture</li>
+                <li> Press <strong>r</strong> to redo capture</li>
+            </ul>
+        </div>
     </div>
     <script>
-      function changeImageURL() {
+        function changeImageURL() {
             var image = document.getElementById('vid_display');
-            gesture_selected = get_gesture()
-            console.log(gesture_selected)
-            url= "{{ url_for('video_feed', gesture_name= "gesture_selected") }}";
-            console.log(url)
+            gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+
+            url= "{{ url_for('video_feed', gesture_name='gesture_selected') }}";
             new_url = url.replace(/gesture_selected/, gesture_selected)
             console.log(new_url)
-            image.src = new_url
-            }
 
-        function get_gesture(){
-            var checkRadio = document.querySelector('input[name="selectGesture"]:checked');
-            if(checkRadio != null) {
-                return checkRadio.value;
-            }
+            image.src = new_url
         }
     </script>
     <!---->
-    <div class="col-sm-1" > </div>
+    <div class="col-sm-1"></div>
     <!---************************ Third Column ************************-->
     <div class="col-sm-3" style="background-color:#d4e6f1;">
-      <h4> Generate Model </h4>
-      <div class="row" id="generateModel" >
-        <p style="text-align:center;"><strong> Captured Data </strong><p>
-      </div>
-      <div class="row">
-        <button type="button" class="btn btn-primary btn-lg btn-block">Generate Model</button>
-      </div>
+        <h4> Generate Model </h4>
+        <div class="row" id="generateModel">
+            <p style="text-align:center;"><strong> Captured Data </strong>
+            <p>
+            {% for k, v in captures.items() %}
+            <div>{{ k }}
+                <br>
+                <img src="{{ v }}" style="max-height: 150px;">
+            </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <button type="button" class="btn btn-primary btn-lg btn-block">Generate Model</button>
+        </div>
     </div>
-    <!---Read captured gestures from json file and show them-->
-    <script>
-        fetch('./static/js/captured_gestures.json')
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                getCapturedData(data);
-            })
-            .catch(function (err) {
-                console.log('error: ' + err);
-            });
-        function getCapturedData(data) {
-            var mainContainer = document.getElementById("generateModel");
-            var keys = Object.keys(data);
-            for (let i = 0; i < keys.length; i++) {
-              var div = document.createElement("div");
-              var image = document.createElement("img");
-              var newline = document.createElement('br');
-              image.src = data[keys[i]];
-              image.class = "img-fluid";
-              image.style = "max-height:150px"
-              div.innerHTML = keys[i];
-              div.appendChild(newline);
-              div.appendChild(image);
-              mainContainer.appendChild(div);
-            }
-        }
-    </script>
-  </div>
 </div>
-
-</body>
-</html>
+{% endblock %}
