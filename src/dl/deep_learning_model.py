@@ -30,7 +30,7 @@ class DeepLearningClassifier(LearningModel):
 
     def train_model(self):
         """Assumption - Data is present in HandDataset"""
-        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Akash_new", window_size=self.window_size)
+        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Josh2", window_size=self.window_size)
         run.setupDL(CNN1D)
         run.trainDL(CNN1D, lr=0.002, epochs=800)
         run.evalDL(CNN1D)

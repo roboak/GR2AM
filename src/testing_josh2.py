@@ -11,14 +11,14 @@ from machine_learning_working.statistical_feature_extraction import FeatureExtra
 
 
 def main():
-    window_size = 20
+    window_size = 30
     parent_directory = dirname(dirname(abspath(__file__)))
     parent_directory = Path(parent_directory)
     path = parent_directory / "HandDataset"
     # extracted_features_path = "extracted_features.joblib"
     # training_features = load(extracted_features_path)
     feature_extraction = FeatureExtraction()
-    train_data, _ = read_data(path=str(path/"TrainingData"), sub_path="Akash_new", predef_size=window_size)
+    train_data, _ = read_data(path=str(path/"TrainingData"), sub_path="Josh2", predef_size=window_size)
     features_labels_training = np.asarray([feature_extraction.get_features_training(file) for file in train_data])
     # dump(features_labels_training, "abdul_training.joblib")
     # features_labels_training = load("abdul_training.joblib")
@@ -26,7 +26,7 @@ def main():
     training_features = features_labels_training[:, :-1]
     classifier = RandomForestClassifier(random_state=0, n_estimators=40)
     classifier.fit(training_features, training_labels)
-    test_data, _ = read_data(path=str(path/"TestingData"), sub_path="Akash_new", predef_size=window_size)
+    test_data, _ = read_data(path=str(path/"TestingData"), sub_path="Josh2", predef_size=window_size)
     features_labels = np.asarray([feature_extraction.get_features_training(file) for file in test_data])
     # dump(features_labels, "abdul_testing.joblib")
     # features_labels = load("abdul_testing.joblib")

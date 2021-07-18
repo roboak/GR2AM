@@ -1,9 +1,9 @@
-
-
 from scipy.spatial import distance
 
+
 class Normalisation:
-    base_scale = 0.12
+    base_scale = 0.08
+
     @staticmethod
     def normalise_scale(hand_data):
         point_5 = (hand_data['X'][5], hand_data['Y'][5])  # Index_mcp
@@ -18,34 +18,31 @@ class Normalisation:
 
     @staticmethod
     def normalise_coordinates(hand_data):
-        reference_x = hand_data['X'][0]   # - 0.5  # (image.shape[1] / 2)
-        reference_y = hand_data['Y'][0]   # - 0.5  # (image.shape[0] / 2)
-        for _, row in hand_data.iterrows():
-            row['X'] = row['X'] - reference_x
-            row['Y'] = row['Y'] - reference_y
-        reference_x = hand_data['X'][0] - 0.5
-        reference_y = hand_data['Y'][0] - 0.5
-        for _, row in hand_data.iterrows():
-            row['X'] = row['X'] - reference_x
-            row['Y'] = row['Y'] - reference_y
-            row['X'] = row['X'] - row['X'].mean()
-            row['Y'] = row['Y'] - row['Y'].mean()
-            row['Z'] = row['Z'] - row['Z'].mean()
+        hand_data['X'] -= hand_data['X'][0]  # - 0.5  # (image.shape[1] / 2)
+        hand_data['Y'] -= hand_data['Y'][0]  # - 0.5  # (image.shape[0] / 2)
+
+        hand_data["X"] -= hand_data['X'][0] - 0.5
+        hand_data["Y"] -= hand_data['Y'][0] - 0.5
+        #hand_data["Z"] -= hand_data['Z'][0] - 0.5
+
+        hand_data["X"] -= hand_data["X"].mean()
+        hand_data["Y"] -= hand_data["Y"].mean()
+        hand_data["Z"] -= hand_data["Z"].mean()
+
         return hand_data
 
     @staticmethod
-    def normalise_coordinates_1(df, reference_coord):
+    def normalise_coordinates_1(hand_data, reference_coord):
         # Recording the wrist coordinate of the first frame of each sequence.
-        df["X"] = df["X"] - reference_coord[0]
-        df["X"] = df["X"] - df["X"].mean()
-        df["Y"] = df["Y"] - reference_coord[1]
-        df["Y"] = df["Y"] - df["Y"].mean()
-        df["Z"] = df["Z"] - reference_coord[2]
-        df["Z"] = df["Z"] - df["Z"].mean()
-        return df
-
+        hand_data["X"] = hand_data["X"] - reference_coord[0]
+        hand_data["X"] = hand_data["X"] - hand_data["X"].mean()
+        hand_data["Y"] = hand_data["Y"] - reference_coord[1]
+        hand_data["Y"] = hand_data["Y"] - hand_data["Y"].mean()
+        hand_data["Z"] = hand_data["Z"] - reference_coord[2]
+        hand_data["Z"] = hand_data["Z"] - hand_data["Z"].mean()
+        return hand_data
 
     @staticmethod
     def normalize_data(hand_data, reference_coord):
-        # return Normalisation.normalise_coordinates_1(Normalisation.normalise_scale(hand_data), reference_coord)
-        return Normalisation.normalise_coordinates(Normalisation.normalise_scale(hand_data))
+        return Normalisation.normalise_coordinates_1(Normalisation.normalise_scale(hand_data), reference_coord)
+        #return Normalisation.normalise_coordinates(Normalisation.normalise_scale(hand_data))

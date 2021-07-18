@@ -80,7 +80,7 @@ class GestureCapture:
                     self.aQueue.put(copy.copy(self.all_keypoints))
 
                     # Record overlapping window
-                    self.all_keypoints = self.all_keypoints[:-self.live_framesize//2]  # save last 20 entries for next window
+                    self.all_keypoints = self.all_keypoints[:-self.live_framesize//3]  # save last 20 entries for next window
 
                     cv2.putText(image, ".", (150, 100), cv2.QT_FONT_NORMAL, 1, (0, 255, 0, 255), 2)
 
