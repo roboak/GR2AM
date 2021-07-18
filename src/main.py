@@ -31,8 +31,7 @@ if __name__ == '__main__':
 
         fnames1 = ['gesture_t_tap_1', 'gesture_t_up_2', 'gesture_t_down_3', 'gesture_i_tap_4', 'gesture_i_up_5',
                   'gesture_i_down_6', 'gesture_m_tap_7', 'gesture_m_up_8', 'gesture_m_down_9', 'gesture_r_tap_10',
-                  'gesture_r_up_11', 'gesture_r_down_12', 'gesture_l_tap_13', 'gesture_l_up_14', 'gesture_l_down_15',
-                  'gesture_n_neg_16']
+                  'gesture_r_up_11', 'gesture_r_down_12', 'gesture_l_tap_13', 'gesture_l_up_14', 'gesture_l_down_15']
         fnames = ['gesture_n_still_16', 'gesture_n_up_17', 'gesture_n_down_18']
 
         for fname in fnames:

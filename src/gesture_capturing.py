@@ -35,8 +35,10 @@ class GestureCapture:
             with open(self.meta_data_file) as file:
                 self.gesture_dict = json.load(file)
             self.live = False
+            self.preventRecord = False
         else:
             self.live = True
+            self.preventRecord = True
 
         self.aQueue = aQueue
         self.bQueue = bQueue
@@ -81,7 +83,7 @@ class GestureCapture:
 
                     # Record overlapping window
                     self.all_keypoints = self.all_keypoints[(self.live_framesize//2):]  # save last 20 entries for next window
-                    
+
                     cv2.putText(image, ".", (150, 100), cv2.QT_FONT_NORMAL, 1, (0, 255, 0, 255), 2)
 
                     # FIXME remove that later
@@ -109,9 +111,11 @@ class GestureCapture:
             ## Keyboard bindings ##
             k = cv2.waitKey(1)  # read key pressed event
             if k % 256 == 32:  # spacebar to record
-                # record = not record
-                print("Toggle Recording Mode")
-                self.live = True
+                if not self.preventRecord:
+                    record = not record
+                    print("Toggle Recording Mode")
+                else:
+                    self.live = True
             if k & 0xFF == ord('q'):  # close on key q
                 record = False
                 self.write_file()
