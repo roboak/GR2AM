@@ -30,7 +30,7 @@ class CNN1D(nn.Module):
             BatchNorm1d(self.n_cnn_filter_1),
             # ReLU(),
             Tanh(),
-            Dropout(0.17),
+            Dropout(0.15),
             # MaxPool1d(2),
             # len_output_features_per_frame = int((input_features_per_frame - kernel_size)/stride) + 1
             Conv1d(in_channels=self.n_cnn_filter_1, out_channels=self.n_cnn_filter_2,
@@ -38,7 +38,7 @@ class CNN1D(nn.Module):
             BatchNorm1d(self.n_cnn_filter_2),
             # ReLU(),
             Tanh(),
-            Dropout(0.3),
+            Dropout(0.10),
             # MaxPool1d(2),
             # len_output_features_per_frame_after_pooling = [int((input_features_per_frame - kernel_size)/stride) + 1]//2
 
