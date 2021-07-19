@@ -6,7 +6,7 @@ mp_hands = mp.solutions.hands
 
 
 def GetHandPoints(image):
-    with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
+    with mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7, max_num_hands= 1) as hands:
         # Flip the image horizontally for a later selfie-view display, and convert
         # the BGR image to RGB.
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
