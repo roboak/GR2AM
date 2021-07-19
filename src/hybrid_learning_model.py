@@ -11,21 +11,20 @@ class HybridLearningClassifier(LearningModel):
         self.window_size = window_size
 
         self.ml = MachineLearningClassifier(already_trained_classifier="trained_model.joblib", window_size=self.window_size)
-        self.dl = DeepLearningClassifier(window_size=self.window_size)
+        self.dl = DeepLearningClassifier(window_size=self.window_size, output_size=18)
 
     def predict_data(self, data):
         result_dl, acc_dl = self.dl.predict_data(data)
-        result_ml = self.ml.predict_data(data)
+        #result_ml = self.ml.predict_data(data)
 
-        # TODO could we do a combined score instead?
-        print(acc_dl)
-        print("DL: " + str(result_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_dl))
-        if acc_dl < 0.85:
-            print("ML" + str(result_ml))
-            return result_ml
-        else:
-            print("DL: " + str(result_dl))
-            return int(result_dl)
+        #print("RESULT--> DL: " + str(result_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_dl))
+        print("RESULT--> DL: " + str(result_dl) + ' Confi:' + str(acc_dl))
+        #if acc_dl < 0.85:
+        #    print("ML" + str(result_ml))
+        #    return result_ml
+        #else:
+        #    print("DL: " + str(result_dl))
+        return int(result_dl)
 
     def train_model(self):
         pass

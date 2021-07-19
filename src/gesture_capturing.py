@@ -35,8 +35,10 @@ class GestureCapture:
             with open(self.meta_data_file) as file:
                 self.gesture_dict = json.load(file)
             self.live = False
+            self.preventRecord = False
         else:
             self.live = True
+            self.preventRecord = True
 
         self.aQueue = aQueue
         self.bQueue = bQueue
@@ -80,9 +82,13 @@ class GestureCapture:
                     self.aQueue.put(copy.copy(self.all_keypoints))
 
                     # Record overlapping window
-                    self.all_keypoints = self.all_keypoints[:-self.live_framesize//2]  # save last 20 entries for next window
+                    self.all_keypoints = self.all_keypoints[(self.live_framesize//2):]  # save last 20 entries for next window
 
                     cv2.putText(image, ".", (150, 100), cv2.QT_FONT_NORMAL, 1, (0, 255, 0, 255), 2)
+
+                    # FIXME remove that later
+                    self.all_keypoints = []
+                    self.live = False
 
                 # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
                 if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
@@ -90,12 +96,14 @@ class GestureCapture:
 
                     # empty out completely, no related movements
                     self.all_keypoints = []
+                    self.live = False
 
-                # Collect results
+            # Collect results
+            if self.bQueue:
                 if not self.bQueue.empty():
                     last_result = str(self.bQueue.get())
 
-            if self.live and last_result:  # In live mode always display text
+            if last_result:  # and self.live  # In live mode always display text
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
 
@@ -104,8 +112,11 @@ class GestureCapture:
             ## Keyboard bindings ##
             k = cv2.waitKey(1)  # read key pressed event
             if k % 256 == 32:  # spacebar to record
-                record = not record
-                print("Toggle Recording Mode")
+                if not self.preventRecord:
+                    record = not record
+                    print("Toggle Recording Mode")
+                else:
+                    self.live = True
             if k & 0xFF == ord('q'):  # close on key q
                 record = False
                 self.write_file()
@@ -125,7 +136,7 @@ class GestureCapture:
         cv2.destroyAllWindows()
 
     def get_hand_points(self, image) -> NamedTuple("res", [('multi_hand_landmarks', list), ('multi_handedness', list)]):
-        with self.mp_hands.Hands(min_detection_confidence=0.4, min_tracking_confidence=0.4) as hands:
+        with self.mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # To improve performance, optionally mark the image as not writeable to pass by reference.
