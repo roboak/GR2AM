@@ -56,8 +56,8 @@ class GestureCapture:
         if not self.live:
             self.setup_cap()
 
-        cap = cv2.VideoCapture(self.camera_input_value)
-        # cap = cv2.VideoCapture('raw_recording.mov')
+        # cap = cv2.VideoCapture(self.camera_input_value)
+        cap = cv2.VideoCapture('raw_recording.mov')
         last_result = ""
 
         record, redo = False, False
@@ -87,8 +87,8 @@ class GestureCapture:
                     cv2.putText(image, ".", (150, 100), cv2.QT_FONT_NORMAL, 1, (0, 255, 0, 255), 2)
 
                     # FIXME remove that later
-                    self.all_keypoints = []
-                    self.live = False
+                    # self.all_keypoints = []
+                    # self.live = False
 
                 # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
                 if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
@@ -136,7 +136,7 @@ class GestureCapture:
         cv2.destroyAllWindows()
 
     def get_hand_points(self, image) -> NamedTuple("res", [('multi_hand_landmarks', list), ('multi_handedness', list)]):
-        with self.mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7) as hands:
+        with self.mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.7) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # To improve performance, optionally mark the image as not writeable to pass by reference.
@@ -195,6 +195,6 @@ class GestureCapture:
                    6: 'Middle tap', 7: 'Middle Swipe Up', 8: 'Middle Swipe Down',
                    9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
                    12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',
-                   15: 'Negative'}
+                   15: 'Negative_still', 16: 'Negative_up', 17: 'Negative_down'}
 
         return classes[classid]

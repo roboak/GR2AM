@@ -8,7 +8,7 @@ from utils import format_data_for_nn as ft
 
 class DeepLearningClassifier(LearningModel):
 
-    def __init__(self, window_size, model='model_save/cnn_state_dict.pt', output_size=16):
+    def __init__(self, window_size, model='model_save/cnn_state_dict.pt', output_size=18):
         self.window_size = window_size
         self.output_size = output_size
 
@@ -31,7 +31,7 @@ class DeepLearningClassifier(LearningModel):
 
     def train_model(self):
         """Assumption - Data is present in HandDataset"""
-        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Abdul", window_size=self.window_size, )
+        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Josh2", window_size=self.window_size, )
         run.setupDL(CNN1D, output_size=self.output_size)
         run.trainDL(CNN1D, lr=0.002, epochs=800)
         run.evalDL(CNN1D)
