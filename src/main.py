@@ -35,7 +35,7 @@ if __name__ == '__main__':
                    'gesture_n_still_16', 'gesture_n_up_17', 'gesture_n_down_18']
         fnames = ['gesture_n_still_16', 'gesture_n_up_17', 'gesture_n_down_18']
 
-        for fname in fnames1:
+        for fname in fnames:
             gestureMetaData = GestureMetaData(gesture_name=fname)
 
             if platform.system() == "Darwin":  # for me on mac input 1 is the camera

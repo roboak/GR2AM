@@ -56,8 +56,8 @@ class GestureCapture:
         if not self.live:
             self.setup_cap()
 
-        # cap = cv2.VideoCapture(self.camera_input_value)
-        cap = cv2.VideoCapture('raw_recording.mov')
+        cap = cv2.VideoCapture(self.camera_input_value)
+        #cap = cv2.VideoCapture('raw_recording.mov')
         last_result = ""
 
         record, redo = False, False
@@ -99,9 +99,8 @@ class GestureCapture:
                     self.live = False
 
             # Collect results
-            if self.bQueue:
-                if not self.bQueue.empty():
-                    last_result = str(self.bQueue.get())
+            if self.bQueue and not self.bQueue.empty():
+                last_result = str(self.bQueue.get())
 
             if last_result:  # and self.live  # In live mode always display text
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
