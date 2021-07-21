@@ -10,10 +10,10 @@ from machine_learning_working.machine_learning_model import MachineLearningClass
 
 
 class Classify(multiprocessing.Process):  #threading.Thread):
-    def __init__(self, queue: Queue, anotherqueue: Queue, window_size):
+    def __init__(self, bQueue: Queue, cQueue: Queue, window_size):
         super().__init__()
-        self.aQueue = queue
-        self.bQueue = anotherqueue
+        self.bQueue = bQueue
+        self.cQueue = cQueue
         self.window_size = window_size
 
         # Call learning model to predict class
@@ -21,8 +21,8 @@ class Classify(multiprocessing.Process):  #threading.Thread):
 
     def run(self):
         while True:
-            if not self.aQueue.empty():
-                self.classify_capture(self.aQueue.get())
+            if not self.bQueue.empty():
+                self.classify_capture(self.bQueue.get())
 
     def classify_capture(self, frames):
         empty_list = []
@@ -44,5 +44,5 @@ class Classify(multiprocessing.Process):  #threading.Thread):
         data_array = np.asarray(empty_list)
 
         data = self.hl.predict_data(data_array)
-        self.bQueue.put(data)
+        self.cQueue.put(data)
         return data

@@ -13,11 +13,10 @@ from src.utils.dataclass import GestureMetaData
 
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
-                 aQueue: Queue = None, bQueue: Queue = None, window_size=30):
+                 aQueue: Queue = None, cQueue: Queue = None, window_size=30):
         self.gesture_name = None
         self.gesture_path = None
         self.all_keypoints = []
-        self.last_append = 0
         self.live_framesize = window_size
 
         self.camera_input_value = camera_input_value
@@ -41,7 +40,7 @@ class GestureCapture:
             self.preventRecord = True
 
         self.aQueue = aQueue
-        self.bQueue = bQueue
+        self.cQueue = cQueue
 
     def setup_cap(self):
         if not (self.gestureMetaData.gestureName in self.gesture_dict.keys()):
@@ -75,32 +74,30 @@ class GestureCapture:
             if record and len(self.all_keypoints) >= self.live_framesize:
                 cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0,0, 255, 255), 2)
 
-            if self.live and self.all_keypoints:
+            # if self.live and self.all_keypoints:
 
                 # When 60 frames are captured create job to classify
-                if len(self.all_keypoints) == self.live_framesize:
-                    self.aQueue.put(copy.copy(self.all_keypoints))
-
-                    # Record overlapping window
-                    self.all_keypoints = self.all_keypoints[(self.live_framesize//2):]  # save last 20 entries for next window
-
-                    cv2.putText(image, ".", (150, 100), cv2.QT_FONT_NORMAL, 1, (0, 255, 0, 255), 2)
+                # if len(self.all_keypoints) == self.live_framesize:
+                #     self.aQueue.put(copy.copy(self.all_keypoints))
+                #
+                #     # Record overlapping window
+                #     self.all_keypoints = self.all_keypoints[(self.live_framesize//2):]  # save last 20 entries for next window
 
                     # FIXME remove that later
                     # self.all_keypoints = []
                     # self.live = False
 
                 # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
-                if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
-                    self.aQueue.put(copy.copy(self.all_keypoints))
-
-                    # empty out completely, no related movements
-                    self.all_keypoints = []
-                    self.live = False
+                # if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
+                #     self.bQueue.put(copy.copy(self.all_keypoints))
+                #
+                #     # empty out completely, no related movements
+                #     self.all_keypoints = []
+                #     self.live = False
 
             # Collect results
-            if self.bQueue and not self.bQueue.empty():
-                last_result = str(self.bQueue.get())
+            if self.cQueue and not self.cQueue.empty():
+                last_result = str(self.cQueue.get())
 
             if last_result:  # and self.live  # In live mode always display text
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
@@ -164,7 +161,8 @@ class GestureCapture:
                     })
         if keypoints_per_frame:
             self.all_keypoints.append(keypoints_per_frame)
-            self.last_append = time.time()
+            self.aQueue.put(keypoints_per_frame)
+            # self.last_append = time.time()
 
     def write_file(self):
         if self.all_keypoints and not self.live:  # only do smth when we have data to write

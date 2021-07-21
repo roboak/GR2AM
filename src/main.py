@@ -13,6 +13,8 @@ from machine_learning_working.machine_learning_model import MachineLearningClass
 from src.utils.dataclass import GestureMetaData
 
 # Press the green button in the gutter to run the script.
+from windowing import Windowing
+
 if __name__ == '__main__':
 
     WINDOW_SIZE = 30
@@ -46,25 +48,28 @@ if __name__ == '__main__':
             gesture.get_frame()
 
     elif sys.argv[1] == "--live" or sys.argv[1] == "-l":
-        aQueue = Queue()
-        bQueue = Queue()
+        aQueue = Queue()  # all frames
+        bQueue = Queue()  # window
+        cQueue = Queue()  # Output of classification
 
 
         def startCapture():
             if platform.system() == "Darwin":  # for me on mac input 1 is the camera
-                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, bQueue=bQueue, window_size=WINDOW_SIZE)
+                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, cQueue=cQueue, window_size=WINDOW_SIZE)
             else:
-                gesture = GestureCapture(camera_input_value=0, aQueue=aQueue, bQueue=bQueue, window_size=WINDOW_SIZE)
+                gesture = GestureCapture(camera_input_value=0, aQueue=aQueue, cQueue=cQueue, window_size=WINDOW_SIZE)
 
             gesture.get_frame()
 
+        # Process C
+        t = Classify(bQueue=bQueue, cQueue=cQueue, window_size=WINDOW_SIZE)
+        t.start()
 
-        # t1 = threading.Thread(target=startCapture)
-        # t1.start()
-
-        t2 = Classify(aQueue, bQueue, window_size=WINDOW_SIZE)
+        # Process B
+        t2 = Windowing(aQueue=aQueue, bQueue=bQueue, window_size=WINDOW_SIZE)
         t2.start()
 
+        # Process A
         startCapture()
 
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
