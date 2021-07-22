@@ -1,4 +1,4 @@
-from flask import render_template, Flask, Response
+from flask import render_template, Flask, Response, request
 import cv2
 import platform
 from os.path import abspath, dirname
@@ -11,8 +11,14 @@ from src.gesture_capturing import GestureCapture
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        print(request)
+        print(request.form)
+
+    elif request.method == 'GET':
+        pass
     with open("static/js/captured_gestures.json") as jsonFile:
         gestures = json.load(jsonFile)
         jsonFile.close()

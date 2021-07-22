@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="row">
-    <button type="button" class="btn btn-success btn-lg btn-block">Start Application</button>
+    <form method="post" action="/">
+    <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app" >Start Application</button>
+        <input type="submit" value="VALUE1" name="action1"/></form>
 </div>
 <div class="row"><br/></div>
 
@@ -10,9 +12,9 @@
     <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
         <h4>Captured Gestures</h4>
         <div class="row">
-            <button type="button" onclick="window.location.href='{{url_for('add_gesture') }}';"
-                    class="btn btn-primary btn-lg btn-block">Add Gesture
-            </button>
+            <a href="{{url_for('add_gesture') }}">
+                <button class="btn btn-primary btn-lg btn-block">Add Gesture</button>
+            </a>
         </div>
         <br/>
         <div class="row" id="myGestures">
