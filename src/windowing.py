@@ -30,8 +30,7 @@ class Windowing(multiprocessing.Process):
             self.bQueue.put(copy.copy(self.all_keypoints))
 
             # Record overlapping window
-            self.all_keypoints = self.all_keypoints[(self.window_size // 3):]  # save last 20 entries for next window
-
+            self.all_keypoints = self.all_keypoints[-int(self.window_size * 0.6):]  # save last x entries for next window
 
 
 # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
