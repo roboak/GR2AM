@@ -55,8 +55,8 @@ class GestureCapture:
         if not self.live:
             self.setup_cap()
 
-        cap = cv2.VideoCapture(self.camera_input_value)
-        #cap = cv2.VideoCapture('raw_recording.mov')
+        # cap = cv2.VideoCapture(self.camera_input_value)
+        cap = cv2.VideoCapture('../HandDataset/Videos/Abdul_Gesture_Video.mp4')
         last_result = ""
 
         record, redo = False, False
