@@ -1,15 +1,15 @@
-import copy
 import io
 import json
 import os
-import time
-from pathlib import Path
 from multiprocessing import Queue
+from pathlib import Path
 from typing import NamedTuple
 
 import cv2
 import mediapipe as mp
+
 from src.utils.dataclass import GestureMetaData
+
 
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
@@ -52,15 +52,15 @@ class GestureCapture:
         print(self.gesture_name)
 
     def get_frame(self):
+        # Setup for right file to be recorded
         if not self.live:
             self.setup_cap()
 
         cap = cv2.VideoCapture(self.camera_input_value)
-        #cap = cv2.VideoCapture('raw_recording.mov')
+        # cap = cv2.VideoCapture('/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw3.mp4')
         last_result = ""
 
-        record, redo = False, False
-        end = False
+        record, redo, end = False, False, False
         while cap.isOpened() and not end:
 
             # result stores the hand points extracted from mediapipe
@@ -71,43 +71,25 @@ class GestureCapture:
             if record or self.live:
                 self.record_frame(image)
 
+            # Display mark to indicate file over length
             if record and len(self.all_keypoints) >= self.live_framesize:
-                cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0,0, 255, 255), 2)
+                cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0, 0, 255, 255), 2)
 
-            # if self.live and self.all_keypoints:
-
-                # When 60 frames are captured create job to classify
-                # if len(self.all_keypoints) == self.live_framesize:
-                #     self.aQueue.put(copy.copy(self.all_keypoints))
-                #
-                #     # Record overlapping window
-                #     self.all_keypoints = self.all_keypoints[(self.live_framesize//2):]  # save last 20 entries for next window
-
-                    # FIXME remove that later
-                    # self.all_keypoints = []
-                    # self.live = False
-
-                # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
-                # if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
-                #     self.bQueue.put(copy.copy(self.all_keypoints))
-                #
-                #     # empty out completely, no related movements
-                #     self.all_keypoints = []
-                #     self.live = False
-
-            # Collect results
+            # Collect results from classifying process
             if self.cQueue and not self.cQueue.empty():
                 last_result = str(self.cQueue.get())
 
-            if last_result:  # and self.live  # In live mode always display text
+            if last_result:  # If a result is present display it
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
 
             cv2.imshow('MediaPipe Hands', image)
 
-            ## Keyboard bindings ##
+            # Keyboard bindings #
             k = cv2.waitKey(1)  # read key pressed event
-            if k % 256 == 32:  # spacebar to record
+            if k == '-1':
+                pass  # no key press (don't waste time)
+            elif k % 256 == 32:  # spacebar to record
                 if not self.preventRecord:
                     record = not record
                     print("Toggle Recording Mode")
@@ -160,9 +142,10 @@ class GestureCapture:
                         'Z': data_point.z,
                     })
         if keypoints_per_frame:
-            self.all_keypoints.append(keypoints_per_frame)
-            self.aQueue.put(keypoints_per_frame)
-            # self.last_append = time.time()
+            if self.aQueue:
+                self.aQueue.put(keypoints_per_frame)
+            else:
+                self.all_keypoints.append(keypoints_per_frame)
 
     def write_file(self):
         if self.all_keypoints and not self.live:  # only do smth when we have data to write

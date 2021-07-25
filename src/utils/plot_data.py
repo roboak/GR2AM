@@ -53,4 +53,4 @@ def plot_data(file_path, image_shape):
     cv2.destroyAllWindows()
 
 
-plot_data("D:\Work\LumosNox\LumosNox\HandDataset\TestingData\Josh2\gesture_n_up_17_2.txt", (480, 640))
+plot_data("/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/TrainingData/Josh2/gesture_i_tap_4_6.txt", (720, 1280))
