@@ -6,6 +6,7 @@ import platform
 from os.path import abspath, dirname
 from pathlib import Path
 from application.config import config
+from dl.deep_learning_model import DeepLearningClassifier
 from utils.dataclass import GestureMetaData
 from gesture_capturing import GestureCapture
 
@@ -28,4 +29,10 @@ def video_feed(gesture_name):
         gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0)
     return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-#FIXME: How to update all gestures? Shall it be hard coded?
+#FIXME: How to update all gestures? Solution 1: It can be hard coded.
+
+"""API to generate model"""
+@bp.route('/generate_model')
+def generate_model():
+    dl = DeepLearningClassifier()
+    dl.train_model()

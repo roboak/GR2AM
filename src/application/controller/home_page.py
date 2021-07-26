@@ -4,7 +4,7 @@ bp = Blueprint("home_page", __name__)
 
 """This function returns the gestures from "all_gestures.json" file which 
 are not present  in the captured_gestures.json file"""
-#FIXME: How to ensure that the available_gesture column is refreshed regularl
+#FIXME: How to ensure that the available_gesture column is refreshed regularly
 def get_unrecorded_gestures():
     with open("static/js/all_gestures.json") as jsonFile:
         all_gestures = json.load(jsonFile)
