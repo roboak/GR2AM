@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+<META HTTP-EQUIV="refresh" CONTENT="15">
+
 <div class="row">
     <form method="post" action="/">
     <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app" >Start Application</button>
@@ -12,7 +14,7 @@
     <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
         <h4>Captured Gestures</h4>
         <div class="row">
-            <a href="{{url_for('add_gesture') }}">
+            <a href="{{url_for('home_page.add_gesture') }}">
                 <button class="btn btn-primary btn-lg btn-block">Add Gesture</button>
             </a>
         </div>
@@ -37,7 +39,7 @@
     <div class="col-sm-4" style="background-color:#d4e6f1;">
         <h4> Current Gesture Application Mapping </h4>
         <div class="row">
-            <button type="button" class="btn btn-primary btn-lg btn-block">Submit Mapping</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="addMapping()">Submit Mapping</button>
         </div>
         <br/>
         <div class="row" id="gestureApplicationMapping">
@@ -73,4 +75,21 @@
 
 </div>
 <div class="row"><br/></div>
+
+<script>
+        function addMapping() {
+            gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+            application_selected = $("input[type='radio'][name='selectApplication']:checked").val();
+            var url = "{{ url_for('home_page.add_gesture_application_mapping') }}";
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            var data = {
+              "gesture_name": gesture_selected,
+              "application": application_selected};
+            console.log(data)
+            xhr.send(JSON.stringify(data));
+        }
+    </script>
 {% endblock %}

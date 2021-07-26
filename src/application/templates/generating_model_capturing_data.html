@@ -49,7 +49,7 @@
             var image = document.getElementById('vid_display');
             gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
 
-            url= "{{ url_for('video_feed', gesture_name='gesture_selected') }}";
+            url= "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
             new_url = url.replace(/gesture_selected/, gesture_selected)
             console.log(new_url)
 
