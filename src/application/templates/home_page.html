@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<META HTTP-EQUIV="refresh" CONTENT="15">
 
 <div class="row">
     <form method="post" action="/">
@@ -90,6 +89,8 @@
               "application": application_selected};
             console.log(data)
             xhr.send(JSON.stringify(data));
+            window.location.reload();
+
         }
     </script>
 {% endblock %}

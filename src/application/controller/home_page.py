@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint, request, Response
 import json
 bp = Blueprint("home_page", __name__)
 
@@ -55,6 +55,6 @@ def add_gesture_application_mapping():
         jsonFile.close()
 
     # return Response("Successful")
-    return render_template("home_page.html", gestures=captured_gestures, mappings=mappings, apps=apps)
+    return Response("Ok")
 
 
