@@ -23,6 +23,7 @@ class DeepLearningClassifier(LearningModel):
 
         :return: Tupel with predicted class from 0-15 and a confidence value"""
 
+        # FIXME check these lines if needed?
         #dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
         #dl_model.eval()
         #dl_model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))
