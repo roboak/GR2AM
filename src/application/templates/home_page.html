@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row pb-3 pt-2">
+    <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app">Start Application</button>
+</div>
+
+<div class="row row-height" style="height:80vh;">
+    <!---************************ First Column ************************-->
+    <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
+        <h4>Captured Gestures</h4>
+        <div class="row px-1">
+            <a class="btn btn-primary btn-lg btn-block" href="{{url_for('home_page.add_gesture') }}" role="button">Add
+                Gesture</a>
+        </div>
+        <br/>
+        <div class="row" id="myGestures">
+            {% for gesture, val in gestures.items() %}
+            <div>
+                <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}" value="{{ gesture }}">
+                <label>{{ gesture }}</label>
+                <img src='{{ val }}' style="max-height: 150px;">
+                <br>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row"><br/></div>
+
+    </div>
+    <div class="col-sm-1"></div>
+
+    <!---************************ Second Column ************************-->
+    <div class="col-sm-4" style="background-color:#d4e6f1;">
+        <h4> Current Gesture Application Mapping </h4>
+        <div class="row px-1">
+            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="addMapping()">Submit Mapping
+            </button>
+        </div>
+        <br/>
+        <div class="row" id="gestureApplicationMapping">
+            {% for k, v in mappings.items() %}
+            <div>{{ k }} : {{ v }}<br></div>
+            {% endfor %}
+        </div>
+
+        <div class="row"><br/></div>
+
+    </div>
+
+    <div class="col-sm-1"></div>
+
+    <!---************************ Third Column ************************-->
+    <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
+        <h4> Available Applications </h4>
+        <div class="row px-1">
+            <button type="button" class="btn btn-primary btn-lg btn-block" disabled>Add Application</button>
+        </div>
+        <br/>
+        <div class="row" id="availableApplications">
+            {% for k, v in apps.items() %}
+            <div>
+                <input type="radio" name="selectApplication" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
+                <label>{{ k }}</label>
+                <img src="{{ v }}" style="max-height: 150px;">
+                <br>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+<div class="row"><br/></div>
+
+<script>
+    function addMapping() {
+        gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+        application_selected = $("input[type='radio'][name='selectApplication']:checked").val();
+        var url = "{{ url_for('home_page.add_gesture_application_mapping') }}";
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url);
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        var data = {
+            "gesture_name": gesture_selected,
+            "application": application_selected
+        };
+        console.log(data)
+        xhr.send(JSON.stringify(data));
+        window.location.reload();
+
+    }
+</script>
+{% endblock %}

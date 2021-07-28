@@ -1,23 +1,31 @@
+import copy
 import io
 import json
 import os
-from multiprocessing import Queue
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import NamedTuple
 
 import cv2
 import mediapipe as mp
+import numpy as np
+import pandas as pd
 
-from src.utils.dataclass import GestureMetaData
+import keyboard
+
+from src.dl.deep_learning_model import DeepLearningClassifier
+from src.hybrid_learning_model import HybridLearningClassifier
+from src.machine_learning_working.machine_learning_model import MachineLearningClassifier
+from src.utils.dataclass import Data, GestureMetaData
 
 
 class GestureCapture:
-    def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
-                 aQueue: Queue = None, cQueue: Queue = None, window_size=30):
+    def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None):
         self.gesture_name = None
         self.gesture_path = None
         self.all_keypoints = []
-        self.live_framesize = window_size
+        self.last_append = 0
+        self.live_framesize = 40
 
         self.camera_input_value = camera_input_value
         self.mp_drawing = mp.solutions.drawing_utils
@@ -34,21 +42,11 @@ class GestureCapture:
             with open(self.meta_data_file) as file:
                 self.gesture_dict = json.load(file)
             self.live = False
-            self.preventRecord = False
         else:
             self.live = True
-            self.preventRecord = True
 
-        self.aQueue = aQueue
-        self.cQueue = cQueue
-
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
-        self.keyboard_listener.start()
-    def on_press(self,key):
-        self.key_capture = key
-        if key == keyboard.Key.esc:
-            # Stop listener
-            return False
+        self.executor = ThreadPoolExecutor(max_workers=4)
+        self.futures = []
 
     def setup_cap(self):
         if not (self.gestureMetaData.gestureName in self.gesture_dict.keys()):
@@ -59,20 +57,51 @@ class GestureCapture:
 
         print(self.gesture_name)
 
+    def classify_capture(self, frames):  # TODO  create function from normalisation part
+
+        empty_list = []
+        # Convert the str represented list to an actual list again
+        for i, frame in enumerate(frames):
+            df = pd.DataFrame(frame)
+            # Recording the wrist coordinate of the first frame of each sequence.
+            if i == 0:
+                reference_x = df["X"][0]
+                reference_y = df["Y"][0]
+                reference_z = df["Z"][0]
+            df["X"] = df["X"] - reference_x
+            df["X"] = df["X"] - df["X"].mean()
+            df["Y"] = df["Y"] - reference_y
+            df["Y"] = df["Y"] - df["Y"].mean()
+            df["Z"] = df["Z"] - reference_z
+            df["Z"] = df["Z"] - df["Z"].mean()
+
+            empty_list.append(df)
+
+        # pad all with zeros to the frame size 60
+        while len(empty_list) < self.live_framesize:
+            empty_list.append(pd.DataFrame(np.zeros((21, 3))))
+
+        data_array = np.asarray(empty_list)
+
+        # Call learning model to predict class
+        ml = MachineLearningClassifier(extracted_features_path="extracted_features.joblib")
+        dl = DeepLearningClassifier()
+        hl = HybridLearningClassifier()
+
+        return hl.predict_data(data_array)
+
     def get_frame(self):
-        # Setup for right file to be recorded
         if not self.live:
             self.setup_cap()
 
         cap = cv2.VideoCapture(self.camera_input_value)
-        # cap = cv2.VideoCapture('/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw3.mp4')
+
         last_result = ""
 
-        record, redo, end = False, False, False
-        frame_count =0
+        record, redo = False, False
+        end = False
         while cap.isOpened() and not end:
 
-            frame_count+=1
             # result stores the hand points extracted from mediapipe
             _, image = cap.read()
             image = cv2.flip(image, 1)  # mirror invert camera image
@@ -81,58 +110,62 @@ class GestureCapture:
             if record or self.live:
                 self.record_frame(image)
 
-            # Display mark to indicate file over length
-            if record and len(self.all_keypoints) >= self.live_framesize:
-                cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0, 0, 255, 255), 2)
+            if self.live and self.all_keypoints:
 
-            # Collect results from classifying process
-            if self.cQueue and not self.cQueue.empty():
-                last_result = str(self.cQueue.get())
+                # When 60 frames are captured create job to classify
+                if len(self.all_keypoints) == self.live_framesize:
 
-            if last_result:  # If a result is present display it
+                    self.futures.append(
+                        self.executor.submit(self.classify_capture, frames=copy.copy(self.all_keypoints)))
+
+                    # Record overlapping window
+                    self.all_keypoints = self.all_keypoints[:-20]  # save last 20 entries for next window
+
+                # When 10s from the last frame have passed create job (cond. have at least 21 frames due to overlap)
+                if len(self.all_keypoints) > 20 and time.time() >= self.last_append + 10:
+
+                    self.futures.append(
+                        self.executor.submit(self.classify_capture, frames=copy.copy(self.all_keypoints)))
+
+                    # empty out completely, no related movements
+                    self.all_keypoints = []
+
+                # Collect results from workers
+                for future in as_completed(self.futures):
+                    last_result = str(future.result())
+                    self.futures.remove(future)
+
+            if self.live and last_result:  # In live mode always display text
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
 
+            # cv2.imshow('MediaPipe Hands', image)
             ret, buffer = cv2.imencode('.jpg', image)
             frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
-            #cv2.imshow('MediaPipe Hands', image)
-
-            # Keyboard bindings #
-            k = cv2.waitKey(1)  # read key pressed event
-            try:
-                if k == '-1':
-                    pass  # no key press (don't waste time)
-                elif (k % 256 == 32) or (self.key_capture.char == 's'):  # spacebar to record
-                    if not self.preventRecord:
-                        record = not record
-                        print("Toggle Recording Mode")
-                    else:
-                        self.live = True
-                if k & 0xFF == ord('q'):  # close on key q
-                    record = False
-                    self.write_file()
-                    end = True
-                elif k & 0xFF == ord('n') or (self.key_capture.char == 'n'):  # next capture
-                    record = False
-                    self.write_file()
-                    self.setup_cap()
-                elif k & 0xFF == ord('r') or (self.key_capture.char == 'r'):  # redo capture
-                    record = False
-                    self.all_keypoints = []
-            except AttributeError:
-                pass  # TODO figure this one out
-
+            # # Keyboard bindings # #
+            if keyboard.is_pressed('space'):  # spacebar to record
+                record = not record
+                print("Toggle Recording Mode")
+            if keyboard.is_pressed('q'):  # close on key q
+                record = False
+                self.write_file()
+                end = True
+            elif keyboard.is_pressed('n'):  # next capture
+                record = False
+                self.write_file()
+                self.setup_cap()
+            elif keyboard.is_pressed('r'):  # redo capture
+                record = False
+                self.all_keypoints = []
+            yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
         # After the loop release the cap object
         cap.release()
 
         # Destroy all the windows
         cv2.destroyAllWindows()
 
-    def get_hand_points(self, image) -> NamedTuple("res", [('multi_hand_landmarks', list), ('multi_handedness', list)]):
-        with self.mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.7) as hands:
+    def get_hand_points(self, image):
+        with self.mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6) as hands:
             # Flip the image horizontally for a later selfie-view display, and convert the BGR image to RGB.
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             # To improve performance, optionally mark the image as not writeable to pass by reference.
@@ -160,15 +193,12 @@ class GestureCapture:
                         'Z': data_point.z,
                     })
         if keypoints_per_frame:
-            if self.aQueue:
-                self.aQueue.put(keypoints_per_frame)
-            else:
-                self.all_keypoints.append(keypoints_per_frame)
+            self.all_keypoints.append(keypoints_per_frame)
+            self.last_append = time.time()
 
     def write_file(self):
         if self.all_keypoints and not self.live:  # only do smth when we have data to write
             with open(self.gesture_path, "w") as data_file:  # open file and save/close afterwards
-                # data_file.write(dimensions)
                 for item in self.all_keypoints:  # write all frames
                     data_file.write(str(item) + "\n")
 
@@ -193,6 +223,6 @@ class GestureCapture:
                    6: 'Middle tap', 7: 'Middle Swipe Up', 8: 'Middle Swipe Down',
                    9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
                    12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',
-                   15: 'Negative_still', 16: 'Negative_up', 17: 'Negative_down'}
+                   15: 'Negative'}
 
         return classes[classid]

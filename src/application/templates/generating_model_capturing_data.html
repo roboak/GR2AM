@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+<script src="./static/js/recordingHelper.js"></script>
+<div class="row pb-3 pt-2">
+    <button onclick="window.location.href='{{url_for('index') }}';" class="btn btn-primary btn-lg btn-block"><i
+        class="fa fa-home"></i> Home
+</button>
+    <br/>
+</div>
+
+<div class="row">
+    <!---************************ First Column ************************-->
+    <div id="myGestures" class="col-sm-3" style="background-color:#d4e6f1;">
+        <h4>Available Gestures</h4>
+        <!--    Click this button to start the gesture recording for the selected radio button-->
+        <div class="row px-1">
+            <button type="button" onclick="changeImageURL()" class="btn btn-primary btn-lg btn-block">Start Recording
+            </button>
+        </div>
+        <form id="gestures">
+        {% for k,v in gestures.items() %}
+        <div>
+            <input type="radio" name="selectGesture" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
+            <label>{{ k }}</label>
+            <img src="{{ v }}" style="max-height: 150px;">
+            <br>
+        </div>
+        {% endfor %}
+        </form>
+    </div>
+
+    <div class="col-sm-1"></div>
+    <!---************************ Second Column ************************-->
+    <div class="col-sm-4" style="background-color:#d4e6f1;">
+        <h4> Input </h4>
+        <div class="row px-2">
+            <div class="progress my-2">
+                <div class="progress-bar progress-bar-striped bg-warning w-0" role="progressbar" aria-valuenow=""
+                     aria-valuemin="0" aria-valuemax="100">0%
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <img src="static/img/hand_gestures.jpg" id="vid_display" width="100%" height="auto"/>
+        </div>
+        <div class="btn-group special py-3" style="width:100%">
+            <button type="button" onclick="clickRecord()" class="btn btn-primary">Record</button>
+            <button type="button" onclick="clickNext()" class="btn btn-primary">Next</button>
+            <button type="button" onclick="clickRedo()" class="btn btn-primary">Redo</button>
+        </div>
+    </div>
+    <script>
+        function changeImageURL() {
+            var image = document.getElementById('vid_display');
+            gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+
+            url= "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
+            new_url = url.replace(/gesture_selected/, gesture_selected)
+            console.log(new_url)
+
+            image.src = new_url
+        }
+    </script>
+    <!---->
+    <div class="col-sm-1"></div>
+    <!---************************ Third Column ************************-->
+    <div class="col-sm-3" style="background-color:#d4e6f1;">
+        <h4> Generate Model </h4>
+        <div class="row pb-3 px-1">
+            <button type="button" onclick="{{url_for('record_gesture.generate_model')}}" class="btn btn-primary btn-lg btn-block">Generate Model</button>
+        </div>
+        <div class="row" id="generateModel">
+            <p style="text-align:center;"><strong> Captured Data </strong>
+            <p>
+            {% for k, v in captures.items() %}
+            <div>{{ k }}<img onclick="" class="del-arrow" src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_X.svg">
+                <br>
+                <img src="{{ v }}" style="max-height: 150px;">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

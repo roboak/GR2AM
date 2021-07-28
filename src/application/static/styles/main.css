@@ -1,0 +1,49 @@
+body {
+    background-color: #a9cce3;
+}
+
+h1 {
+    color: black;
+}
+
+h3 {
+    color: grey;
+}
+
+h4 {
+    text-align: center;
+}
+
+h4 {
+    color: grey;
+}
+
+p {
+    color: black;
+}
+
+img {
+    height: auto;
+}
+
+img {
+    width: 100%;
+}
+
+img {
+    object-fit: contain;
+}
+
+.btn-group.special {
+  display: flex;
+}
+
+.special .btn {
+  flex: 1
+}
+
+.del-arrow{ /* small red arrow */
+	width: 12px;
+	cursor: pointer;
+	margin-left: 10px;
+}
