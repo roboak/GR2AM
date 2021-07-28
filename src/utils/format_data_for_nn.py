@@ -60,7 +60,7 @@ def get_class_proportions(a):
     print(distribution)
 
 
-def split_training_test_valid(data_dict, num_labels):
+def split_training_test_valid(data_dict, num_labels= None):
     data_dict["labels"] = data_dict["labels"] - 1
     # data_dict["labels"] = to_categorical(data_dict["labels"], num_labels)
     X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,
@@ -99,22 +99,26 @@ def get_device():
 
 #
 def get_data_for_training(batch_size, val_batch_size, test_batch_size, path_to_data, folder_name, window_size):
-    train_data, seq_len = read_data(path_to_data + "/TrainingData", folder_name, window_size)
-    test_data, _ = read_data(path_to_data + "/TestingData", folder_name, window_size)
+    #code to load data when train and test are segregated into different folders.
+    # train_data, seq_len = read_data(path_to_data + "/TrainingData", folder_name, window_size)
+    # test_data, _ = read_data(path_to_data + "/TestingData", folder_name, window_size)
+    # num_classes, train_data_dict = format_batch_data(train_data)
+    # _, test_data_dict = format_batch_data(test_data)
+    #
+    # train_data_dict["labels"] = train_data_dict["labels"] - 1
+    # test_data_dict["labels"] = test_data_dict["labels"] - 1
+    # train_dataset = TensorDataset(torch.from_numpy(train_data_dict["data"]),
+    #                               torch.from_numpy(train_data_dict["labels"]))
+    # test_dataset = TensorDataset(torch.from_numpy(test_data_dict["data"]), torch.from_numpy(test_data_dict["labels"]))
+    # val_dataset = test_dataset
+    #
+    # train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
+    # val_loader = DataLoader(val_dataset, shuffle=True, batch_size=val_batch_size, drop_last=True)
+    # test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
 
-    num_classes, train_data_dict = format_batch_data(train_data)
-    _, test_data_dict = format_batch_data(test_data)
-
-    train_data_dict["labels"] = train_data_dict["labels"] - 1
-    test_data_dict["labels"] = test_data_dict["labels"] - 1
-
-    train_dataset = TensorDataset(torch.from_numpy(train_data_dict["data"]),
-                                  torch.from_numpy(train_data_dict["labels"]))
-    test_dataset = TensorDataset(torch.from_numpy(test_data_dict["data"]), torch.from_numpy(test_data_dict["labels"]))
-    val_dataset = test_dataset
-
-    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, drop_last=True)
-    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=val_batch_size, drop_last=True)
-    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=test_batch_size, drop_last=True)
-
-    return train_loader, val_loader, test_loader, seq_len, num_classes
+    #code when the train and test data has to be read from a single folder
+    data, seq_len = read_data(path_to_data, folder_name, window_size)
+    num_classes, data_dict = format_batch_data(data)
+    X_train, X_test, X_val, y_train, y_test, y_val = split_training_test_valid(data_dict)
+    train_loader, val_loader, test_loader = get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size, test_batch_size, val_batch_size)
+    return train_loader, val_loader, test_loader, seq_len

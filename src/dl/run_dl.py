@@ -17,7 +17,7 @@ class DL_run:
         # device = "cpu"
 
     def setupDL(self, obj, output_size):
-        self.train_loader, self.val_loader, self.test_loader, seq_len, num_classes = format_data_for_nn.get_data_for_training(
+        self.train_loader, self.val_loader, self.test_loader, seq_len = format_data_for_nn.get_data_for_training(
             batch_size=self.batch_size,
             val_batch_size=self.val_batch_size,
             test_batch_size=self.test_batch_size,

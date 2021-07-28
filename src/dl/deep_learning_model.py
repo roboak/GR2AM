@@ -24,6 +24,7 @@ class DeepLearningClassifier(LearningModel):
         :return: Tupel with predicted class from 0-15 and a confidence value"""
 
         # FIXME check these lines if needed?
+        # TODO: We may need these lines when there will be different model for different users.
         #dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
         #dl_model.eval()
         #dl_model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))
@@ -36,7 +37,7 @@ class DeepLearningClassifier(LearningModel):
 
     def train_model(self):
         """Assumption - Data is present in HandDataset"""
-        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Josh2_less", window_size=self.window_size, )
+        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Abdul", window_size=self.window_size, )
         run.setupDL(CNN1D, output_size=self.output_size)
         run.trainDL(CNN1D, lr=0.002, epochs=800)
         run.evalDL(CNN1D)

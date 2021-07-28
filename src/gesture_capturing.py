@@ -7,6 +7,7 @@ from typing import NamedTuple
 
 import cv2
 import mediapipe as mp
+from pynput import keyboard
 
 from src.utils.dataclass import GestureMetaData
 

@@ -8,7 +8,9 @@ from application.config import config
 from dl.deep_learning_model import DeepLearningClassifier
 from gesture_capturing import GestureCapture
 from utils.dataclass import GestureMetaData
+from pynput.keyboard import Key, Controller
 
+keyboard = Controller()
 bp = Blueprint("record_gesture", __name__)
 
 """API to display video in the record gesture webpage."""
@@ -29,11 +31,34 @@ def video_feed(gesture_name):
     return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-# FIXME: How to update all gestures? Solution 1: It can be hard coded.
+
+
+
+
+@bp.route('/nextClick', methods=['GET', 'POST'])
+def nextClick():
+    keyboard.press('n')
+    keyboard.release('n')
+
+    return Response(status=200)
+
+
+@bp.route('/recordClick', methods=['GET', 'POST'])
+def recordClick():
+    keyboard.press("s")
+    keyboard.release("s")
+
+    return Response(status=200)
+
+
+@bp.route('/redoClick', methods=['GET', 'POST'])
+def redoClick():
+    keyboard.press('r')
+    keyboard.release('r')
+
+    return Response(status=200)
 
 """API to generate model"""
-
-
 @bp.route('/generate_model')
 def generate_model():
     dl = DeepLearningClassifier()

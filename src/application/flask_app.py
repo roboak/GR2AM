@@ -73,33 +73,6 @@ def init():
         jsonFile.close()
 
 
-from pynput.keyboard import Key, Controller
-
-keyboard = Controller()
-
-
-@app.route('/nextClick', methods=['GET', 'POST'])
-def nextClick():
-    keyboard.press('n')
-    keyboard.release('n')
-
-    return Response(status=200)
-
-
-@app.route('/recordClick', methods=['GET', 'POST'])
-def recordClick():
-    keyboard.press("s")
-    keyboard.release("s")
-
-    return Response(status=200)
-
-
-@app.route('/redoClick', methods=['GET', 'POST'])
-def redoClick():
-    keyboard.press('r')
-    keyboard.release('r')
-
-    return Response(status=200)
 
 if __name__ == "__main__":
     app.run(debug=True)

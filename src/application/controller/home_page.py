@@ -8,7 +8,6 @@ bp = Blueprint("home_page", __name__)
 are not present  in the captured_gestures.json file"""
 
 
-# FIXME: How to ensure that the available_gesture column is refreshed regularly
 def get_unrecorded_gestures():
     with open("static/js/all_gestures.json") as jsonFile:
         all_gestures = json.load(jsonFile)
@@ -54,5 +53,4 @@ def add_gesture_application_mapping():
         json.dump(mappings, jsonFile)
         jsonFile.close()
 
-    # return Response("Successful")
     return Response(status=200)
