@@ -31,11 +31,18 @@ def video_feed(gesture_name):
     return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@bp.route('/remove-gesture/<gesture_id>', methods=['GET'])
+def removeGesture(gesture_id):
+    # TODO remove files based on gesture id
+    # look for all files beginning with gesture_id (due to the numbering
+    # and use os.remove to delete them
+
+    print("Removing", gesture_id)
+
+    return Response(status=200)
 
 
-
-
-@bp.route('/nextClick', methods=['GET', 'POST'])
+@bp.route('/nextClick', methods=['GET'])
 def nextClick():
     keyboard.press('n')
     keyboard.release('n')
@@ -43,7 +50,7 @@ def nextClick():
     return Response(status=200)
 
 
-@bp.route('/recordClick', methods=['GET', 'POST'])
+@bp.route('/recordClick', methods=['GET'])
 def recordClick():
     keyboard.press("s")
     keyboard.release("s")

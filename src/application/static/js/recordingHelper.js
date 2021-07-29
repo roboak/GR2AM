@@ -62,8 +62,8 @@ function roleDist(rank) {
 
 function clickRecord() {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/recordClick", true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.open("GET", "/recordClick", true);
+    // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send();
 }
 
@@ -73,8 +73,8 @@ $( window ).on( "load", function() {
 
 function clickNext() {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/nextClick", true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.open("GET", "/nextClick", true);
+    // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send();
 
     i += 10;
@@ -84,7 +84,19 @@ function clickNext() {
 
 function clickRedo() {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/redoClick", true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.open("GET", "/redoClick", true);
+    // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send();
+}
+
+function removeCapture(gesture_id){
+    var xhr = new XMLHttpRequest()
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState === this.DONE)
+            location.reload()
+    }
+
+    xhr.open("GET", "/remove-gesture/" + gesture_id)
+    xhr.send()
 }

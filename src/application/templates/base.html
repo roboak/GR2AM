@@ -32,6 +32,16 @@
     <div>
         <h1>LumosNox</h1>
         <h3>Gesture Recognition & Mapping Application</h3>
+
+        {% if not session or not session.username %}
+        <form action="/login" method="POST">
+            <p><input class="input" type="text" name="username" placeholder="Username">
+            <input class="btn btn-secondary btn-sm" type="submit" value="Login">
+        </form>
+        {% else %}
+            Hello {{session.username}}
+            <a class="btn btn-secondary btn-sm" href="/logout" role="button">Logout</a>
+        {% endif %}
     </div>
     {% block content %}{% endblock %}
 </div>

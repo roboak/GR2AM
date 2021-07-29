@@ -73,7 +73,7 @@
             <p style="text-align:center;"><strong> Captured Data </strong>
             <p>
             {% for k, v in captures.items() %}
-            <div>{{ k }}<img onclick="" class="del-arrow" src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_X.svg">
+            <div>{{ k }}<img onclick="removeCapture('{{ k }}')" class="del-arrow" src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_X.svg">
                 <br>
                 <img src="{{ v }}" style="max-height: 150px;">
             </div>

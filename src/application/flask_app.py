@@ -2,7 +2,7 @@ import json
 from os.path import abspath, dirname
 from pathlib import Path
 
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, redirect, render_template, request, session, url_for
 
 from application.config import config
 from application.controller import home_page, record_gesture
@@ -10,6 +10,8 @@ from application.controller import home_page, record_gesture
 app = Flask(__name__)
 app.register_blueprint(record_gesture.bp)
 app.register_blueprint(home_page.bp)
+
+app.secret_key = b'DUMMYKEY'
 
 """API that returns the index page with captured getures,
  available applications and application_gesture mapping"""
@@ -39,6 +41,19 @@ def index():
         jsonFile.close()
 
     return render_template("home_page.html", gestures=captured_gestures, mappings=mappings, apps=apps)
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    if request.method == 'POST':
+        session['username'] = request.form['username']
+        return redirect(url_for('index'))
+
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
 
 
 def init():
