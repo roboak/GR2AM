@@ -2,7 +2,6 @@ import joblib
 import numpy as np
 from joblib import dump, load
 from sklearn.ensemble import RandomForestClassifier
-
 from src.learning_model_class import LearningModel
 from src.machine_learning_working.statistical_feature_extraction import FeatureExtraction
 from src.utils.read_data import read_data
@@ -43,7 +42,8 @@ class MachineLearningClassifier(LearningModel):
         :param training_features:
         :return:
         """
-        self.classifier = RandomForestClassifier(random_state=0, n_estimators=40)
+        self.classifier = RandomForestClassifier(random_state=0, n_estimators=400)
+        # n_estimators: The number of trees in the forest.
         self.features = training_features
         column_number = training_features.shape[1] - 1
         training_data = training_features[:, :column_number]
@@ -69,7 +69,8 @@ class MachineLearningClassifier(LearningModel):
         features = self.feature_extraction.get_features_prediction(data)
         features = np.reshape(features, (1, features.shape[0]))
         prediction_result = self.classifier.predict(features)
-        return int(prediction_result[0]) - 1
+        prediction_percentage_array = self.classifier.predict_proba(features)
+        return int(prediction_result[0]) - 1, np.amax(prediction_percentage_array)
 
     def save_features(self):
         if self.features != 0:

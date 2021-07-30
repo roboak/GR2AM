@@ -1,9 +1,12 @@
 import numpy as np
 import tsfel
+from scipy.stats import iqr, kurtosis, skew, median_abs_deviation
+from numpy import mean, std, median, var
 
 
 class FeatureExtraction:
     def __init__(self):
+        # TODO: Remove this stuff if agreed on the new extraction methods
         self.feature_config_file = tsfel.get_features_by_domain("statistical")
         keys_to_remove = ['ECDF', 'ECDF Percentile', 'ECDF Percentile Count', 'Histogram']
         # These are distributions to describe the data how it's distributed and what it looks like and so on.
@@ -51,11 +54,21 @@ class FeatureExtraction:
     def __features(self, array):
         """
         :param array: 1D numpy array
-        :return: an array of 16 statistical features
-                ['ECDF', 'ECDF Percentile', 'ECDF Percentile Count', 'Histogram', 'Interquartile range', 'Kurtosis',
-                'Max', 'Mean', 'Mean absolute deviation', 'Median', 'Median absolute deviation', 'Min',
-                'Root mean square', 'Skewness', 'Standard deviation', 'Variance']
-        Each one returns 1 value except 'ECDF' -> 10, 'Histogram' -> 10, ECDF Percentile -> 2,
-        'ECDF Percentile Count' -> 2
+        :return: an array of 8 statistical features
+                ['Interquartile range', 'Kurtosis',
+                'Mean', 'Median', 'Median absolute deviation',
+                'Skewness', 'Standard deviation', 'Variance']
+
         """
-        return tsfel.time_series_features_extractor(self.feature_config_file, array)
+        array_iqr = iqr(array)
+        array_kurtosis = kurtosis(array)
+        array_skew = skew(array)
+        array_median_abs_deviation = median_abs_deviation(array)
+        array_mean = mean(array)
+        array_std = std(array)
+        array_median = median(array)
+        array_var = var(array)
+        result = [array_iqr, array_kurtosis, array_skew, array_median_abs_deviation, array_mean, array_std,
+                  array_median, array_var]
+        # result = tsfel.time_series_features_extractor(self.feature_config_file, array)
+        return result
