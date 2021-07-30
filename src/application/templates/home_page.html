@@ -10,8 +10,13 @@
     <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
         <h4>Captured Gestures</h4>
         <div class="row px-1">
+            {% if session.username %}
             <a class="btn btn-primary btn-lg btn-block" href="{{url_for('home_page.add_gesture') }}" role="button">Add
                 Gesture</a>
+            {% else %}
+             <a class="btn btn-primary btn-lg btn-block disabled" href="{{url_for('home_page.add_gesture') }}" role="button">Add
+                Gesture</a>
+            {% endif %}
         </div>
         <br/>
         <div class="row" id="myGestures">

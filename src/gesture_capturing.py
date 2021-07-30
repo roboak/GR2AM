@@ -43,8 +43,8 @@ class GestureCapture:
         self.aQueue = aQueue
         self.cQueue = cQueue
 
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
-        self.keyboard_listener.start()
+        #self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
+        #self.keyboard_listener.start()
     def on_press(self,key):
         self.key_capture = key
         if key == keyboard.Key.esc:
@@ -65,8 +65,8 @@ class GestureCapture:
         if not self.live:
             self.setup_cap()
 
-        cap = cv2.VideoCapture(self.camera_input_value)
-        # cap = cv2.VideoCapture('/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw3.mp4')
+        # cap = cv2.VideoCapture(self.camera_input_value)
+        cap = cv2.VideoCapture('/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw4_15.mp4')
         last_result = ""
 
         record, redo, end = False, False, False
@@ -94,12 +94,12 @@ class GestureCapture:
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
 
-            ret, buffer = cv2.imencode('.jpg', image)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            #ret, buffer = cv2.imencode('.jpg', image)
+            #frame = buffer.tobytes()
+            #yield (b'--frame\r\n'
+            #       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
-            #cv2.imshow('MediaPipe Hands', image)
+            cv2.imshow('MediaPipe Hands', image)
 
             # Keyboard bindings #
             k = cv2.waitKey(1)  # read key pressed event
