@@ -21,6 +21,23 @@ def volume_up(flag):
             keyboard.release(Key.media_volume_up)
     return Response("Volume {}".format(flag))
 
+@app.route("/play_pause", methods=['GET'])
+def toggle_play_pause():
+    keyboard = Controller()
+    keyboard.press(Key.media_play_pause)
+    keyboard.release(Key.media_play_pause)
+    return Response("Ok")
+
+@app.route("/media_change/<flag>", methods=['GET'])
+def toggle_play_pause(flag):
+    keyboard = Controller()
+    if(flag == 'next'):
+        keyboard.press(Key.media_next)
+        keyboard.release(Key.media_next)
+    if(flag == 'prev'):
+        keyboard.press(Key.media_previous)
+        keyboard.release(Key.media_previous)
+    return Response("Ok")
 
 @app.route("/brightness_change/<flag>", methods=['GET', 'POST'])
 def brightness_change(flag):
@@ -34,6 +51,8 @@ def brightness_change(flag):
     sbc.set_brightness(new_brightness)
     print(sbc.get_brightness())
     return Response("All Ok")
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8081)

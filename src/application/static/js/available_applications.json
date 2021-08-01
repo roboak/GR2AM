@@ -2,7 +2,10 @@
     "Toggle Light": "./static/img/control_light.png",
     "Play Music": "./static/img/play.png",
     "Pause Music": "./static/img/pause.png",
-    "Inc Volume": "../static/img/increase_volume.png",
-    "Dec Volume": "./static/img/decrease_volume.png",
-    "Do smth": "./static/img/control_va.png"
+    "Volume Up": "../static/img/increase_volume.png",
+    "Volume Down": "./static/img/decrease_volume.png",
+    "Do smth": "./static/img/control_va.png",
+    "Nothing": "",
+    "Brightness Up": "",
+    "Brightness Down": ""
 }

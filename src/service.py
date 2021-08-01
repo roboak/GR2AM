@@ -45,22 +45,36 @@ class Service(multiprocessing.Process):
     def brightness_up(self):
         base_url = config.CLIENT_URL + "brightness_change/up"
         requests.get(base_url)
-        time.sleep(1)
+        # time.sleep(1)
 
     def brightness_down(self):
         base_url = config.CLIENT_URL + "brightness_change/up"
-        response = requests.get(base_url)
-        time.sleep(1)
+        requests.get(base_url)
+        # time.sleep(1)
 
     def volume_up(self):
         base_url = config.CLIENT_URL + "volume_change/up"
-        response = requests.get(base_url)
-        time.sleep(1)
+        requests.get(base_url)
+        # time.sleep(1)
 
     def volume_down(self):
         base_url = config.CLIENT_URL + "volume_change/down"
-        response = requests.get(base_url)
-        time.sleep(1)
+        requests.get(base_url)
+        # time.sleep(1)
+
+    def toggle_play_pause(self):
+        base_url = config.CLIENT_URL + "play_pause"
+        requests.get(base_url)
+
+    def media_next(self):
+        base_url = config.CLIENT_URL + "media_change/next"
+        requests.get(base_url)
+        # time.sleep(1)
+
+    def media_previous(self):
+        base_url = config.CLIENT_URL + "media_change/prev"
+        requests.get(base_url)
+        # time.sleep(1)
 
 
 
