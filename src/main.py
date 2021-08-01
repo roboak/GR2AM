@@ -9,9 +9,8 @@ from pathlib import Path
 from classifing import Classify
 from dl.deep_learning_model import DeepLearningClassifier
 from gesture_capturing import GestureCapture
-from machine_learning_working.machine_learning_model import MachineLearningClassifier
 from src.utils.dataclass import GestureMetaData
-
+import service
 # Press the green button in the gutter to run the script.
 from windowing import Windowing
 
@@ -53,14 +52,14 @@ if __name__ == '__main__':
         aQueue = Queue()  # all frames
         bQueue = Queue()  # window
         cQueue = Queue()  # Output of classification
+        dQueue = Queue()  # Output of classification will be consumed by a service triggerer
 
 
         def startCapture():
             if platform.system() == "Darwin":  # for me on mac input 1 is the camera
-                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, cQueue=cQueue, window_size=WINDOW_SIZE)
+                gesture = GestureCapture(camera_input_value=1, aQueue=aQueue, cQueue=cQueue, dQueue= dQueue, window_size=WINDOW_SIZE)
             else:
-                gesture = GestureCapture(camera_input_value=0, aQueue=aQueue, cQueue=cQueue, window_size=WINDOW_SIZE)
-
+                gesture = GestureCapture(camera_input_value=0, aQueue=aQueue, cQueue=cQueue, dQueue= dQueue, window_size=WINDOW_SIZE)
             gesture.get_frame()
 
         # Process C
@@ -71,6 +70,9 @@ if __name__ == '__main__':
         t2 = Windowing(aQueue=aQueue, bQueue=bQueue, window_size=WINDOW_SIZE)
         t2.start()
 
+        # Process D- reading classification and triggering applications
+        t3 = service.Service(dQueue)
+        t3.start()
         # Process A
         startCapture()
 

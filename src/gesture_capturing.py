@@ -14,7 +14,7 @@ from src.utils.dataclass import GestureMetaData
 
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
-                 aQueue: Queue = None, cQueue: Queue = None, window_size=30):
+                 aQueue: Queue = None, cQueue: Queue = None, dQueue: Queue = None, window_size=30):
         self.gesture_name = None
         self.gesture_path = None
         self.all_keypoints = []
@@ -42,6 +42,7 @@ class GestureCapture:
 
         self.aQueue = aQueue
         self.cQueue = cQueue
+        self.dQueue = dQueue
 
         #self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
         #self.keyboard_listener.start()
@@ -66,13 +67,12 @@ class GestureCapture:
             self.setup_cap()
 
         # cap = cv2.VideoCapture(self.camera_input_value)
-        cap = cv2.VideoCapture('/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw4_15.mp4')
+        cap = cv2.VideoCapture(r'D:\Work\LumosNox\LumosNox\HandDataset\raw4.mp4')
         last_result = ""
 
         record, redo, end = False, False, False
         frame_count =0
         while cap.isOpened() and not end:
-
             frame_count+=1
             # result stores the hand points extracted from mediapipe
             _, image = cap.read()
@@ -90,13 +90,19 @@ class GestureCapture:
             if self.cQueue and not self.cQueue.empty():
                 last_result = str(self.cQueue.get())
 
+            #The collected result will be pushed inside dQueue which will be consumed by Service process to trigger applications
+            if last_result and self.dQueue:
+                self.dQueue.put(last_result)
+
             if last_result:  # If a result is present display it
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
+            #TODO: The following lines of code have to be
+            # uncommented for using the application with UI
 
-            #ret, buffer = cv2.imencode('.jpg', image)
-            #frame = buffer.tobytes()
-            #yield (b'--frame\r\n'
+            # ret, buffer = cv2.imencode('.jpg', image)
+            # frame = buffer.tobytes()
+            # yield (b'--frame\r\n'
             #       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
             cv2.imshow('MediaPipe Hands', image)

@@ -25,10 +25,9 @@ class Windowing(multiprocessing.Process):
         self.all_keypoints.append(frame)
         self.last_append = time.time()
 
-        # When 60 frames are captured create job to classify
+        # When WINDOW_SIZE frames are captured create job to classify
         if len(self.all_keypoints) == self.window_size:
             self.bQueue.put(copy.copy(self.all_keypoints))
-
             # Record overlapping window
             self.all_keypoints = self.all_keypoints[-int(self.window_size * 0.6):]  # save last x entries for next window
 
