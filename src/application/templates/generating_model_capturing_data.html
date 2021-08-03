@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<script src="./static/js/recordingHelper.js"></script>
 <div class="row pb-3 pt-2">
     <button onclick="window.location.href='{{url_for('index') }}';" class="btn btn-primary btn-lg btn-block"><i
         class="fa fa-home"></i> Home
@@ -14,15 +13,15 @@
         <h4>Available Gestures</h4>
         <!--    Click this button to start the gesture recording for the selected radio button-->
         <div class="row px-1">
-            <button type="button" onclick="changeImageURL()" class="btn btn-primary btn-lg btn-block">Start Recording
+            <button id="recordStart" type="button" onclick="changeImageURL()" class="btn btn-primary btn-lg btn-block" disabled>Start Recording
             </button>
         </div>
         <form id="gestures">
         {% for k,v in gestures.items() %}
         <div>
             <input type="radio" name="selectGesture" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
-            <label>{{ k }}</label>
-            <img src="{{ v }}" style="max-height: 150px;">
+            <label>{{ v[1] }}</label>
+            <img src="{{ v[0] }}" style="max-height: 50px;">
             <br>
         </div>
         {% endfor %}
@@ -75,10 +74,11 @@
             {% for k, v in captures.items() %}
             <div>{{ k }}<img onclick="removeCapture('{{ k }}')" class="del-arrow" src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_X.svg">
                 <br>
-                <img src="{{ v }}" style="max-height: 150px;">
+                <img src="{{ v }}" style="max-height: 50px;">
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
+<script src="./static/js/recordingHelper.js"></script>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="row pb-3 pt-2">
-    <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app">Start Application</button>
+    <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app" disabled>(WIP) Start Application</button>
 </div>
 
 <div class="row row-height" style="height:80vh;">
@@ -20,6 +20,7 @@
         </div>
         <br/>
         <div class="row" id="myGestures">
+            <form id="gestures">
             {% for gesture, val in gestures.items() %}
             <div>
                 <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}" value="{{ gesture }}">
@@ -27,6 +28,7 @@
                 <img src='{{ val }}' style="max-height: 150px;">
                 <br>
             </div>
+            </form>
             {% endfor %}
         </div>
 
@@ -39,7 +41,7 @@
     <div class="col-sm-4" style="background-color:#d4e6f1;">
         <h4> Current Gesture Application Mapping </h4>
         <div class="row px-1">
-            <button type="button" class="btn btn-primary btn-lg btn-block" onclick="addMapping()">Submit Mapping
+            <button id="mapBtn" type="button" class="btn btn-primary btn-lg btn-block" onclick="addMapping()" disabled>Submit Mapping
             </button>
         </div>
         <br/>
@@ -67,7 +69,7 @@
             <div>
                 <input type="radio" name="selectApplication" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
                 <label>{{ k }}</label>
-                <img src="{{ v }}" style="max-height: 150px;">
+                <img src="{{ v }}" style="max-height: 50px;">
                 <br>
             </div>
             {% endfor %}
@@ -96,4 +98,5 @@
 
     }
 </script>
+<script src="./static/js/recordingHelper.js"></script>
 {% endblock %}

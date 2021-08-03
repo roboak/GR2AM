@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, Response, render_template, request
+from flask import Blueprint, Response, redirect, render_template, request, session, url_for
 
 bp = Blueprint("home_page", __name__)
 
@@ -12,10 +12,14 @@ def get_unrecorded_gestures():
     with open("static/js/all_gestures.json") as jsonFile:
         all_gestures = json.load(jsonFile)
         jsonFile.close()
-    with open("static/js/captured_gestures.json") as jsonFile:
-        captured_gestures = json.load(jsonFile)
-        jsonFile.close()
+
+    captured_gestures = {}
+    if 'username' in session:
+        with open("static/js/" + session["username"] + "/captured_gestures.json") as jsonFile:
+            captured_gestures = json.load(jsonFile)
+            jsonFile.close()
     unrecorded_gestures = {key: all_gestures[key] for key in all_gestures if key not in captured_gestures}
+
     return unrecorded_gestures
 
 
@@ -24,7 +28,10 @@ def get_unrecorded_gestures():
 
 @bp.route("/add_gesture")
 def add_gesture():
-    with open("static/js/captured_gestures.json") as jsonFile:
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    with open("static/js/" + session["username"] + "/captured_gestures.json") as jsonFile:
         captures = json.load(jsonFile)
         jsonFile.close()
 
@@ -44,13 +51,17 @@ def add_gesture_application_mapping():
     gesture_name = request.json.get('gesture_name')
     application = request.json.get('application')
 
-    with open("static/js/gesture_application_mapping.json", "r") as jsonFile:
-        mappings = json.load(jsonFile)
-        jsonFile.close()
-    mappings[gesture_name] = application
+    if 'username' in session:
+        with open("static/js/" + session["username"] + "/gesture_application_mapping.json", "r") as jsonFile:
+            mappings = json.load(jsonFile)
+            jsonFile.close()
+        mappings[gesture_name] = application
 
-    with open("static/js/gesture_application_mapping.json", "w") as jsonFile:
-        json.dump(mappings, jsonFile)
-        jsonFile.close()
+        with open("static/js/" + session["username"] + "/gesture_application_mapping.json", "w") as jsonFile:
+            json.dump(mappings, jsonFile)
+            jsonFile.close()
 
-    return Response(status=200)
+        return Response(status=200)
+
+    else:
+        return Response(status=401)

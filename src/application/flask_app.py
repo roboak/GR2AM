@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 from os.path import abspath, dirname
 from pathlib import Path
 
@@ -19,22 +21,25 @@ app.secret_key = b'DUMMYKEY'
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-    init()
+    if 'username' in session:
+        init()
     if request.method == 'POST':
         print(request)
         print(request.form)
 
     elif request.method == 'GET':
         pass
-    with open("static/js/captured_gestures.json") as jsonFile:
-        captured_gestures = json.load(jsonFile)
-        jsonFile.close()
 
-        # Map
+    captured_gestures, mappings = {}, {}
+    if 'username' in session:
+        # return f'Logged in as {session["username"]}'
+        with open("static/js/" + session["username"] + "/captured_gestures.json") as jsonFile:
+            captured_gestures = json.load(jsonFile)
+            jsonFile.close()
 
-    with open("static/js/gesture_application_mapping.json") as jsonFile:
-        mappings = json.load(jsonFile)
-        jsonFile.close()
+        with open("static/js/" + session["username"] + "/gesture_application_mapping.json") as jsonFile:
+            mappings = json.load(jsonFile)
+            jsonFile.close()
 
     with open("static/js/available_applications.json") as jsonFile:
         apps = json.load(jsonFile)
@@ -47,6 +52,19 @@ def index():
 def login():
     if request.method == 'POST':
         session['username'] = request.form['username']
+
+        # Check if user was already created once by checking for folder, else create new folder from existing files
+        if os.path.isdir('static/js/' + session['username']):  # user already exists
+            pass
+        else:  # new user -> create user folder + copy all files over
+            os.mkdir('static/js/' + session['username'])
+            files = [file for file in os.listdir("static/js") if str.endswith(file, ".json")]
+
+            for file_name in files:
+                full_file_name = os.path.join("static/js", file_name)
+                if os.path.isfile(full_file_name):
+                    shutil.copy(full_file_name, "static/js/" + session['username'])
+
         return redirect(url_for('index'))
 
 
@@ -64,29 +82,31 @@ def init():
 
     parent_directory = dirname(dirname(dirname(abspath(__file__))))
     parent_directory = Path(parent_directory)
-    path = parent_directory / config.GESTURE_FOLDER_NAME / "MetaData.json"
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username'] / "MetaData.json"
+    if not os.path.isfile(path):
+        print("Nothing there yet")
+        return
+
     with open(path, "r") as jsonFile:
         recorded_gestures_dict = json.load(jsonFile)
         jsonFile.close()
 
     recorded_gesture_names = list(recorded_gestures_dict.keys())
 
-    # Map with the correct names
+    if 'username' in session:
+        with open("static/js/" + session["username"] + "/captured_gestures.json", "r") as jsonFile:
+            gestures_gifs = json.load(jsonFile)
+            jsonFile.close()
 
-    with open("static/js/captured_gestures.json", "r") as jsonFile:
-        gestures_gifs = json.load(jsonFile)
-        jsonFile.close()
+        gestures_gifs.clear()
+        for ele in recorded_gesture_names:
+            # print(recorded_gestures_dict[ele])
+            if recorded_gestures_dict[ele]["trials"] > config.THRESHOLD_TRIALS:
+                gestures_gifs[ele] = "./static/img/{}.gif".format(ele.lower())
 
-    gestures_gifs.clear()
-    for ele in recorded_gesture_names:
-        # print(recorded_gestures_dict[ele])
-        if recorded_gestures_dict[ele]["trials"] > config.THRESHOLD_TRIALS:
-            gestures_gifs[ele] = "./static/img/{}.gif".format(ele.lower())
-
-    with open("static/js/captured_gestures.json", "w") as jsonFile:
-        json.dump(gestures_gifs, jsonFile)
-        jsonFile.close()
-
+        with open("static/js/" + session["username"] + "/captured_gestures.json", "w") as jsonFile:
+            json.dump(gestures_gifs, jsonFile)
+            jsonFile.close()
 
 
 if __name__ == "__main__":

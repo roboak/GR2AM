@@ -9,6 +9,7 @@ from pathlib import Path
 from classifing import Classify
 from dl.deep_learning_model import DeepLearningClassifier
 from gesture_capturing import GestureCapture
+from machine_learning_working.machine_learning_model import MachineLearningClassifier
 from src.utils.dataclass import GestureMetaData
 import service
 # Press the green button in the gutter to run the script.
@@ -71,14 +72,14 @@ if __name__ == '__main__':
         t2.start()
 
         # Process D- reading classification and triggering applications
-        t3 = service.Service(dQueue)
-        t3.start()
+        #t3 = service.Service(dQueue)
+        #t3.start()
         # Process A
         startCapture()
 
     elif sys.argv[1] == "--train" or sys.argv[1] == '-t':  # Train
-        # ml = MachineLearningClassifier(training_data_path='../HandDataset/TrainingData', training_data_folder='Josh2', window_size=WINDOW_SIZE)
-        # ml.save_model()
+        ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Abdul_Josh', window_size=WINDOW_SIZE)
+        ml.save_model()
 
         dl = DeepLearningClassifier(window_size=WINDOW_SIZE, model=None, output_size=18)
         dl.train_model()

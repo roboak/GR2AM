@@ -1,8 +1,9 @@
+import os.path
 import platform
 from os.path import abspath, dirname
 from pathlib import Path
 
-from flask import Blueprint, Response
+from flask import Blueprint, Response, session
 
 from application.config import config
 from dl.deep_learning_model import DeepLearningClassifier
@@ -20,7 +21,9 @@ bp = Blueprint("record_gesture", __name__)
 def video_feed(gesture_name):
     parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
     parent_directory = Path(parent_directory)
-    path = parent_directory / config.GESTURE_FOLDER_NAME
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    if not os.path.isdir(path):
+        os.mkdir(path)
     gestureMetaData = GestureMetaData(gesture_name=gesture_name)
 
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
@@ -33,11 +36,19 @@ def video_feed(gesture_name):
 
 @bp.route('/remove-gesture/<gesture_id>', methods=['GET'])
 def removeGesture(gesture_id):
-    # TODO remove files based on gesture id
-    # look for all files beginning with gesture_id (due to the numbering
-    # and use os.remove to delete them
+    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
+    parent_directory = Path(parent_directory)
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    if not os.path.isdir(path):
+        return Response(status=500)
 
-    print("Removing", gesture_id)
+    # look for all files beginning with gesture_id (due to the numbering)
+    files = [file for file in os.listdir(path) if str.startswith(file, gesture_id)]
+
+    # delete all those files
+    for f in files:
+        os.remove(path / f)
+        print("Removing", f)
 
     return Response(status=200)
 
@@ -65,8 +76,10 @@ def redoClick():
 
     return Response(status=200)
 
-"""API to generate model"""
+
 @bp.route('/generate_model')
 def generate_model():
-    dl = DeepLearningClassifier()
+    """API to generate model"""
+    # FIXME session username dependent
+    dl = DeepLearningClassifier(window_size=30)
     dl.train_model()
