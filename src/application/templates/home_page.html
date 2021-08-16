@@ -1,84 +1,80 @@
 {% extends 'base.html' %}
-{% block content %}
+{% block btn %}
 
 <div class="row pb-3 pt-2">
     <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app" disabled>(WIP) Start Application</button>
 </div>
 
-<div class="row row-height" style="height:80vh;">
-    <!---************************ First Column ************************-->
-    <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
+{% endblock %}
+
+        {% block col1 %}
         <h4>Captured Gestures</h4>
         <div class="row px-1">
             {% if session.username %}
-            <a class="btn btn-primary btn-lg btn-block" href="{{url_for('home_page.add_gesture') }}" role="button">Add
+            <a class="btn btn-primary btn-lg btn-block btn-color" href="{{url_for('home_page.add_gesture') }}" role="button">Add
                 Gesture</a>
             {% else %}
-             <a class="btn btn-primary btn-lg btn-block disabled" href="{{url_for('home_page.add_gesture') }}" role="button">Add
+             <a class="btn btn-primary btn-lg btn-block btn-color disabled" href="{{url_for('home_page.add_gesture') }}" role="button">Add
                 Gesture</a>
             {% endif %}
         </div>
         <br/>
         <div class="row" id="myGestures">
             <form id="gestures">
-            {% for gesture, val in gestures.items() %}
-            <div>
-                <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}" value="{{ gesture }}">
-                <label>{{ gesture }}</label>
-                <img src='{{ val }}' style="max-height: 150px;">
-                <br>
-            </div>
+                {% for gesture, val in gestures.items() %}
+                <div class="d-flex align-items-center">
+                    <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}" value="{{ gesture }}">
+                    <label style="margin-left: 5px" for="radio_{{ gesture | lower | replace(' ', '_') }}">{{ val[1] }}</label>
+                    <img class="ms-auto" src='{{ val[0] }}' style="max-height: 48px;">
+                </div>
+                {% endfor %}
             </form>
-            {% endfor %}
         </div>
 
         <div class="row"><br/></div>
+        {% endblock %}
 
-    </div>
-    <div class="col-sm-1"></div>
-
-    <!---************************ Second Column ************************-->
-    <div class="col-sm-4" style="background-color:#d4e6f1;">
+        {% block col2 %}
         <h4> Current Gesture Application Mapping </h4>
         <div class="row px-1">
-            <button id="mapBtn" type="button" class="btn btn-primary btn-lg btn-block" onclick="addMapping()" disabled>Submit Mapping
+            <button id="mapBtn" type="button" class="btn btn-primary btn-lg btn-block btn-color" onclick="addMapping()" disabled>Submit Mapping
             </button>
         </div>
         <br/>
-        <div class="row" id="gestureApplicationMapping">
+        <div class="row" id="gestureApplicationMapping" style="text-align: center">
             {% for k, v in mappings.items() %}
-            <div>{{ k }} : {{ v }}<br></div>
+            <div id="{{k}}">{{ v[0] }} <span class="material-icons md-18 mx-4">arrow_forward</span> {% for _, v1 in v[1].items() %} {{ v1 }} {% endfor %}<br></div>
             {% endfor %}
         </div>
 
         <div class="row"><br/></div>
+        {% endblock %}
 
-    </div>
-
-    <div class="col-sm-1"></div>
-
-    <!---************************ Third Column ************************-->
-    <div class="col-sm-3" style="background-color:#d4e6f1; overflow-y: scroll; height: 100%;">
+        {% block col3 %}
         <h4> Available Applications </h4>
         <div class="row px-1">
-            <button type="button" class="btn btn-primary btn-lg btn-block" disabled>Add Application</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block btn-color" disabled>Add Application</button>
         </div>
         <br/>
         <div class="row" id="availableApplications">
             {% for k, v in apps.items() %}
-            <div>
+            <div class="d-flex align-items-center">
                 <input type="radio" name="selectApplication" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
-                <label>{{ k }}</label>
-                <img src="{{ v }}" style="max-height: 50px;">
-                <br>
+                <label style="margin-left: 5px" for="radio_{{ k | lower | replace(' ', '_') }}">{{ v[1] }}</label>
+<!--                <div style="text-align: center">-->
+                <span class="material-icons md-48 ms-auto">{{ v[0] }}</span>
+<!--                </div>-->
+<!--                <img src="{{ v[0] }}" style="max-height: 50px;">-->
+<!--                <br>-->
             </div>
             {% endfor %}
         </div>
-    </div>
+        {% endblock %}
 
 </div>
 <div class="row"><br/></div>
 
+{% block script %}
 <script>
     function addMapping() {
         gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
@@ -89,14 +85,14 @@
         xhr.setRequestHeader("Accept", "application/json");
         xhr.setRequestHeader("Content-Type", "application/json");
         var data = {
-            "gesture_name": gesture_selected,
-            "application": application_selected
+            "gesture_id": gesture_selected,
+            "gesture_name": $("label[for='radio_"+gesture_selected+"']").text(),
+            "app_id": application_selected,
+            "app_name": $("label[for='radio_"+application_selected+"']").text()
         };
         console.log(data)
         xhr.send(JSON.stringify(data));
         window.location.reload();
-
     }
 </script>
-<script src="./static/js/recordingHelper.js"></script>
 {% endblock %}

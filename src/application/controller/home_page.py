@@ -48,14 +48,18 @@ def add_gesture_application_mapping():
     Return home page with updated gesture_application_mapping.json file.
     """
 
+    gesture_id = request.json.get('gesture_id')
     gesture_name = request.json.get('gesture_name')
-    application = request.json.get('application')
+    app_id = request.json.get('app_id')
+    app_name = request.json.get('app_name')
+
+    print(gesture_id, gesture_name, app_id, app_name)
 
     if 'username' in session:
         with open("static/js/" + session["username"] + "/gesture_application_mapping.json", "r") as jsonFile:
             mappings = json.load(jsonFile)
             jsonFile.close()
-        mappings[gesture_name] = application
+        mappings[gesture_id] = [gesture_name, {app_id: app_name}]
 
         with open("static/js/" + session["username"] + "/gesture_application_mapping.json", "w") as jsonFile:
             json.dump(mappings, jsonFile)

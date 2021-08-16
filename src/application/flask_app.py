@@ -78,8 +78,6 @@ def init():
     """Read the folder where the gestures are recorded and accordingly update the
     captured_gestures.json file."""
 
-    # FIXME this mess needs to be fixed don't use the files names from metaData!!!!!!
-
     parent_directory = dirname(dirname(dirname(abspath(__file__))))
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username'] / "MetaData.json"
@@ -94,15 +92,14 @@ def init():
     recorded_gesture_names = list(recorded_gestures_dict.keys())
 
     if 'username' in session:
-        with open("static/js/" + session["username"] + "/captured_gestures.json", "r") as jsonFile:
-            gestures_gifs = json.load(jsonFile)
+        with open("static/js/" + session["username"] + "/all_gestures.json", "r") as jsonFile:
+            all_gestures = json.load(jsonFile)
             jsonFile.close()
 
-        gestures_gifs.clear()
+        gestures_gifs = dict()
         for ele in recorded_gesture_names:
-            # print(recorded_gestures_dict[ele])
             if recorded_gestures_dict[ele]["trials"] > config.THRESHOLD_TRIALS:
-                gestures_gifs[ele] = "./static/img/{}.gif".format(ele.lower())
+                gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1]]
 
         with open("static/js/" + session["username"] + "/captured_gestures.json", "w") as jsonFile:
             json.dump(gestures_gifs, jsonFile)
