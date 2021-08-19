@@ -27,17 +27,15 @@ class DL_run:
         )
         self.model = obj.CNN1D(seq_len, self.device, output_size=output_size).to(self.device)
 
-    def trainDL(self, obj, lr=0.002, epochs=100):
+    def trainDL(self, obj, model_path, lr=0.002, epochs=100):
         self.nn_train = obj.train_neural_network(model=self.model, device=self.device,
                                                  lr=lr, epochs=epochs, train_loader=self.train_loader,
                                                  test_loader=self.test_loader,
                                                  val_loader=self.val_loader)
-        self.nn_train.train_model()
+        self.nn_train.train_model(model_save_path=model_path)
 
-    def evalDL(self, obj):
-        self.model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))  # map_location=torch.device("cpu")
-        # self.model.load_state_dict(torch.load('../cnn_state_dict_abdul_95.pt'))
-        # self.model.load_state_dict(torch.load('../model_save/gru_state_dict.pt'))
+    def evalDL(self, obj, model_path):
+        self.model.load_state_dict(torch.load(model_path))  # map_location=torch.device("cpu")
         self.nn_train.evaluate_model(self.test_batch_size)
 
 

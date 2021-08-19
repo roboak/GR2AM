@@ -86,7 +86,7 @@ class train_neural_network:
         self.model = model
         self.optimiser = torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
-    def train_model(self):
+    def train_model(self, model_save_path='model_save/cnn_state_dict.pt'):
         counter = 0
         print_every = 10
         clip = 15
@@ -124,7 +124,7 @@ class train_neural_network:
                               "Loss: {:.6f}...".format(loss.item()),
                               "Val Loss: {:.6f}".format(np.mean(val_losses)))
                         if np.mean(val_losses) <= valid_loss_min:
-                            torch.save(self.model.state_dict(), 'model_save/cnn_state_dict.pt')
+                            torch.save(self.model.state_dict(), model_save_path)
                             print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
                                 valid_loss_min,
                                 np.mean(
@@ -166,3 +166,6 @@ class train_neural_network:
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
         plt.show()
+
+        #TODO check this out
+        plt.savefig('test_plt.png')

@@ -70,6 +70,7 @@ class MachineLearningClassifier(LearningModel):
         features = np.reshape(features, (1, features.shape[0]))
         prediction_result = self.classifier.predict(features)
         prediction_percentage_array = self.classifier.predict_proba(features)
+        print(prediction_percentage_array)
         return int(prediction_result[0]) - 1, np.amax(prediction_percentage_array)
 
     def save_features(self):

@@ -68,7 +68,7 @@ class GestureCapture:
             self.setup_cap()
 
         cap = cv2.VideoCapture(self.camera_input_value)
-        #cap = cv2.VideoCapture(r'/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw4.mp4')
+        # cap = cv2.VideoCapture(r'/Users/jsonnet/OneDrive/Studium/PyCom/LumosNox/HandDataset/raw4.mp4')
         last_result = ""
 
         record, redo, end = False, False, False
@@ -98,6 +98,8 @@ class GestureCapture:
             if last_result:  # If a result is present display it
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
+                # cv2.putText(image, "Last class: " + str(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
+                #             (0, 0, 255, 255), 2)  # BGR of course
             # TODO: The following lines of code have to be
             # uncommented for using the application with UI
 
@@ -107,7 +109,7 @@ class GestureCapture:
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
             # TODO this line needs them to be commented out
-            #cv2.imshow('MediaPipe Hands', image)
+            # cv2.imshow('MediaPipe Hands', image)
 
             # Keyboard bindings #
             k = cv2.waitKey(1)  # read key pressed event

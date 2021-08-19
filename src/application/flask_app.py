@@ -4,7 +4,7 @@ import shutil
 from os.path import abspath, dirname
 from pathlib import Path
 
-from flask import Flask, Response, redirect, render_template, request, session, url_for
+from flask import Flask, Response, flash, redirect, render_template, request, session, url_for
 
 from application.config import config
 from application.controller import home_page, record_gesture
@@ -55,6 +55,7 @@ def login():
 
         # Check if user was already created once by checking for folder, else create new folder from existing files
         if os.path.isdir('static/js/' + session['username']):  # user already exists
+            flash("Login successful, user loaded")
             pass
         else:  # new user -> create user folder + copy all files over
             os.mkdir('static/js/' + session['username'])
@@ -65,12 +66,16 @@ def login():
                 if os.path.isfile(full_file_name):
                     shutil.copy(full_file_name, "static/js/" + session['username'])
 
+            flash("Login successful, new user created")
+
+
         return redirect(url_for('index'))
 
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    flash("Logout successful")
     return redirect(url_for('index'))
 
 

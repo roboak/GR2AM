@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, Response, redirect, render_template, request, session, url_for
+from flask import Blueprint, Response, flash, redirect, render_template, request, session, url_for
 
 bp = Blueprint("home_page", __name__)
 
@@ -65,7 +65,8 @@ def add_gesture_application_mapping():
             json.dump(mappings, jsonFile)
             jsonFile.close()
 
+        flash("Mapping updated")
         return Response(status=200)
-
     else:
+        flash("An error occurred", 'error')
         return Response(status=401)

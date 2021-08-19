@@ -1,0 +1,10 @@
+{
+    "light_toggle": ["tungsten", "Toggle Light"],
+    "music_play": ["play_arrow", "Play Music"],
+    "music_stop": ["pause", "Pause Music"],
+    "volume_up": ["volume_up", "Volume Up"],
+    "volume_down": ["volume_down", "Volume Down"],
+    "pa": ["campaign", "PA"],
+    "brightness_up": ["brightness_high", "Brightness Up"],
+    "brightness_down": ["brightness_low", "Brightness Down"]
+}

@@ -16,6 +16,7 @@
             disabled>Start Recording
     </button>
 </div>
+<br/>
 <form id="gestures">
     {% for k,v in gestures.items() %}
     <div class="d-flex align-items-center">
@@ -24,6 +25,10 @@
         <img class="ms-auto" src="{{ v[0] }}" style="max-height: 50px;">
     </div>
     {% endfor %}
+    <div class="d-flex align-items-center">
+        <input type="radio" name="selectGesture" id="radio_custom" value="custom">
+        <input type="text" id="custom_gesture" name="custom_gesture" style="margin-left: 5px">
+    </div>
 </form>
 {% endblock %}
 
@@ -51,19 +56,39 @@
         var image = document.getElementById('vid_display');
         gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
 
-        url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
-        new_url = url.replace(/gesture_selected/, gesture_selected)
-        console.log(new_url)
+        if (gesture_selected === "custom") {
+            gesture_selected = $("input[type='text'][name='custom_gesture']").val();
+        }
 
-        image.src = new_url
+        url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
+        new_url = url.replace(/gesture_selected/, gesture_selected);
+        console.log(new_url);
+
+        image.src = new_url;
+    }
+
+    function callModelGeneration() {
+        // {{url_for('record_gesture.generate_model')}}
+        $('.spinner-grow').show();
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "{{url_for('record_gesture.generate_model')}}", true);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4) {
+                    $('.spinner-grow').hide();
+                    window.location.reload();
+            }
+        };
+        xhr.send();
     }
 </script>
 {% endblock %}
 {% block col3 %}
 <h4> Generate Model </h4>
 <div class="row pb-3 px-1">
-    <button class="btn btn-primary btn-lg btn-block btn-color" type="button" onclick="$(document).ready(function(){$('.spinner-grow').hide();});{{url_for('record_gesture.generate_model')}}">
-        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+    <button class="btn btn-primary btn-lg btn-block btn-color" type="button"
+            onclick="callModelGeneration();">
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" style="display: none;"></span>
         Generate Model
     </button>
 </div>

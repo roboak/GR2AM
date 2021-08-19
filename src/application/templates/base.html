@@ -23,49 +23,81 @@
 </head>
 <body>
 
-<div class="container-fluid overflow-hidden">
-    <div class="row" style="background-color: #cc3734">
-        <div class="col-10">
+<div class="container-fluid" style="overflow-x: hidden">
+    <div id="header" class="row">
+        <div class="col-7">
             <h1><img class="logo" src="./static/img/lumos_nox.jpeg" alt="LumosNox"></h1>
             <span class="caption block text-white">Gesture Recognition & Mapping Application</span>
         </div>
         <div class="col text-end mt-2">
-            {% if not session or not session.username %}
-            <form action="/login" method="POST">
-                <p><input class="input" type="text" name="username" placeholder="Username">
-                    <input class="btn btn-secondary btn-sm" type="submit" value="Login">
-            </form>
-            {% else %}
-            Hello {{session.username}}
-            <a class="btn btn-secondary btn-sm" href="/logout" role="button">Logout</a>
-            {% endif %}
+            <div class="row-*">
+                {% if not session or not session.username %}
+                <form action="/login" method="POST">
+                    <p><input class="input" type="text" name="username" placeholder="Username">
+                        <input class="btn btn-secondary btn-sm" type="submit" value="Login">
+                </form>
+                {% else %}
+                Hello {{session.username}}
+                <a class="btn btn-secondary btn-sm" href="/logout" role="button">Logout</a>
+                {% endif %}
+            </div>
+            <div class="row-* pt-3 text-start">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for tag, message in messages %}
+                {% if tag == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% else %} <!-- `tag` is default message -->
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
         </div>
     </div>
 
     {% block btn %}{% endblock %}
     <div class="row px-3 gx-0 w-100">
-        <div class="cardy">
-            <span class="cdot" style="--i:0;"></span>
-            <span class="cdot" style="--i:1;"></span>
-            <span class="cdot" style="--i:2;"></span>
-            <span class="cdot" style="--i:3;"></span>
-            <!--<div class="row row-height" style="height:80vh;">-->
-            <!---************************ First Column ************************-->
-            <div class="col-sm-3 p-3 mb-5" style="height: 600px;">
+        <!---************************ First Column ************************-->
+        <div class="col-sm-3 p-3 mb-5" style="height: 600px;">
+            <div class="cardy">
+                <span class="cdot" style="--i:0;"></span>
+                <span class="cdot" style="--i:1;"></span>
+                <span class="cdot" style="--i:2;"></span>
+                <span class="cdot" style="--i:3;"></span>
                 <div class="glass p-3">
                     {% block col1 %}{% endblock %}
                 </div>
             </div>
-            <div class="col-sm-1"></div>
-            <!---************************ Second Column ************************-->
-            <div class="col-sm-4 p-3 mb-5" style="height: 600px;">
+        </div>
+        <div class="col-sm-1"></div>
+        <!---************************ Second Column ************************-->
+        <div class="col-sm-4 p-3 mb-5" style="height: 600px;">
+            <div class="cardy">
+                <span class="cdot" style="--i:0;"></span>
+                <span class="cdot" style="--i:1;"></span>
+                <span class="cdot" style="--i:2;"></span>
+                <span class="cdot" style="--i:3;"></span>
                 <div class="glass p-3">
                     {% block col2 %}{% endblock %}
                 </div>
             </div>
-            <div class="col-sm-1"></div>
-            <!---************************ Third Column ************************-->
-            <div class="col-sm-3 p-3 mb-5" style="height: 100%;">
+        </div>
+        <div class="col-sm-1"></div>
+        <!---************************ Third Column ************************-->
+        <div class="col-sm-3 p-3 mb-5" style="height: 600px;">
+            <div class="cardy">
+                <span class="cdot" style="--i:0;"></span>
+                <span class="cdot" style="--i:1;"></span>
+                <span class="cdot" style="--i:2;"></span>
+                <span class="cdot" style="--i:3;"></span>
                 <div class="glass p-3">
                     {% block col3 %}{% endblock %}
                 </div>

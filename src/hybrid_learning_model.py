@@ -15,25 +15,26 @@ class HybridLearningClassifier(LearningModel):
         self.dl = DeepLearningClassifier(window_size=self.window_size, output_size=18)
 
     def predict_data(self, data):
-        # First time
-        start = time.time_ns()
+
         result_dl, acc_dl = self.dl.predict_data(data)
-        mid = time.time_ns()
         result_ml, acc_ml = self.ml.predict_data(data)
-        end = time.time_ns()
 
-        print("Duration DL:", mid-start, "- Duration ML", end-mid)
+        fancy_str = "RESULT--> DL: " + str(result_dl) + ' Confi:' + str(acc_dl)[:6] + " ML: " + str(result_ml) + ' Confi:' + str(acc_ml)[:6]
 
-        #print("RESULT--> DL: " + str(result_dl) + ' Confi:' + str(acc_dl))
-        print("RESULT--> DL: " + str(result_dl) + ' Confi:' + str(acc_dl) + " ML: " + str(result_ml) + ' Confi:' + str(acc_ml))
-        # print("RESULT--> ML: " + str(result_ml) + ' Confidence:' + str(acc_ml))
-        # if acc_dl < 0.85:
-        #     print("ML" + str(result_ml) + " " + str(acc_ml))
-        #     return result_ml
-        # else:
-        #     print("DL: " + str(result_dl))
-        return int(result_ml)
-        # return result_ml
+        if acc_dl > 0.82:
+            return result_dl
+        elif acc_ml > 0.17:
+            return result_ml
+        else:
+            return 15
+
+        # return fancy_str
+
+        # dl > 82%  --> result
+        # else
+        # ml > 17% --> result
+        # else
+        # class 15 --> result
 
     def train_model(self):
         pass

@@ -1,13 +1,15 @@
+import json
 import os.path
 import platform
 from os.path import abspath, dirname
 from pathlib import Path
 
-from flask import Blueprint, Response, session
+from flask import Blueprint, Response, flash, session
 
 from application.config import config
 from dl.deep_learning_model import DeepLearningClassifier
 from gesture_capturing import GestureCapture
+from machine_learning_working.machine_learning_model import MachineLearningClassifier
 from utils.dataclass import GestureMetaData
 from pynput.keyboard import Key, Controller
 
@@ -50,6 +52,14 @@ def removeGesture(gesture_id):
         os.remove(path / f)
         print("Removing", f)
 
+    if os.path.isfile(path / 'MetaData.json'):
+        with open(str(path / 'MetaData.json'), 'r+') as metafile:
+            gesture_dict = json.load(metafile)
+            del gesture_dict[gesture_id]
+            json.dump(gesture_dict, metafile)  # FIXME this appends instead of overwrite!
+
+    flash("Removed " + gesture_id + " successfully")
+
     return Response(status=200)
 
 
@@ -80,6 +90,19 @@ def redoClick():
 @bp.route('/generate_model')
 def generate_model():
     """API to generate model"""
-    # FIXME session username dependent
-    dl = DeepLearningClassifier(window_size=30)
-    dl.train_model()
+    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
+    parent_directory = Path(parent_directory)
+    path = parent_directory / config.GESTURE_FOLDER_NAME
+
+    try:
+        ml = MachineLearningClassifier(training_data_path=path, training_data_folder=session['username'], window_size=30)
+        ml.save_model()
+
+        dl = DeepLearningClassifier(window_size=30, model=None, output_size=18)
+        dl.train_model(model_path=str(path / session['username'])+'/state_dict.pt', path_to_data=path, folder_name=session['username'])
+    except:
+        flash("Error generating model", 'error')
+        return Response(status=500)
+    else:
+        flash("Model was successfully generated")
+        return Response(response='Model successfully generated', status=200)

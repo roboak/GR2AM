@@ -22,12 +22,6 @@ class DeepLearningClassifier(LearningModel):
         This function returns an integer representing the class of the gesture.
 
         :return: Tupel with predicted class from 0-15 and a confidence value"""
-
-        # FIXME check these lines if needed?
-        # TODO: We may need these lines when there will be different model for different users.
-        #dl_model = CNN1D.CNN1D(self.window_size, "device", output_size=16)
-        #dl_model.eval()
-        #dl_model.load_state_dict(torch.load('model_save/cnn_state_dict.pt'))
         
         data = ft.format_individual_data(data)
         data = torch.from_numpy(data)
@@ -35,12 +29,12 @@ class DeepLearningClassifier(LearningModel):
 
         return torch.argmax(pred).item(), torch.max(pred).item()  # pred_class, confid
 
-    def train_model(self):
+    def train_model(self, model_path, path_to_data="../HandDataset", folder_name="Abdul_Josh"):
         """Assumption - Data is present in HandDataset"""
-        run = dl.DL_run(path_to_data="../HandDataset", folder_name="Abdul_Josh", window_size=self.window_size, )
+        run = dl.DL_run(path_to_data=path_to_data, folder_name=folder_name, window_size=self.window_size)
         run.setupDL(CNN1D, output_size=self.output_size)
-        run.trainDL(CNN1D, lr=0.002, epochs=800)
-        run.evalDL(CNN1D)
+        run.trainDL(CNN1D, lr=0.002, epochs=800, model_path=model_path)
+        run.evalDL(CNN1D, model_path=model_path)
 
 
 if __name__ == '__main__':

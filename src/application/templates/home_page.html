@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block btn %}
 
-<div class="row pb-3 pt-2">
-    <button type="submit" class="btn btn-success btn-lg btn-block" value="start_app" disabled>(WIP) Start Application</button>
+<div class="row pb-3 pt-2 mx-1">
+    <button type="submit" class="btn btn-info btn-lg btn-block" value="start_app">Start Application</button>
 </div>
 
 {% endblock %}
@@ -79,20 +79,27 @@
     function addMapping() {
         gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
         application_selected = $("input[type='radio'][name='selectApplication']:checked").val();
+
         var url = "{{ url_for('home_page.add_gesture_application_mapping') }}";
         var xhr = new XMLHttpRequest();
         xhr.open("POST", url);
         xhr.setRequestHeader("Accept", "application/json");
         xhr.setRequestHeader("Content-Type", "application/json");
+
         var data = {
             "gesture_id": gesture_selected,
             "gesture_name": $("label[for='radio_"+gesture_selected+"']").text(),
             "app_id": application_selected,
             "app_name": $("label[for='radio_"+application_selected+"']").text()
         };
-        console.log(data)
+
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4) {  // DONE
+                    window.location.reload();
+            }
+        };
+
         xhr.send(JSON.stringify(data));
-        window.location.reload();
     }
 </script>
 {% endblock %}
