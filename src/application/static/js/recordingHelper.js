@@ -1,4 +1,3 @@
-
 var form = document.getElementById('gestures');
 form.addEventListener('change', function (e) {
     /* Determine if the e.target (radio that's clicked) is NOT e.currentTarget (#roles) */
@@ -10,6 +9,12 @@ form.addEventListener('change', function (e) {
         // Enable button
         if (btn != null) btn.disabled = false;
         if (btn2 != null) btn2.disabled = false;
+
+        $(function () {
+            $('#tooltipDiv[data-toggle="tooltip"]').attr('title', "Record selected gesture");
+
+            new bootstrap.Tooltip($('#tooltipDiv[data-toggle="tooltip"]')[0])
+        })
     }
 }, false);
 
@@ -41,7 +46,7 @@ function clickRedo() {
     xhr.send();
 }
 
-function removeCapture(gesture_id){
+function removeCapture(gesture_id) {
     var xhr = new XMLHttpRequest()
 
     xhr.onreadystatechange = function () {

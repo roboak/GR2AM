@@ -1,78 +1,77 @@
 {% extends 'base.html' %}
+
 {% block btn %}
-
-<div class="row pb-3 pt-2 mx-1">
-    <button type="submit" class="btn btn-info btn-lg btn-block" value="start_app">Start Application</button>
+<div class="row pb-3 pt-2 mx-1" style="justify-content: center">
+    <button type="submit" class="btn btn-danger btn-lg btn-block rounded-pill" value="start_app" style="width: 150px">
+        Start
+        Application
+    </button>
 </div>
-
 {% endblock %}
 
-        {% block col1 %}
-        <h4>Captured Gestures</h4>
-        <div class="row px-1">
-            {% if session.username %}
-            <a class="btn btn-primary btn-lg btn-block btn-color" href="{{url_for('home_page.add_gesture') }}" role="button">Add
-                Gesture</a>
-            {% else %}
-             <a class="btn btn-primary btn-lg btn-block btn-color disabled" href="{{url_for('home_page.add_gesture') }}" role="button">Add
-                Gesture</a>
-            {% endif %}
+{% block col1 %}
+<h4>Gestures</h4>
+<br/>
+<div class="row" id="myGestures">
+    <form id="gestures">
+        {% for gesture, val in gestures.items() %}
+        <div class="d-flex align-items-center">
+            <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}"
+                   value="{{ gesture }}">
+            <label style="margin-left: 5px" for="radio_{{ gesture | lower | replace(' ', '_') }}">{{ val[1] }}</label>
+            <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus" title="{{ val[1] }} Preview" data-bs-content="" data-bs-img="{{ val[0] }}">info</span>
+<!--            <img class="ms-auto" src='{{ val[0] }}' style="max-height: 48px;">-->
         </div>
-        <br/>
-        <div class="row" id="myGestures">
-            <form id="gestures">
-                {% for gesture, val in gestures.items() %}
-                <div class="d-flex align-items-center">
-                    <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}" value="{{ gesture }}">
-                    <label style="margin-left: 5px" for="radio_{{ gesture | lower | replace(' ', '_') }}">{{ val[1] }}</label>
-                    <img class="ms-auto" src='{{ val[0] }}' style="max-height: 48px;">
-                </div>
-                {% endfor %}
-            </form>
-        </div>
-
-        <div class="row"><br/></div>
-        {% endblock %}
-
-        {% block col2 %}
-        <h4> Current Gesture Application Mapping </h4>
-        <div class="row px-1">
-            <button id="mapBtn" type="button" class="btn btn-primary btn-lg btn-block btn-color" onclick="addMapping()" disabled>Submit Mapping
-            </button>
-        </div>
-        <br/>
-        <div class="row" id="gestureApplicationMapping" style="text-align: center">
-            {% for k, v in mappings.items() %}
-            <div id="{{k}}">{{ v[0] }} <span class="material-icons md-18 mx-4">arrow_forward</span> {% for _, v1 in v[1].items() %} {{ v1 }} {% endfor %}<br></div>
-            {% endfor %}
-        </div>
-
-        <div class="row"><br/></div>
-        {% endblock %}
-
-        {% block col3 %}
-        <h4> Available Applications </h4>
-        <div class="row px-1">
-            <button type="button" class="btn btn-primary btn-lg btn-block btn-color" disabled>Add Application</button>
-        </div>
-        <br/>
-        <div class="row" id="availableApplications">
-            {% for k, v in apps.items() %}
-            <div class="d-flex align-items-center">
-                <input type="radio" name="selectApplication" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
-                <label style="margin-left: 5px" for="radio_{{ k | lower | replace(' ', '_') }}">{{ v[1] }}</label>
-<!--                <div style="text-align: center">-->
-                <span class="material-icons md-48 ms-auto">{{ v[0] }}</span>
-<!--                </div>-->
-<!--                <img src="{{ v[0] }}" style="max-height: 50px;">-->
-<!--                <br>-->
-            </div>
-            {% endfor %}
-        </div>
-        {% endblock %}
-
+        {% endfor %}
+    </form>
 </div>
+<div class="row edgebtn" tabindex="0" data-bs-placement="top" data-toggle="tooltip" title="Add a new gesture">
+    {% if session.username %}
+    <a class="btn btn-primary btn-circle btn-xl" href="{{url_for('home_page.add_gesture') }}"
+       role="button"><span class="material-icons-outlined md-36">add</span></a>
+    {% else %}
+    <a class="btn btn-primary btn-circle btn-xl disabled"
+       href="{{url_for('home_page.add_gesture') }}"
+       role="button"><span class="material-icons-outlined md-24">add</span></a>
+    {% endif %}
+</div>
+
 <div class="row"><br/></div>
+{% endblock %}
+
+{% block col2 %}
+<h4>Applications</h4>
+<br/>
+<div class="row" id="availableApplications">
+    {% for k, v in apps.items() %}
+    <div class="d-flex align-items-center">
+        <input type="radio" name="selectApplication" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
+        <label style="margin-left: 5px" for="radio_{{ k | lower | replace(' ', '_') }}">{{ v[1] }}</label>
+        <span class="material-icons-outlined md-36 ms-auto">{{ v[0] }}</span>
+    </div>
+    {% endfor %}
+</div>
+<!--<div class="row edgebtn">-->
+<!--    <button type="button" class="btn btn-primary btn-lg btn-block btn-color" disabled>Add Application</button>-->
+<!--</div>-->
+{% endblock %}
+
+{% block col3 %}
+<h4>Mappings</h4>
+<br/>
+<div class="row" id="gestureApplicationMapping" style="text-align: center">
+    {% for k, v in mappings.items() %}
+    <div id="{{k}}">{{ v[0] }} <span class="material-icons md-18 mx-4">arrow_forward</span> {% for _, v1 in v[1].items()
+        %} {{ v1 }} {% endfor %}<br></div>
+    {% endfor %}
+</div>
+<div class="row edgebtn d-inline-block" tabindex="0" data-bs-placement="top" data-toggle="tooltip" title="Confirm gesture application mapping">
+    <button id="mapBtn" type="button" class="btn btn-primary btn-circle btn-xl"
+            onclick="addMapping()"
+            disabled><span class="material-icons-outlined md-36">done</span>
+    </button>
+</div>
+{% endblock %}
 
 {% block script %}
 <script>
@@ -88,14 +87,14 @@
 
         var data = {
             "gesture_id": gesture_selected,
-            "gesture_name": $("label[for='radio_"+gesture_selected+"']").text(),
+            "gesture_name": $("label[for='radio_" + gesture_selected + "']").text(),
             "app_id": application_selected,
-            "app_name": $("label[for='radio_"+application_selected+"']").text()
+            "app_name": $("label[for='radio_" + application_selected + "']").text()
         };
 
         xhr.onload = function (e) {
             if (xhr.readyState === 4) {  // DONE
-                    window.location.reload();
+                window.location.reload();
             }
         };
 

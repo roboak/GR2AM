@@ -9,14 +9,14 @@
     <!-- The initial-scale=1.0 part sets the initial zoom level when the page is first loaded by the browser.-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- To enable using CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <!-- Add icon library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- To enable using jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- To enable using CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <!-- Add icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined">
     <!-- Calling bootstrap -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/main.css') }}">
 
@@ -24,10 +24,10 @@
 <body>
 
 <div class="container-fluid" style="overflow-x: hidden">
-    <div id="header" class="row">
+    <div id="header" class="row pl-3">
         <div class="col-7">
-            <h1><img class="logo" src="./static/img/lumos_nox.jpeg" alt="LumosNox"></h1>
-            <span class="caption block text-white">Gesture Recognition & Mapping Application</span>
+            <h1><a href="/">GR&#xb2;AM<img class="logo" src="./static/img/lumos_nox.jpeg" alt="LumosNox"></a></h1>
+            <span class="caption block">Gesture Recording, Recognition and Application Mapping</span>
         </div>
         <div class="col text-end mt-2">
             <div class="row-*">
@@ -62,54 +62,79 @@
             </div>
         </div>
     </div>
-
-    {% block btn %}{% endblock %}
+    <hr class="mx-5">
     <div class="row px-3 gx-0 w-100">
         <!---************************ First Column ************************-->
-        <div class="col-sm-3 p-3 mb-5" style="height: 600px;">
+        <div class="col-sm-4 p-3 mb-5" style="height: 600px;">
             <div class="cardy">
-                <span class="cdot" style="--i:0;"></span>
-                <span class="cdot" style="--i:1;"></span>
-                <span class="cdot" style="--i:2;"></span>
-                <span class="cdot" style="--i:3;"></span>
+                <!--                <span class="cdot" style="&#45;&#45;i:0;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:1;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:2;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:3;"></span>-->
                 <div class="glass p-3">
                     {% block col1 %}{% endblock %}
                 </div>
             </div>
         </div>
-        <div class="col-sm-1"></div>
+        <!--        <div class="col-sm-1"></div>-->
         <!---************************ Second Column ************************-->
         <div class="col-sm-4 p-3 mb-5" style="height: 600px;">
             <div class="cardy">
-                <span class="cdot" style="--i:0;"></span>
-                <span class="cdot" style="--i:1;"></span>
-                <span class="cdot" style="--i:2;"></span>
-                <span class="cdot" style="--i:3;"></span>
+                <!--                <span class="cdot" style="&#45;&#45;i:0;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:1;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:2;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:3;"></span>-->
                 <div class="glass p-3">
                     {% block col2 %}{% endblock %}
                 </div>
             </div>
         </div>
-        <div class="col-sm-1"></div>
+        <!--         <div class="col-sm-1"></div>-->
         <!---************************ Third Column ************************-->
-        <div class="col-sm-3 p-3 mb-5" style="height: 600px;">
+
+        <div class="col-sm-4 p-3 mb-5" style="height: 600px;">
             <div class="cardy">
-                <span class="cdot" style="--i:0;"></span>
-                <span class="cdot" style="--i:1;"></span>
-                <span class="cdot" style="--i:2;"></span>
-                <span class="cdot" style="--i:3;"></span>
+                <!--                <span class="cdot" style="&#45;&#45;i:0;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:1;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:2;"></span>-->
+                <!--                <span class="cdot" style="&#45;&#45;i:3;"></span>-->
                 <div class="glass p-3">
                     {% block col3 %}{% endblock %}
                 </div>
             </div>
         </div>
     </div>
+
+    {% block btn %}{% endblock %}
 </div>
 
 <script src="./static/js/recordingHelper.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
         crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        $('[data-bs-toggle="popover"]').each(function () {
+            if ($(this).data('bs-img')) {
+                $(this).popover({
+                    placement: 'right',
+                    html: true,
+                    content: '<img class="popover-img" src="' + $(this).data('bs-img') + '" style="">' //
+                });
+            } else {
+                $(this).popover({
+                    placement: 'right',
+                    html: true,
+                    content: $(this).data('content')
+                });
+            }
+        });
+    });
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
 {% block script %}{% endblock %}
 </body>
 </html>

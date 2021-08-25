@@ -48,8 +48,10 @@ def index():
     return render_template("home_page.html", gestures=captured_gestures, mappings=mappings, apps=apps)
 
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "GET":
+        return render_template("login.html")
     if request.method == 'POST':
         session['username'] = request.form['username']
 
@@ -67,7 +69,6 @@ def login():
                     shutil.copy(full_file_name, "static/js/" + session['username'])
 
             flash("Login successful, new user created")
-
 
         return redirect(url_for('index'))
 

@@ -1,5 +1,6 @@
 body {
     background-color: #fff;
+    color: #545454;
 }
 
 html, body {
@@ -8,30 +9,34 @@ html, body {
   height:100%;
 }
 
-h1 {
-    color: black;
+h1, a {
+    color: grey;
+    text-decoration: none!important;
+    color: #393939;
 }
 
 h3 {
-    color: white;
+    color: grey;
 }
 
 h4 {
     text-align: center;
-}
-
-h4 {
     color: grey;
 }
 
 p {
-    color: black;
+    color: #545454;
 }
 
 img {
     height: auto;
     object-fit: contain;
     /*width: 100%;*/
+}
+
+img.popover-img {
+    height: 200px;
+    width: 200px;
 }
 
 img.logo {
@@ -43,32 +48,25 @@ img.logo {
 
 #header{
     position: relative;
-    background: linear-gradient(345deg, #fff, #cc3734, #cc3734);
-    /*-moz-box-shadow: 1px 2px 30px rgba(0,0,0,.5);*/
-    /*-webkit-box-shadow: 1px 2px 30px rgba(0,0,0,.5);*/
-    /*box-shadow: 1px 2px 30px rgba(0,0,0,.5);*/
 }
 
-/*#header::after{*/
-/*    content: '';*/
-/*    position: absolute;*/
-/*    top: 0;*/
-/*    left: -75px;*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*    background: linear-gradient(345deg, #fff, #cc3734, #cc3734);*/
-/*    filter: blur(25px);*/
-/*    transform: translateY(10px) scale(0.9);*/
-
-/*    z-index: -1;  !* to be below the parent element *!*/
-/*}*/
-
-.btn-group.special {
-  display: flex;
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
 }
 
-.special .btn {
-  flex: 1
+.btn-circle.btn-xl {
+    width: 70px;
+    height: 70px;
+    padding: 10px 16px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1.33;
 }
 
 .cardy {
@@ -79,6 +77,12 @@ img.logo {
     /*justify-content: center;*/
     border: none !important;
     overflow: visible;
+}
+
+.cardy .edgebtn{
+    position: absolute;
+    bottom: 1rem;
+    right: 2rem;
 }
 
 .cardy .cdot{
@@ -118,7 +122,7 @@ img.logo {
     position: relative;
     width: 100%;
     height: 600px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(167, 167, 167, 0.6);
     border-radius: 20px;
     border: 2px solid #fff;
     overflow: hidden;
@@ -153,6 +157,11 @@ img.logo {
 .material-icons.md-24 { font-size: 24px; }
 .material-icons.md-36 { font-size: 36px; }
 .material-icons.md-48 { font-size: 48px; }
+
+.material-icons-outlined.md-18 { font-size: 18px; }
+.material-icons-outlined.md-24 { font-size: 24px; }
+.material-icons-outlined.md-36 { font-size: 36px; }
+.material-icons-outlined.md-48 { font-size: 48px; }
 
 /* Rules for using icons as black on a light background. */
 .material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }

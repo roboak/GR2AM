@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- The title when added to bookmarks and shown in the tab title -->
+    <title>LumosNox Gesture Recognition</title>
+    <meta charset="utf-8">
+
+    <!-- The width=device-width part sets the width of the page to follow the screen-width of the device (which will vary depending on the device).-->
+    <!-- The initial-scale=1.0 part sets the initial zoom level when the page is first loaded by the browser.-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- To enable using jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- To enable using CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <!-- Add icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined">
+    <!-- Calling bootstrap -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/main.css') }}">
+
+</head>
+<body>
+
+<div class="container-fluid" style="overflow-x: hidden">
+
+    <div id="header" class="row">
+        <div class="col-7">
+            <h1><a href="/">GR&#xb2;AM<img class="logo" src="./static/img/lumos_nox.jpeg" alt="LumosNox"></a></h1>
+            <span class="caption block">Gesture Recording, Recognition and Application Mapping</span>
+        </div>
+    </div>
+    <hr class="mx-5">
+    <div class="row px-3 gx-0 w-100">
+        <form>
+            <div class="form-group">
+                <label for="usernameInput">Username</label>
+                <input type="text" class="form-control" id="usernameInput" aria-describedby="usernameHelp"
+                       placeholder="Enter username">
+                <small id="usernameHelp" class="form-text text-muted">Will be used to save your data</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+</div>
+</div>
+
+<script src="./static/js/recordingHelper.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+        crossorigin="anonymous"></script>
+{% block script %}{% endblock %}
+</body>
+</html>
