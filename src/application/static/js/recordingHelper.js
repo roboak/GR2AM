@@ -26,13 +26,14 @@ function clickRecord() {
     xhr.send();
 }
 
-var i = 0;
 
 function clickNext() {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "/nextClick", true);
     // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send();
+
+    i = parseInt($(".progress-bar").text().split('%')[0])
 
     i += 10;
     // update progress bar

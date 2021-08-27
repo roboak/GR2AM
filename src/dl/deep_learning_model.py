@@ -33,8 +33,8 @@ class DeepLearningClassifier(LearningModel):
         """Assumption - Data is present in HandDataset"""
         run = dl.DL_run(path_to_data=path_to_data, folder_name=folder_name, window_size=self.window_size)
         run.setupDL(CNN1D, output_size=self.output_size)
-        run.trainDL(CNN1D, lr=0.002, epochs=800, model_path=model_path)
-        run.evalDL(CNN1D, model_path=model_path)
+        run.trainDL(CNN1D, lr=0.002, epochs=800, model_path=model_path + '/state_dict.pt')
+        run.evalDL(CNN1D, model_path=model_path + '/state_dict.pt')
 
 
 if __name__ == '__main__':

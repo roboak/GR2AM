@@ -23,10 +23,11 @@ app.secret_key = b'DUMMYKEY'
 def index():
     if 'username' in session:
         init()
-    if request.method == 'POST':
-        print(request)
-        print(request.form)
+    else:
+        return redirect(url_for('login'))
 
+    if request.method == 'POST':
+        pass
     elif request.method == 'GET':
         pass
 

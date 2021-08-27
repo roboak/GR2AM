@@ -32,15 +32,18 @@
         </div>
     </div>
     <hr class="mx-5">
-    <div class="row px-3 gx-0 w-100">
-        <form>
-            <div class="form-group">
-                <label for="usernameInput">Username</label>
-                <input type="text" class="form-control" id="usernameInput" aria-describedby="usernameHelp"
-                       placeholder="Enter username">
+    <div class="d-flex align-items-center justify-content-center px-3 gx-0" style="height: 400px">
+        <form method="POST">
+            <div class="form-group align-items-center">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" aria-describedby="usernameHelp"
+                       placeholder="Enter username" style="width: 350px">
                 <small id="usernameHelp" class="form-text text-muted">Will be used to save your data</small>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <br>
+            <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+                </div>
         </form>
     </div>
 </div>

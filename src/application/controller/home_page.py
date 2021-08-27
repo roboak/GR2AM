@@ -29,7 +29,7 @@ def get_unrecorded_gestures():
 @bp.route("/add_gesture")
 def add_gesture():
     if 'username' not in session:
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
 
     with open("static/js/" + session["username"] + "/captured_gestures.json") as jsonFile:
         captures = json.load(jsonFile)

@@ -82,7 +82,7 @@ if __name__ == '__main__':
         ml.save_model()
 
         dl = DeepLearningClassifier(window_size=WINDOW_SIZE, model=None, output_size=18)
-        dl.train_model()
+        dl.train_model(model_path='../HandDataset/Abdul_Josh')
 
     else:
         print("Please use -r to record or -l for live classification")

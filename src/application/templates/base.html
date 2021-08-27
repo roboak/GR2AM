@@ -32,10 +32,11 @@
         <div class="col text-end mt-2">
             <div class="row-*">
                 {% if not session or not session.username %}
-                <form action="/login" method="POST">
-                    <p><input class="input" type="text" name="username" placeholder="Username">
-                        <input class="btn btn-secondary btn-sm" type="submit" value="Login">
-                </form>
+<!--                <form action="/login" method="POST">-->
+<!--                    <p><input class="input" type="text" name="username" placeholder="Username">-->
+<!--                        <input class="btn btn-secondary btn-sm" type="submit" value="Login">-->
+<!--                </form>-->
+                <a type="button" href="/login" class="btn btn-secondary btn-sm">Login</a>
                 {% else %}
                 Hello {{session.username}}
                 <a class="btn btn-secondary btn-sm" href="/logout" role="button">Logout</a>
@@ -63,6 +64,7 @@
         </div>
     </div>
     <hr class="mx-5">
+    {% block outcontent %}{% endblock %}
     <div class="row px-3 gx-0 w-100">
         <!---************************ First Column ************************-->
         <div class="col-sm-4 p-3 mb-5" style="height: 600px;">

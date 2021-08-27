@@ -4,7 +4,7 @@ import platform
 from os.path import abspath, dirname
 from pathlib import Path
 
-from flask import Blueprint, Response, flash, session
+from flask import Blueprint, Response, flash, request, send_file, session
 
 from application.config import config
 from dl.deep_learning_model import DeepLearningClassifier
@@ -20,7 +20,10 @@ bp = Blueprint("record_gesture", __name__)
 
 
 @bp.route('/video_feed/<gesture_name>')
-def video_feed(gesture_name):
+def video_feed(gesture_name: str):
+    if gesture_name.startswith("custom_"):
+        gesture_name = 'gesture_c_' + gesture_name[8:] + '_X'
+
     parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
@@ -34,6 +37,28 @@ def video_feed(gesture_name):
     else:
         gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0)
     return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@bp.route('/progress/<gesture_name>')
+def gesture_progress(gesture_name):
+    # FIXME if gesture_name startwith custom_
+
+    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
+    parent_directory = Path(parent_directory)
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    if not os.path.isdir(path):
+        return Response(status=500)
+
+    if os.path.isfile(path / 'MetaData.json'):
+        with open(str(path / 'MetaData.json'), 'r') as metafile:
+            gesture_dict = json.load(metafile)
+            i = 0
+            if gesture_name in gesture_dict:
+                i = gesture_dict[gesture_name]['trials'] * 10
+            return Response(str(i), mimetype='text/plain', status=200)
+
+    else:  # No file so first ever recording -> start at 0%
+        return Response('0', mimetype='text/plain', status=200)
 
 
 @bp.route('/remove-gesture/<gesture_id>', methods=['GET'])
@@ -106,3 +131,16 @@ def generate_model():
     else:
         flash("Model was successfully generated")
         return Response(response='Model successfully generated', status=200)
+
+
+@bp.route('/matrix')
+def get_image():
+    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
+    parent_directory = Path(parent_directory)
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    matrix = path / 'test_plt.png'
+    if os.path.isfile(matrix):
+        return send_file(matrix, mimetype='image/png')
+
+    return Response(status=404)
+

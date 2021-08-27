@@ -7,7 +7,22 @@
 <!--    <br/>-->
 <!--</div>-->
 {% endblock %}
+{% block outcontent %}
+<div class="modal fade" id="matrixModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="matrixModalLabel">Generated Model Result</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img src="/" alt="Confusion matrix">
+            </div>
+        </div>
+    </div>
+</div>
 
+{% endblock %}
 {% block col1 %}
 <h4>Gesture List</h4>
 <br/>
@@ -21,8 +36,8 @@
     </div>
     {% endfor %}
     <div class="d-flex align-items-center">
-        <input type="radio" name="selectGesture" id="radio_custom" value="custom">
-        <input type="text" id="custom_gesture" name="custom_gesture" style="margin-left: 5px">
+        <input type="radio" name="selectGesture" id="radio_custom" value="custom" disabled>
+        <input type="text" id="custom_gesture" name="custom_gesture" style="margin-left: 5px" disabled>
         <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
               title="Custom Gesture" data-content="Here you can add a custom gesture">info</span>
     </div>
@@ -37,8 +52,8 @@
 
 {% block col2 %}
 <h4>View</h4>
-<div class="row px-2">
-    <div class="progress my-2">
+<div class="row mx-1">
+    <div class="progress my-2 mx-0">
         <div class="progress-bar progress-bar-striped bg-warning w-0" role="progressbar" aria-valuenow=""
              aria-valuemin="0" aria-valuemax="100">0%
         </div>
@@ -67,12 +82,25 @@
 
         var text = $("input[type='text'][name='custom_gesture']").val()
         if (gesture_selected === "custom" && text !== "") {
-            gesture_selected = text;
+            gesture_selected = 'custom_' + text;
         }
 
         url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
         new_url = url.replace(/gesture_selected/, gesture_selected);
         console.log(new_url);
+
+        // Set progressBar
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("GET", "/progress/"+gesture_selected);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4)
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    let val = xhr.responseText;
+                    $(".progress-bar").css("width", val + "%").text(val + " %");
+                }
+        };
+        xhr.send();
 
         image.src = new_url;
     }
@@ -86,7 +114,8 @@
         xhr.onload = function (e) {
             if (xhr.readyState === 4) {
                 $('.spinner-grow').hide();
-                window.location.reload();
+                $('#matrixModal').modal('show');
+                //window.location.reload();
             }
         };
         xhr.send();
@@ -105,7 +134,8 @@
                  src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_X.svg">
             {{ v[1] }}
         </div>
-        <span class="material-icons-outlined md-36 ms-auto" data-bs-placement="left" data-bs-toggle="popover" data-bs-trigger="hover focus"
+        <span class="material-icons-outlined md-36 ms-auto" data-bs-placement="left" data-bs-toggle="popover"
+              data-bs-trigger="hover focus"
               title="{{ v[1] }} Preview" data-content="" data-bs-img="{{ v[0] }}">info</span>
     </div>
     {% endfor %}
