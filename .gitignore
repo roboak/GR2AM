@@ -134,3 +134,7 @@ dmypy.json
 
 *.joblib
 /src/App/
+
+!flask_trial_gestures
+flask_trial_gestures/**/*.txt
+!flask_trial_gestures/NegativeClasses
