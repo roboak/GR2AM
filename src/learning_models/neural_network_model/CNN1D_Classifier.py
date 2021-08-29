@@ -166,7 +166,9 @@ class train_neural_network:
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
+        fig = plt.gcf()
+        fig.savefig('saved_figure.png')
         plt.show()
 
-        #TODO check this out
-        plt.savefig('test_plt.png')
+        # TODO check this out
+        # plt.savefig('test_plt.png')
