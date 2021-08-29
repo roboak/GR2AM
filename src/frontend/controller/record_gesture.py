@@ -43,7 +43,6 @@ def video_feed(gesture_name: str):
 
         path = path / session['username']
 
-
     gestureMetaData = GestureMetaData(gesture_name=gesture_name)
 
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
@@ -139,8 +138,8 @@ def generate_model():
         ml.save_model(save_path=str(path / session['username'])+'/trained_model.joblib')
 
         dl = DeepLearningClassifier(window_size=30, model=None, output_size=18)
-        dl.train_model(model_path=str(path / session['username'])+'/state_dict.pt', path_to_data=path, folder_name=session['username'])
-    except:
+        dl.train_model(model_path=str(path / session['username']), path_to_data=path, folder_name=session['username'])
+    except Exception:
         flash("Error generating model", 'error')
         return Response(status=500)
     else:
