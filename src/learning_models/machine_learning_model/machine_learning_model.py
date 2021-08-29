@@ -77,8 +77,8 @@ class MachineLearningClassifier(LearningModel):
         if self.features != 0:
             dump(self.features, "./saved_models/extracted_features.joblib")
 
-    def save_model(self):
-        dump(self.classifier, "./saved_models/trained_model.joblib")
+    def save_model(self, save_path="./saved_models/trained_model.joblib"):
+        dump(self.classifier, save_path)
 
     def train_model(self):
         pass

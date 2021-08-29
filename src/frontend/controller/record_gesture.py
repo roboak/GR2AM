@@ -6,11 +6,11 @@ from pathlib import Path
 
 from flask import Blueprint, Response, flash, request, send_file, session
 
-from application.config import config
-from dl.deep_learning_model import DeepLearningClassifier
-from gesture_capturing import GestureCapture
-from machine_learning_working.machine_learning_model import MachineLearningClassifier
-from utils.dataclass import GestureMetaData
+from frontend.config import config
+from learning_models.neural_network_model.deep_learning_model import DeepLearningClassifier
+from use_case.gesture_capturing import GestureCapture
+from learning_models.machine_learning_model.machine_learning_model import MachineLearningClassifier
+from utils.gesture_data_related.dataclass import GestureMetaData
 from pynput.keyboard import Key, Controller
 
 keyboard = Controller()
@@ -29,6 +29,21 @@ def video_feed(gesture_name: str):
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
     if not os.path.isdir(path):
         os.mkdir(path)
+
+        path = path / ".."
+
+        # Copy over neg class files
+        files = [file for file in os.listdir(path / "NegativeClasses") if str.endswith(file, ".txt")]
+
+        for file_name in files:
+            full_file_name = os.path.join(path / "NegativeClasses", file_name)
+            if os.path.isfile(full_file_name):
+                print(full_file_name, file_name)
+                os.symlink(full_file_name, path / session['username'] / file_name)
+
+        path = path / session['username']
+
+
     gestureMetaData = GestureMetaData(gesture_name=gesture_name)
 
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
@@ -121,7 +136,7 @@ def generate_model():
 
     try:
         ml = MachineLearningClassifier(training_data_path=path, training_data_folder=session['username'], window_size=30)
-        ml.save_model()
+        ml.save_model(save_path=str(path / session['username'])+'/trained_model.joblib')
 
         dl = DeepLearningClassifier(window_size=30, model=None, output_size=18)
         dl.train_model(model_path=str(path / session['username'])+'/state_dict.pt', path_to_data=path, folder_name=session['username'])

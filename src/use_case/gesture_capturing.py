@@ -135,8 +135,8 @@ class GestureCapture:
                 elif k & 0xFF == ord('r') or (self.key_capture.char == 'r'):  # redo capture
                     record = False
                     self.all_key_points = []
-            except AttributeError:
-                print("Gesture Capturing Attribute Error: ", AttributeError)
+            except AttributeError as e:
+                print("Gesture Capturing Attribute Error: ", AttributeError, e)
                 pass  # TODO figure this one out
 
         # After the loop release the cap object
