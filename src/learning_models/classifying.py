@@ -3,18 +3,18 @@ from multiprocessing import Queue
 from src.utils.gesture_preprocessing.normalisation import Normalisation as norm
 import numpy as np
 import pandas as pd
-from hybrid_learning_model import HybridLearningClassifier
+from learning_models.hybrid_learning_model import HybridLearningClassifier
 
 
 class Classify(multiprocessing.Process):
-    def __init__(self, bQueue: Queue, cQueue: Queue, window_size):
+    def __init__(self, bQueue: Queue, cQueue: Queue, window_size, model_path='saved_models/'):
         super().__init__()
         self.bQueue = bQueue
         self.cQueue = cQueue
         self.window_size = window_size
 
         # Call learning model to predict class
-        self.hl = HybridLearningClassifier(self.window_size)
+        self.hl = HybridLearningClassifier(self.window_size, model_path=model_path)
 
     def run(self):
         while True:

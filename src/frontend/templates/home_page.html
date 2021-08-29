@@ -2,7 +2,8 @@
 
 {% block btn %}
 <div class="row pb-3 pt-2 mx-1" style="justify-content: center">
-    <button type="submit" class="btn btn-danger btn-lg btn-block rounded-pill" value="start_app" style="width: 150px">
+    <button type="button" class="btn btn-danger btn-lg btn-block rounded-pill" value="start_app" style="width: 150px"
+            onclick="$.get('/start')">
         Start
         Application
     </button>
@@ -19,8 +20,9 @@
             <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}"
                    value="{{ gesture }}">
             <label style="margin-left: 5px" for="radio_{{ gesture | lower | replace(' ', '_') }}">{{ val[1] }}</label>
-            <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus" title="{{ val[1] }} Preview" data-bs-content="" data-bs-img="{{ val[0] }}">info</span>
-<!--            <img class="ms-auto" src='{{ val[0] }}' style="max-height: 48px;">-->
+            <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
+                  title="{{ val[1] }} Preview" data-bs-content="" data-bs-img="{{ val[0] }}">info</span>
+            <!--            <img class="ms-auto" src='{{ val[0] }}' style="max-height: 48px;">-->
         </div>
         {% endfor %}
     </form>
@@ -65,7 +67,8 @@
         %} {{ v1 }} {% endfor %}<br></div>
     {% endfor %}
 </div>
-<div class="row edgebtn d-inline-block" tabindex="0" data-bs-placement="top" data-toggle="tooltip" title="Confirm gesture application mapping">
+<div class="row edgebtn d-inline-block" tabindex="0" data-bs-placement="top" data-toggle="tooltip"
+     title="Confirm gesture application mapping">
     <button id="mapBtn" type="button" class="btn btn-primary btn-circle btn-xl"
             onclick="addMapping()"
             disabled><span class="material-icons-outlined md-36">done</span>

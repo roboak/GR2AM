@@ -9,7 +9,7 @@ from src.utils.neural_network_related import format_data_for_nn as ft
 
 class DeepLearningClassifier(LearningModel):
 
-    def __init__(self, window_size, model='saved_models/cnn_state_dict.pt', output_size=18):
+    def __init__(self, window_size, model, output_size=18):
         self.window_size = window_size
         self.output_size = output_size
 

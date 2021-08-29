@@ -1,6 +1,11 @@
 import json
+from os.path import abspath, dirname
+from pathlib import Path
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, session, url_for
+
+import main
+from frontend.config import config
 
 bp = Blueprint("home_page", __name__)
 
@@ -70,3 +75,14 @@ def add_gesture_application_mapping():
     else:
         flash("An error occurred", 'error')
         return Response(status=401)
+
+
+@bp.route('/start')
+def start_app():
+
+    parent_directory = Path(dirname(dirname(dirname(dirname(abspath(__file__))))))
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+
+    main.main(["-l", "-m", str(path)])
+
+    return Response(status=200)
