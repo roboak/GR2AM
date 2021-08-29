@@ -6,19 +6,16 @@ from multiprocessing import Queue
 from os.path import abspath, dirname
 from pathlib import Path
 
-from classifing import Classify
-from dl.deep_learning_model import DeepLearningClassifier
-from gesture_capturing import GestureCapture
-from machine_learning_working.machine_learning_model import MachineLearningClassifier
-from src.utils.dataclass import GestureMetaData
-import service
+from src.learning_models.classifying import Classify
+from src.learning_models.neural_network_model.deep_learning_model import DeepLearningClassifier
+from src.use_case.gesture_capturing import GestureCapture
+from src.learning_models.machine_learning_model.machine_learning_model import MachineLearningClassifier
+from src.utils.gesture_data_related.dataclass import GestureMetaData
 # Press the green button in the gutter to run the script.
-from windowing import Windowing
+from src.utils.gesture_preprocessing.windowing import Windowing
 
 if __name__ == '__main__':
-
     WINDOW_SIZE = 30
-
     os.environ['GLOG_minloglevel'] = '2'
 
     logging.basicConfig(filename='log.log', level=logging.DEBUG)

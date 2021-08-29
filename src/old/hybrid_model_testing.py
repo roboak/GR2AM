@@ -30,14 +30,14 @@ if __name__ == '__main__':
     # read data
     test_data, _ = rd.read_data("../../HandDataset/TestingData", "Josh", 80)
 
-    # load dl model
+    # load neural_network_model model
     dl_model = CNN1D.CNN1D(80, "cpu", output_size=15)
     dl_model.eval()
-    dl_model.load_state_dict(torch.load('model_save/cnn_state_dict_Josh_1.pt'))
+    dl_model.load_state_dict(torch.load('saved_models/cnn_state_dict_Josh_1.pt'))
 
-    # load features and train the ml model
+    # load features and train the ml_old model
     classifier_class = Classifier(training_data_path="", training_data_folder="")
-    classifier = classifier_class.get_classifier_loaded("./machine_learning_working/training_features_josh.joblib")
+    classifier = classifier_class.get_classifier_loaded("./machine_learning_model/training_features_josh.joblib")
 
     results_dl = []  # actual, predicted, confidence
     results_ml = []
