@@ -132,7 +132,7 @@ class train_neural_network:
                                     val_losses)))
                             valid_loss_min = np.mean(val_losses)
 
-    def evaluate_model(self, test_batch_size):
+    def evaluate_model(self, test_batch_size, img_path="saved_figure.png"):
         test_losses = []
         num_correct = 0
         self.model.eval()
@@ -167,8 +167,6 @@ class train_neural_network:
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
         fig = plt.gcf()
-        fig.savefig('saved_figure.png')
+        fig.savefig(img_path)
         plt.show()
 
-        # TODO check this out
-        # plt.savefig('test_plt.png')

@@ -30,12 +30,14 @@ class DeepLearningClassifier(LearningModel):
 
         return torch.argmax(pred).item(), torch.max(pred).item()  # pred_class, confid
 
-    def train_model(self, model_path, path_to_data="../HandDataset", folder_name="Abdul_Josh"):
-        """Assumption - Data is present in HandDataset"""
+    def train_model(self, model_path, path_to_data="../HandDataset", folder_name="Abdul_Josh", img_path=""):
+        """Train the Model
+        :param img_path: path for the confusion matrix to be saved
+        """
         run = dl.DL_run(path_to_data=path_to_data, folder_name=folder_name, window_size=self.window_size)
         run.setupDL(CNN1D, output_size=self.output_size)
         run.trainDL(CNN1D, lr=0.002, epochs=800, model_path=model_path + '/state_dict.pt')
-        run.evalDL(CNN1D, model_path=model_path + '/state_dict.pt')
+        run.evalDL(CNN1D, model_path=model_path + '/state_dict.pt', img_path=img_path + "saved_figure.png")
 
 
 if __name__ == '__main__':

@@ -4,14 +4,14 @@ import platform
 from os.path import abspath, dirname
 from pathlib import Path
 
-from flask import Blueprint, Response, flash, request, send_file, session
+from flask import Blueprint, Response, flash, send_file, session
+from pynput.keyboard import Controller
 
 from frontend.config import config
+from learning_models.machine_learning_model.machine_learning_model import MachineLearningClassifier
 from learning_models.neural_network_model.deep_learning_model import DeepLearningClassifier
 from use_case.gesture_capturing import GestureCapture
-from learning_models.machine_learning_model.machine_learning_model import MachineLearningClassifier
 from utils.gesture_data_related.dataclass import GestureMetaData
-from pynput.keyboard import Key, Controller
 
 keyboard = Controller()
 bp = Blueprint("record_gesture", __name__)
@@ -134,11 +134,13 @@ def generate_model():
     path = parent_directory / config.GESTURE_FOLDER_NAME
 
     try:
-        ml = MachineLearningClassifier(training_data_path=path, training_data_folder=session['username'], window_size=30)
-        ml.save_model(save_path=str(path / session['username'])+'/trained_model.joblib')
+        ml = MachineLearningClassifier(training_data_path=path, training_data_folder=session['username'],
+                                       window_size=30)
+        ml.save_model(save_path=str(path / session['username']) + '/trained_model.joblib')
 
         dl = DeepLearningClassifier(window_size=30, model=None, output_size=18)
-        dl.train_model(model_path=str(path / session['username']), path_to_data=path, folder_name=session['username'])
+        dl.train_model(model_path=str(path / session['username']), path_to_data=path, folder_name=session['username'],
+                       img_path=str(path / session['username']) + "/")
     except Exception:
         flash("Error generating model", 'error')
         return Response(status=500)
@@ -152,9 +154,8 @@ def get_image():
     parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
-    matrix = path / 'test_plt.png'
+    matrix = path / 'saved_figure.png'
     if os.path.isfile(matrix):
         return send_file(matrix, mimetype='image/png')
 
     return Response(status=404)
-

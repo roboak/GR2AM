@@ -9,14 +9,14 @@
 {% endblock %}
 {% block outcontent %}
 <div class="modal fade" id="matrixModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-lg modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="matrixModalLabel">Generated Model Result</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img src="/" alt="Confusion matrix">
+                <img src="/matrix" alt="Confusion matrix" class="mx-auto d-block" id="modalImg">
             </div>
         </div>
     </div>
@@ -106,7 +106,6 @@
     }
 
     function callModelGeneration() {
-        // {{url_for('record_gesture.generate_model')}}
         $('.spinner-grow').show();
 
         var xhr = new XMLHttpRequest();
@@ -114,6 +113,8 @@
         xhr.onload = function (e) {
             if (xhr.readyState === 4) {
                 $('.spinner-grow').hide();
+                imgM = document.getElementById("modalImg")
+                imgM.src = "/matrix"
                 $('#matrixModal').modal('show');
                 //window.location.reload();
             }
