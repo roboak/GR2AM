@@ -66,8 +66,10 @@ def split_training_test_valid(data_dict, num_labels= None):
     X_train, X_test, y_train, y_test = train_test_split(data_dict["data"], data_dict["labels"], test_size=0.3,
                                                         random_state=75, stratify=data_dict["labels"])
     # get_class_proportions(y_train)
-    X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5,
-                                                    random_state=75, stratify=y_test)
+    # X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5,
+    #                                                 random_state=75, stratify=y_test)
+    X_val = X_test
+    y_val = y_test
     # print(y_train, y_test)
 
     return X_train, X_test, X_val, y_train, y_test, y_val

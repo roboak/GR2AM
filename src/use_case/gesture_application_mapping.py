@@ -30,8 +30,8 @@ class Service(multiprocessing.Process):
             pass
         else:
             if mappings[gesture_name]:
-                app = mappings[gesture_name]
-        app = app.strip().replace(' ', '_').lower()
+                app = list(mappings[gesture_name][1].keys())[0]
+        # app = app.strip().replace(' ', '_').lower()
         # Depending on app name, trigger the corresponding frontend
         print(app)
         try:
