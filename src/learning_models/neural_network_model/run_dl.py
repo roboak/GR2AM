@@ -32,7 +32,7 @@ class DL_run:
                                                  lr=lr, epochs=epochs, train_loader=self.train_loader,
                                                  test_loader=self.test_loader,
                                                  val_loader=self.val_loader)
-        self.nn_train.train_model()
+        self.nn_train.train_model(model_save_path=model_path)
 
     def evalDL(self, obj, model_path, img_path="saved_figure.png"):
         self.model.load_state_dict(torch.load(model_path))  # map_location=torch.device("cpu")
