@@ -1,10 +1,11 @@
 {
     "light_toggle": ["tungsten", "Toggle Light"],
-    "music_play": ["play_arrow", "Play Music"],
-    "music_stop": ["pause", "Pause Music"],
+    "toggle_play_pause": ["play_arrow", "Play/Pause Media"],
     "volume_up": ["volume_up", "Volume Up"],
     "volume_down": ["volume_down", "Volume Down"],
     "pa": ["campaign", "PA"],
     "brightness_up": ["brightness_high", "Brightness Up"],
-    "brightness_down": ["brightness_low", "Brightness Down"]
+    "brightness_down": ["brightness_low", "Brightness Down"],
+    "media_prev": ["media_prev", "Media Prev"],
+    "media_next": ["media_next", "Media Next"]
 }

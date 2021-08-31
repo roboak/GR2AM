@@ -4,7 +4,7 @@ from gesture_capturing import GestureCapture
 import json
 import requests
 from src.frontend.config import config
-
+from flask import session
 
 class Service(multiprocessing.Process):
     def __init__(self, dQueue: Queue):
@@ -21,7 +21,7 @@ class Service(multiprocessing.Process):
         print(GestureCapture.translate_class(data))
         gesture_name = GestureCapture.translate_class(data)
 
-        with open("../frontend/static/js/gesture_application_mapping.json", "r") as jsonFile:
+        with open("../frontend/static/js/"+session["username"]+"gesture_application_mapping.json", "r") as jsonFile:
             mappings = json.load(jsonFile)
             jsonFile.close()
 
@@ -30,8 +30,8 @@ class Service(multiprocessing.Process):
             pass
         else:
             if mappings[gesture_name]:
-                app = mappings[gesture_name]
-        app = app.strip().replace(' ', '_').lower()
+                app = list(mappings[gesture_name][1].keys())[0]
+        # app = app.strip().replace(' ', '_').lower()
         # Depending on app name, trigger the corresponding frontend
         print(app)
         try:
