@@ -47,10 +47,12 @@ def video_feed(gesture_name: str):
 
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
     if platform.system() == "Darwin":  # for mac input 1 is the camera
-        gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=1)
+        gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=1,
+                                 frontend=True)
     else:
-        gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0)
-    return Response(gesture.get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData, camera_input_value=0,
+                                 frontend=True)
+    return Response(gesture.get_frame_yield(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @bp.route('/progress/<gesture_name>')

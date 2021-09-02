@@ -11,9 +11,13 @@ from pynput import keyboard
 from src.utils.gesture_data_related.dataclass import GestureMetaData
 
 
+
+
+
 class GestureCapture:
     def __init__(self, camera_input_value: int, folder_location: str = "", gesture_meta_data: GestureMetaData = None,
-                 aQueue: Queue = None, cQueue: Queue = None, dQueue: Queue = None, window_size=30):
+                 aQueue: Queue = None, cQueue: Queue = None, dQueue: Queue = None, window_size=30, frontend=False):
+
         self.gesture_name = None
         self.gesture_path = None
         self.key_capture = None
@@ -49,14 +53,19 @@ class GestureCapture:
         self.dQueue = dQueue
 
         # TODO: those two lines needed for flask but will stop normal UI from starting
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
-        self.keyboard_listener.start()
+        if frontend:
+            self.keyboard_listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
+            self.keyboard_listener.start()
 
     def on_press(self, key):
         self.key_capture = key
         if key == keyboard.Key.esc:
             # Stop listener
             return False
+
+    def on_release(self, key):
+        # self.key_capture = None
+        pass
 
     def setup_cap(self):
         if not (self.gestureMetaData.gestureName in self.gesture_dict.keys()):
@@ -102,42 +111,103 @@ class GestureCapture:
                 cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
                             (0, 0, 255, 255), 2)  # BGR of course
 
-            # TODO: The following lines of code have to be
-            # uncommented for using the frontend with UI
-
-            ret, buffer = cv2.imencode('.jpg', image)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
-            # TODO this line needs them to be commented out
-            # cv2.imshow('MediaPipe Hands', image)
+            cv2.imshow('MediaPipe Hands', image)
 
             # Keyboard bindings
             k = cv2.waitKey(1)  # read key pressed event
             try:
                 if k == '-1':
                     pass  # no key press (don't waste time)
-                elif (k % 256 == 32) or (self.key_capture.char == 's'):  # spacebar to record
+                elif k % 256 == 32:  # spacebar to record
                     if not self.preventRecord:
                         record = not record
                         print("Toggle Recording Mode")
                     else:
                         self.live = True
-                if k & 0xFF == ord('q'):  # close on key q
+                elif k & 0xFF == ord('q'):  # close on key q
                     record = False
                     self.write_file()
                     end = True
-                elif k & 0xFF == ord('n') or (self.key_capture.char == 'n'):  # next capture
+                elif k & 0xFF == ord('n'):  # next capture
                     record = False
                     self.write_file()
                     self.setup_cap()
-                elif k & 0xFF == ord('r') or (self.key_capture.char == 'r'):  # redo capture
+                elif k & 0xFF == ord('r'):  # redo capture
                     record = False
                     self.all_key_points = []
             except AttributeError as e:
                 print("Gesture Capturing Attribute Error: ", AttributeError, e)
                 pass  # TODO figure this one out
+
+        # After the loop release the cap object
+        cap.release()
+
+        # Destroy all the windows
+        cv2.destroyAllWindows()
+
+    def get_frame_yield(self):
+        # Setup for right file to be recorded
+        if not self.live:
+            self.setup_cap()
+
+        cap = cv2.VideoCapture(self.camera_input_value)
+        last_result = ""
+
+        record, redo, end = False, False, False
+        while cap.isOpened() and not end:
+            # result stores the hand points extracted from MediaPipe
+            _, image = cap.read()
+            image = cv2.flip(image, 1)  # mirror invert camera image
+
+            # Record frames to all_key_points
+            if record or self.live:
+                self.record_frame(image)
+
+            # Display mark to indicate file over length
+            if record and len(self.all_key_points) >= self.live_frame_size:
+                cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0, 0, 255, 255), 2)
+
+            # Collect results from classifying process
+            if self.cQueue and not self.cQueue.empty():
+                last_result = str(self.cQueue.get())
+
+            # The collected result will be pushed inside dQueue which will be consumed by Service process to trigger
+            # applications
+            if last_result and self.dQueue:
+                self.dQueue.put(last_result)
+
+            if last_result:  # If a result is present display it
+                cv2.putText(image, "Last class: " + self.translate_class(last_result), (10, 50), cv2.QT_FONT_NORMAL, 1,
+                            (0, 0, 255, 255), 2)  # BGR of course
+
+            ret, buffer = cv2.imencode('.jpg', image)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+
+            # Keyboard bindings
+            # k = cv2.waitKey(1)  # read key pressed event
+            try:
+                if not self.key_capture:
+                    pass  # Don't waste my time, printing errorsr
+                elif self.key_capture.char == 's':  # s to record
+                    if not self.preventRecord:
+                        record = not record
+                        print("Toggle Recording Mode")
+                    else:
+                        self.live = True
+                elif self.key_capture.char == 'n':  # next capture
+                    record = False
+                    self.write_file()
+                    self.setup_cap()
+                elif self.key_capture.char == 'r':  # redo capture
+                    record = False
+                    self.all_key_points = []
+            except AttributeError as e:
+                print("Gesture Capturing Attribute Error: ", AttributeError, e)
+                pass  # TODO figure this one out
+            finally:
+                self.key_capture = None
 
         # After the loop release the cap object
         cap.release()

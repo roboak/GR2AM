@@ -60,7 +60,7 @@
     </div>
 </div>
 <div class="row">
-    <img src="static/img/hand_gestures.jpg" id="vid_display" width="100%" height="50%"/>
+    <img src="static/img/NoCamera.png" id="vid_display" width="100%" height="50%"/>
 </div>
 <div class="btn-group py-3" style="width:100%">
     <button type="button" onclick="clickRecord()" class="btn btn-danger" data-toggle="tooltip"
@@ -92,10 +92,10 @@
         // Set progressBar
         var xhr = new XMLHttpRequest();
 
-        xhr.open("GET", "/progress/"+gesture_selected);
+        xhr.open("GET", "/progress/" + gesture_selected);
         xhr.onload = function (e) {
             if (xhr.readyState === 4)
-                if (xhr.status >= 200 && xhr.status < 300) {
+                if (xhr.status === 200) {
                     let val = xhr.responseText;
                     $(".progress-bar").css("width", val + "%").text(val + " %");
                 }
@@ -106,13 +106,13 @@
     }
 
     function callModelGeneration() {
-        $('.spinner-grow').show();
+        $('.spinner-boder').show();
 
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "{{url_for('record_gesture.generate_model')}}", true);
         xhr.onload = function (e) {
             if (xhr.readyState === 4) {
-                $('.spinner-grow').hide();
+                $('.spinner-boder').hide();
                 imgM = document.getElementById("modalImg")
                 imgM.src = "/matrix"
                 $('#matrixModal').modal('show');
@@ -121,6 +121,33 @@
         };
         xhr.send();
     }
+
+    function checkProgress() {
+        $("input[type='radio'][name='selectGesture']").each( function () {
+
+            let g_name = $(this).val()
+            var xhr = new XMLHttpRequest();
+
+            xhr.open("GET", "/progress/" + g_name);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        let val = xhr.responseText;
+                        if (val !== "0") {
+                            //Color text red
+                            $("label[for='radio_" + g_name + "']").css("color", "red")
+                            let btn = document.getElementById("btn_gen_model")
+                            btn.disabled = true;
+                        }
+                    }
+            };
+            xhr.send();
+        });
+    }
+
+    $(function() {
+        checkProgress();
+    });
 </script>
 {% endblock %}
 {% block col3 %}
@@ -142,7 +169,7 @@
     {% endfor %}
 </div>
 <div class="row edgebtn">
-    <button class="btn btn-primary btn-circle btn-xl" type="button"
+    <button class="btn btn-primary btn-circle btn-xl" type="button" id="btn_gen_model"
             onclick="callModelGeneration();" data-toggle="tooltip" data-bs-placement="top" title="Build model on data">
         <span class="material-icons-outlined md-36">build</span>
     </button>

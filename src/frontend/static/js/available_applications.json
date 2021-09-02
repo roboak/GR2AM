@@ -6,6 +6,6 @@
     "pa": ["campaign", "PA"],
     "brightness_up": ["brightness_high", "Brightness Up"],
     "brightness_down": ["brightness_low", "Brightness Down"],
-    "media_prev": ["media_prev", "Media Prev"],
-    "media_next": ["media_next", "Media Next"]
+    "media_prev": ["skip_previous", "Media Prev"],
+    "media_next": ["skip_next", "Media Next"]
 }

@@ -1,11 +1,18 @@
 import json
+import multiprocessing
+import threading
+from multiprocessing import Queue
 from os.path import abspath, dirname
 from pathlib import Path
+from sys import platform
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, session, url_for
 
 import main
 from frontend.config import config
+from learning_models.classifying import Classify
+from use_case.gesture_capturing import GestureCapture
+from utils.gesture_preprocessing.windowing import Windowing
 
 bp = Blueprint("home_page", __name__)
 
@@ -77,12 +84,18 @@ def add_gesture_application_mapping():
         return Response(status=401)
 
 
+def concFunc(sess):
+    parent_directory = Path(dirname(dirname(dirname(dirname(abspath(__file__))))))
+    path = parent_directory / config.GESTURE_FOLDER_NAME / sess
+
+    main.main(["-l", "-m", str(path)])
+
+
 @bp.route('/start')
 def start_app():
 
-    parent_directory = Path(dirname(dirname(dirname(dirname(abspath(__file__))))))
-    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
-
-    main.main(["-l", "-m", str(path)])
+    # th = threading.Thread(target=concFunc, args=(session['username'],))
+    th = multiprocessing.Process(target=concFunc, args=(session['username'],))
+    th.start()
 
     return Response(status=200)

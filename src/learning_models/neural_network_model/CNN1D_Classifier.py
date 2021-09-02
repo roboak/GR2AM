@@ -87,7 +87,7 @@ class train_neural_network:
         self.model = model
         self.optimiser = torch.optim.Adam(self.model.parameters(), lr=self.lr)
 
-    def train_model(self, model_save_path='saved_models/cnn_state_dict.pt'):
+    def train_model(self, model_save_path='saved_models/state_dict.pt'):
         counter = 0
         print_every = 10
         clip = 15
