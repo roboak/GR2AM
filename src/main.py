@@ -10,6 +10,7 @@ from src.learning_models.classifying import Classify
 from src.learning_models.machine_learning_model.machine_learning_model import MachineLearningClassifier
 from src.learning_models.neural_network_model.deep_learning_model import DeepLearningClassifier
 from src.use_case.gesture_capturing import GestureCapture
+from src.use_case.gesture_application_mapping import ApplicationTriggeringService
 from src.utils.gesture_data_related.dataclass import GestureMetaData
 # Press the green button in the gutter to run the script.
 from src.utils.gesture_preprocessing.windowing import Windowing
@@ -65,7 +66,7 @@ def main(args):
                                          window_size=WINDOW_SIZE)
             gesture.get_frame()
 
-        if len(args) == 3 and (args[1] == '-m' or args[1] == "--model"):
+        if len(args) == 4 and (args[1] == '-m' or args[1] == "--model"):
             model_path = args[2] if args[2].endswith("/") else args[2] + "/"
 
         # Process C
@@ -78,8 +79,9 @@ def main(args):
         t2.start()
 
         # Process D- reading classification and triggering applications
-        # t3 = service.Service(dQueue)
-        # t3.start()
+        username = args[3]#'test_user'
+        t3 = ApplicationTriggeringService(dQueue, username)
+        t3.start()
         # Process A
         startCapture()
 

@@ -88,7 +88,7 @@ def concFunc(sess):
     parent_directory = Path(dirname(dirname(dirname(dirname(abspath(__file__))))))
     path = parent_directory / config.GESTURE_FOLDER_NAME / sess
 
-    main.main(["-l", "-m", str(path)])
+    main.main(["-l", "-m", str(path), sess])
 
 
 @bp.route('/start')

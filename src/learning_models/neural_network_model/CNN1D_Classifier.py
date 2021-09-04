@@ -161,12 +161,12 @@ class train_neural_network:
         confusi = confusion_matrix(label_list, pred_list, labels=[x for x in range(self.model.output_size)])
         # print("confusion_matrix:\n", confusi)
         display_1 = ConfusionMatrixDisplay(confusion_matrix=confusi,
-                                           display_labels=["gesture" + str(x) for x in range(1, self.model.output_size+1)]).plot()
+                                           display_labels=["g" + str(x) for x in range(1, self.model.output_size+1)]).plot()
 
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))
         fig = plt.gcf()
         fig.savefig(img_path)
-        plt.show()
+        # plt.show()
 

@@ -106,13 +106,13 @@
     }
 
     function callModelGeneration() {
-        $('.spinner-boder').show();
+        $('.spinner-border').show();
 
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "{{url_for('record_gesture.generate_model')}}", true);
         xhr.onload = function (e) {
             if (xhr.readyState === 4) {
-                $('.spinner-boder').hide();
+                $('.spinner-border').hide();
                 imgM = document.getElementById("modalImg")
                 imgM.src = "/matrix"
                 $('#matrixModal').modal('show');

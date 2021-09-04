@@ -143,7 +143,8 @@ def generate_model():
         dl = DeepLearningClassifier(window_size=30, model=None, output_size=18)
         dl.train_model(model_path=str(path / session['username']), path_to_data=path, folder_name=session['username'],
                        img_path=str(path / session['username']) + "/")
-    except Exception:
+    except Exception as e:
+        print(e)
         flash("Error generating model", 'error')
         return Response(status=500)
     else:

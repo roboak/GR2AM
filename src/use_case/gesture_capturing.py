@@ -99,12 +99,14 @@ class GestureCapture:
                 cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0, 0, 255, 255), 2)
 
             # Collect results from classifying process
+            last_result_copy = None
             if self.cQueue and not self.cQueue.empty():
                 last_result = str(self.cQueue.get())
+                last_result_copy = last_result
 
             # The collected result will be pushed inside dQueue which will be consumed by Service process to trigger
             # applications
-            if last_result and self.dQueue:
+            if last_result_copy and self.dQueue:
                 self.dQueue.put(last_result)
 
             if last_result:  # If a result is present display it
@@ -168,12 +170,16 @@ class GestureCapture:
                 cv2.putText(image, "!", (150, 100), cv2.QT_FONT_NORMAL, 2, (0, 0, 255, 255), 2)
 
             # Collect results from classifying process
+            last_result_copy = None
+            print("last result: ", last_result)
+            print("last result_copy: ", last_result_copy)
             if self.cQueue and not self.cQueue.empty():
                 last_result = str(self.cQueue.get())
+                last_result_copy = last_result
 
             # The collected result will be pushed inside dQueue which will be consumed by Service process to trigger
             # applications
-            if last_result and self.dQueue:
+            if last_result_copy and self.dQueue:
                 self.dQueue.put(last_result)
 
             if last_result:  # If a result is present display it
@@ -270,10 +276,24 @@ class GestureCapture:
             print("wats dat?!" + classification_id)
             return ''
         classification_id = int(classification_id)
-
         classes = {0: 'Thumb tap', 1: 'Thumb Swipe Up', 2: 'Thumb Swipe Down',
                    3: 'Index tap', 4: 'Index Swipe Up', 5: 'Index Swipe Down',
                    6: 'Middle tap', 7: 'Middle Swipe Up', 8: 'Middle Swipe Down',
+                   9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
+                   12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',
+                   15: 'Negative_still', 16: 'Negative_up', 17: 'Negative_down'}
+
+        return classes[classification_id]
+
+    @staticmethod
+    def translate_class_to_gesture_id(classification_id: str) -> str:
+        if not classification_id.isdigit():
+            print("wats dat?!" + classification_id)
+            return ''
+        classification_id = int(classification_id)
+        classes = {0: 'gesture_t_tab_1', 1: 'gesture_t_up_2', 2: 'gesture_t_down_3',
+                   3: 'gesture_i_tap_4', 4: 'gesture_i_up_5', 5: 'gesture_i_down_6',
+                   6: 'gesture_m_tab_7', 7: 'gesture_m_up_8', 8: 'gesture_m_down_9',
                    9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
                    12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',
                    15: 'Negative_still', 16: 'Negative_up', 17: 'Negative_down'}
