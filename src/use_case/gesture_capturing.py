@@ -39,7 +39,16 @@ class GestureCapture:
 
             if not (os.path.isfile(self.meta_data_file) and os.access(self.meta_data_file, os.R_OK)):
                 with io.open(self.meta_data_file, 'w') as db_file:
-                    db_file.write(json.dumps({}))
+                    # Pre-filling the Metadata.json file with negative classes
+                    gestureMetaData_neg1 = GestureMetaData(gesture_name="gesture_n_still_16", trials=10)
+                    gestureMetaData_neg2 = GestureMetaData(gesture_name="gesture_n_up_17", trials=10)
+                    gestureMetaData_neg3 = GestureMetaData(gesture_name="gesture_n_down_18", trials=10)
+                    temp_dict = {}
+                    temp_dict["gesture_n_still_16"] = gestureMetaData_neg1.__dict__
+                    temp_dict["gesture_n_up_17"] = gestureMetaData_neg2.__dict__
+                    temp_dict["gesture_n_down_18"] = gestureMetaData_neg3.__dict__
+                    json.dump(temp_dict, db_file)
+                    # db_file.write(json.dumps({}))
             with open(self.meta_data_file) as file:
                 self.gesture_dict = json.load(file)
             self.live = False
@@ -73,8 +82,7 @@ class GestureCapture:
         self.gesture_name = self.gestureMetaData.gestureName + '_' + str(
             self.gesture_dict[self.gestureMetaData.gestureName]["trials"] + 1) + '.txt'
         self.gesture_path = self.folder_location + '/' + self.gesture_name
-
-        print(self.gesture_name)
+        # print(self.gesture_name)
 
     def get_frame(self):
         # Setup for right file to be recorded
@@ -171,8 +179,8 @@ class GestureCapture:
 
             # Collect results from classifying process
             last_result_copy = None
-            print("last result: ", last_result)
-            print("last result_copy: ", last_result_copy)
+            # print("last result: ", last_result)
+            # print("last result_copy: ", last_result_copy)
             if self.cQueue and not self.cQueue.empty():
                 last_result = str(self.cQueue.get())
                 last_result_copy = last_result

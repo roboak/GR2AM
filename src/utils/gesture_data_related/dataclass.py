@@ -10,7 +10,7 @@ class Data:
 
 
 class GestureMetaData:
-    def __init__(self, gesture_name):
+    def __init__(self, gesture_name, trials=0):
         self.gestureName = gesture_name
-        self.trials = 0
+        self.trials = trials
         self.files = []
