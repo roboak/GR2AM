@@ -1,7 +1,7 @@
 # import time
 from flask import Flask, Response
 # from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-import screen_brightness_control as sbc
+# import screen_brightness_control as sbc
 from pynput.keyboard import Key, Controller
 # import math
 
@@ -57,28 +57,28 @@ def media_change(flag):
     return Response("Ok")
 
 
-@app.route("/brightness_change/<flag>", methods=['GET', 'POST'])
-def brightness_change(flag):
-    """
-        :param flag: String with values either 'up' or 'down'
-        Will increase or decrease the screen brightness of the device.
-        :return: An http response
-    """
-    # get current brightness value
-    current_brightness = sbc.get_brightness()
-    print(current_brightness)
-    if flag == 'up':
-        new_brightness = min(100, int(1.25*current_brightness))
-    elif flag == 'down':
-        new_brightness = max(0, int(0.75*current_brightness))
-    else:
-        # Shouldn't happen!
-        print("What's Wrong")
-        new_brightness = current_brightness
-    sbc.set_brightness(new_brightness)
-    print(sbc.get_brightness())
-    return Response("All Ok")
+# @app.route("/brightness_change/<flag>", methods=['GET', 'POST'])
+# def brightness_change(flag):
+#     """
+#         :param flag: String with values either 'up' or 'down'
+#         Will increase or decrease the screen brightness of the device.
+#         :return: An http response
+#     """
+#     # get current brightness value
+#     current_brightness = sbc.get_brightness()
+#     print(current_brightness)
+#     if flag == 'up':
+#         new_brightness = min(100, int(1.25*current_brightness))
+#     elif flag == 'down':
+#         new_brightness = max(0, int(0.75*current_brightness))
+#     else:
+#         # Shouldn't happen!
+#         print("What's Wrong")
+#         new_brightness = current_brightness
+#     sbc.set_brightness(new_brightness)
+#     print(sbc.get_brightness())
+#     return Response("All Ok")
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8081)
+    app.run(debug=True, port=5001)

@@ -142,6 +142,11 @@ img.logo {
     z-index: -1;  /* to be below the parent element */
 }
 
+.cardy .glass .form-inner{
+    max-height: 400px;
+    overflow: scroll;
+}
+
 .del-arrow{ /* small red arrow */
 	width: 12px;
 	cursor: pointer;

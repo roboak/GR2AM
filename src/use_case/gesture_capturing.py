@@ -291,9 +291,9 @@ class GestureCapture:
             print("wats dat?!" + classification_id)
             return ''
         classification_id = int(classification_id)
-        classes = {0: 'gesture_t_tab_1', 1: 'gesture_t_up_2', 2: 'gesture_t_down_3',
+        classes = {0: 'gesture_t_tap_1', 1: 'gesture_t_up_2', 2: 'gesture_t_down_3',
                    3: 'gesture_i_tap_4', 4: 'gesture_i_up_5', 5: 'gesture_i_down_6',
-                   6: 'gesture_m_tab_7', 7: 'gesture_m_up_8', 8: 'gesture_m_down_9',
+                   6: 'gesture_m_tap_7', 7: 'gesture_m_up_8', 8: 'gesture_m_down_9',
                    9: 'Ring tap', 10: 'Ring Swipe Up', 11: 'Ring Swipe Down',
                    12: 'Little tap', 13: 'Little Swipe Up', 14: 'Little Swipe Down',
                    15: 'Negative_still', 16: 'Negative_up', 17: 'Negative_down'}

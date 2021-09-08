@@ -14,8 +14,9 @@
 <h4>Gestures</h4>
 <br/>
 <div class="row" id="myGestures">
-    <form id="gestures">
+    <form id="gestures" class="form-inner">
         {% for gesture, val in gestures.items() %}
+        {% if val[2] %}
         <div class="d-flex align-items-center">
             <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}"
                    value="{{ gesture }}">
@@ -24,6 +25,7 @@
                   title="{{ val[1] }} Preview" data-bs-content="" data-bs-img="{{ val[0] }}">info</span>
             <!--            <img class="ms-auto" src='{{ val[0] }}' style="max-height: 48px;">-->
         </div>
+        {% endif %}
         {% endfor %}
     </form>
 </div>

@@ -106,7 +106,10 @@ def init():
         gestures_gifs = dict()
         for ele in recorded_gesture_names:
             if recorded_gestures_dict[ele]["trials"] > config.THRESHOLD_TRIALS:
-                gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1]]
+                if len(all_gestures[ele]) == 3:
+                    gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1], all_gestures[ele][2]]
+                else:
+                    gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1], True]
 
         with open("static/js/" + session["username"] + "/captured_gestures.json", "w") as jsonFile:
             json.dump(gestures_gifs, jsonFile)
@@ -114,4 +117,4 @@ def init():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

@@ -163,6 +163,13 @@ class train_neural_network:
         display_1 = ConfusionMatrixDisplay(confusion_matrix=confusi,
                                            display_labels=["g" + str(x) for x in range(1, self.model.output_size+1)]).plot()
 
+        # FIXME
+        # display_labels_1 = list(set(expected_speech_label))
+        # confusion_matrix_1 = confusion_matrix(expected_speech_label, predicted_speech_label)
+        # print(f"Accuracy {accuracy_score(expected_speech_label, predicted_speech_label)} "
+        #       f"for {classifier_name} on {data_type}")
+        # display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_1, display_labels=display_labels_1)
+
         print("Test loss: {:.3f}".format(np.mean(test_losses)))
         test_acc = num_correct / (test_batch_size * num_test_mini_batches)
         print("Test accuracy: {:.3f}%".format(test_acc * 100))

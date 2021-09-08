@@ -57,8 +57,6 @@ def video_feed(gesture_name: str):
 
 @bp.route('/progress/<gesture_name>')
 def gesture_progress(gesture_name):
-    # FIXME if gesture_name startwith custom_
-
     parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
@@ -94,10 +92,13 @@ def removeGesture(gesture_id):
         print("Removing", f)
 
     if os.path.isfile(path / 'MetaData.json'):
-        with open(str(path / 'MetaData.json'), 'r+') as metafile:
+        gesture_dict = None
+        # Following operation fixes the overwrite/append issue, as to writing less data
+        with open(str(path / 'MetaData.json'), 'r') as metafile:
             gesture_dict = json.load(metafile)
             del gesture_dict[gesture_id]
-            json.dump(gesture_dict, metafile)  # FIXME this appends instead of overwrite!
+        with open(str(path / 'MetaData.json'), 'w') as metafile:
+            json.dump(gesture_dict, metafile)
 
     flash("Removed " + gesture_id + " successfully")
 

@@ -52,7 +52,10 @@ function removeCapture(gesture_id) {
 
     xhr.onreadystatechange = function () {
         if (this.readyState === this.DONE)
-            location.reload()
+            var xhr2 = new XMLHttpRequest()
+            xhr2.open("GET", "/")
+            xhr2.send()
+            setTimeout(location.reload(), 1000);
     }
 
     xhr.open("GET", "/remove-gesture/" + gesture_id)

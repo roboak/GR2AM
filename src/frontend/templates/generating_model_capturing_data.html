@@ -26,7 +26,7 @@
 {% block col1 %}
 <h4>Gesture List</h4>
 <br/>
-<form id="gestures">
+<form id="gestures" class="form-inner">
     {% for k,v in gestures.items() %}
     <div class="d-flex align-items-center">
         <input type="radio" name="selectGesture" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
@@ -153,7 +153,7 @@
 {% block col3 %}
 <h4>Model</h4>
 <br>
-<div class="d-flex row" id="generateModel">
+<div class="d-flex row form-inner" id="generateModel">
     <p style="text-align:center;">Captured Data</p>
     {% for k, v in captures.items() %}
     <div class="d-flex align-items-center">
@@ -171,7 +171,7 @@
 <div class="row edgebtn">
     <button class="btn btn-primary btn-circle btn-xl" type="button" id="btn_gen_model"
             onclick="callModelGeneration();" data-toggle="tooltip" data-bs-placement="top" title="Build model on data">
-        <span class="material-icons-outlined md-36">build</span>
+        <span class="material-icons-outlined md-36">psychology</span>
     </button>
 </div>
 <span class="spinner-border" role="status" aria-hidden="true"
