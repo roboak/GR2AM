@@ -109,7 +109,7 @@ def init():
                 if len(all_gestures[ele]) == 3:
                     gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1], all_gestures[ele][2]]
                 else:
-                    gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1], True]
+                    gestures_gifs[ele] = [all_gestures[ele][0], all_gestures[ele][1], False]
 
         with open("static/js/" + session["username"] + "/captured_gestures.json", "w") as jsonFile:
             json.dump(gestures_gifs, jsonFile)

@@ -54,10 +54,84 @@ function removeCapture(gesture_id) {
         if (this.readyState === this.DONE)
             var xhr2 = new XMLHttpRequest()
             xhr2.open("GET", "/")
+            xhr2.onreadystatechange = function () {
+                if (this.readyState === this.DONE)
+                    location.reload()
+            }
             xhr2.send()
-            setTimeout(location.reload(), 1000);
     }
 
     xhr.open("GET", "/remove-gesture/" + gesture_id)
     xhr.send()
 }
+
+function changeImageURL() {
+        var image = document.getElementById('vid_display');
+        gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+
+        var text = $("input[type='text'][name='custom_gesture']").val()
+        if (gesture_selected === "custom" && text !== "") {
+            gesture_selected = 'custom_' + text;
+        }
+
+        url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
+        new_url = url.replace(/gesture_selected/, gesture_selected);
+        console.log(new_url);
+
+        // Set progressBar
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("GET", "/progress/" + gesture_selected);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4)
+                if (xhr.status === 200) {
+                    let val = xhr.responseText;
+                    $(".progress-bar").css("width", val + "%").text(val + " %");
+                }
+        };
+        xhr.send();
+
+        image.src = new_url;
+
+        $("#rcdBtns :input").attr("disabled", false);
+    }
+
+    function callModelGeneration() {
+        $('.spinner-border').show();
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "{{url_for('record_gesture.generate_model')}}", true);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4) {
+                $('.spinner-border').hide();
+                imgM = document.getElementById("modalImg")
+                imgM.src = "/matrix"
+                $('#matrixModal').modal('show');
+                //window.location.reload();
+            }
+        };
+        xhr.send();
+    }
+
+    function checkProgress() {
+        $("input[type='radio'][name='selectGesture']").each( function () {
+
+            let g_name = $(this).val()
+            var xhr = new XMLHttpRequest();
+
+            xhr.open("GET", "/progress/" + g_name);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        let val = xhr.responseText;
+                        if (val !== "0") {
+                            //Color text red
+                            $("label[for='radio_" + g_name + "']").css("color", "red")
+                            let btn = document.getElementById("btn_gen_model")
+                            btn.disabled = true;
+                        }
+                    }
+            };
+            xhr.send();
+        });
+    }

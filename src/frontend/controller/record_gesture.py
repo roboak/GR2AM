@@ -61,7 +61,7 @@ def gesture_progress(gesture_name):
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
     if not os.path.isdir(path):
-        return Response(status=500)
+        return Response(status=404)
 
     if os.path.isfile(path / 'MetaData.json'):
         with open(str(path / 'MetaData.json'), 'r') as metafile:
@@ -81,7 +81,7 @@ def removeGesture(gesture_id):
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
     if not os.path.isdir(path):
-        return Response(status=500)
+        return Response(status=404)
 
     # look for all files beginning with gesture_id (due to the numbering)
     files = [file for file in os.listdir(path) if str.startswith(file, gesture_id)]

@@ -1,18 +1,13 @@
 import json
 import multiprocessing
-import threading
-from multiprocessing import Queue
+import os
 from os.path import abspath, dirname
 from pathlib import Path
-from sys import platform
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, session, url_for
 
 import main
 from frontend.config import config
-from learning_models.classifying import Classify
-from use_case.gesture_capturing import GestureCapture
-from utils.gesture_preprocessing.windowing import Windowing
 
 bp = Blueprint("home_page", __name__)
 
@@ -47,8 +42,16 @@ def add_gesture():
         captures = json.load(jsonFile)
         jsonFile.close()
 
+    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
+    parent_directory = Path(parent_directory)
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    hide = False
+    if not os.path.isdir(path) or not os.path.isfile(path / 'MetaData.json'):
+        hide = True
+
     unrecorded_gestures = get_unrecorded_gestures()
-    return render_template("generating_model_capturing_data.html", captures=captures, gestures=unrecorded_gestures)
+    return render_template("generating_model_capturing_data.html", captures=captures, gestures=unrecorded_gestures,
+                           hide=hide)
 
 
 @bp.route('/gesture_application_mapping', methods=['POST'])
@@ -93,7 +96,6 @@ def concFunc(sess):
 
 @bp.route('/start')
 def start_app():
-
     # th = threading.Thread(target=concFunc, args=(session['username'],))
     th = multiprocessing.Process(target=concFunc, args=(session['username'],))
     th.start()

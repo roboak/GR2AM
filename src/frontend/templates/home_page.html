@@ -16,7 +16,7 @@
 <div class="row" id="myGestures">
     <form id="gestures" class="form-inner">
         {% for gesture, val in gestures.items() %}
-        {% if val[2] %}
+        {% if not val[2] %}
         <div class="d-flex align-items-center">
             <input type="radio" name="selectGesture" id="radio_{{ gesture | lower | replace(' ', '_') }}"
                    value="{{ gesture }}">

@@ -28,12 +28,14 @@
 <br/>
 <form id="gestures" class="form-inner">
     {% for k,v in gestures.items() %}
+    {% if not hide or (hide and not v[2]) %}
     <div class="d-flex align-items-center">
         <input type="radio" name="selectGesture" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
         <label style="margin-left: 5px" for="radio_{{ k | lower | replace(' ', '_') }}">{{ v[1] }}</label>
         <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
               title="{{ v[1] }} Preview" data-content="" data-bs-img="{{ v[0] }}">info</span>
     </div>
+    {% endif %}
     {% endfor %}
     <div class="d-flex align-items-center">
         <input type="radio" name="selectGesture" id="radio_custom" value="custom" disabled>
@@ -62,89 +64,20 @@
 <div class="row">
     <img src="static/img/NoCamera.png" id="vid_display" width="100%" height="50%"/>
 </div>
-<div class="btn-group py-3" style="width:100%">
+<div id="rcdBtns" class="btn-group py-3" style="width:100%">
     <button type="button" onclick="clickRecord()" class="btn btn-danger" data-toggle="tooltip"
-            data-bs-placement="bottom" title="Start recording"><span class="material-icons-outlined md-18">circle</span>
+            data-bs-placement="bottom" title="Start recording" disabled><span class="material-icons-outlined md-18">circle</span>
     </button>
     <button type="button" onclick="clickNext()" class="btn btn-primary" data-toggle="tooltip"
-            data-bs-placement="bottom" title="Next"><span
+            data-bs-placement="bottom" title="Next" disabled><span
             class="material-icons-outlined md-18">skip_next</span></button>
     <button type="button" onclick="clickRedo()" class="btn btn-warning" data-toggle="tooltip"
-            data-bs-placement="bottom" title="Redo"><span class="material-icons-outlined md-18">replay</span>
+            data-bs-placement="bottom" title="Redo" disabled><span class="material-icons-outlined md-18">replay</span>
     </button>
 </div>
 {% endblock %}
 {% block script %}
 <script>
-    function changeImageURL() {
-        var image = document.getElementById('vid_display');
-        gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
-
-        var text = $("input[type='text'][name='custom_gesture']").val()
-        if (gesture_selected === "custom" && text !== "") {
-            gesture_selected = 'custom_' + text;
-        }
-
-        url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
-        new_url = url.replace(/gesture_selected/, gesture_selected);
-        console.log(new_url);
-
-        // Set progressBar
-        var xhr = new XMLHttpRequest();
-
-        xhr.open("GET", "/progress/" + gesture_selected);
-        xhr.onload = function (e) {
-            if (xhr.readyState === 4)
-                if (xhr.status === 200) {
-                    let val = xhr.responseText;
-                    $(".progress-bar").css("width", val + "%").text(val + " %");
-                }
-        };
-        xhr.send();
-
-        image.src = new_url;
-    }
-
-    function callModelGeneration() {
-        $('.spinner-border').show();
-
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "{{url_for('record_gesture.generate_model')}}", true);
-        xhr.onload = function (e) {
-            if (xhr.readyState === 4) {
-                $('.spinner-border').hide();
-                imgM = document.getElementById("modalImg")
-                imgM.src = "/matrix"
-                $('#matrixModal').modal('show');
-                //window.location.reload();
-            }
-        };
-        xhr.send();
-    }
-
-    function checkProgress() {
-        $("input[type='radio'][name='selectGesture']").each( function () {
-
-            let g_name = $(this).val()
-            var xhr = new XMLHttpRequest();
-
-            xhr.open("GET", "/progress/" + g_name);
-            xhr.onload = function (e) {
-                if (xhr.readyState === 4)
-                    if (xhr.status === 200) {
-                        let val = xhr.responseText;
-                        if (val !== "0") {
-                            //Color text red
-                            $("label[for='radio_" + g_name + "']").css("color", "red")
-                            let btn = document.getElementById("btn_gen_model")
-                            btn.disabled = true;
-                        }
-                    }
-            };
-            xhr.send();
-        });
-    }
-
     $(function() {
         checkProgress();
     });
@@ -153,7 +86,7 @@
 {% block col3 %}
 <h4>Model</h4>
 <br>
-<div class="d-flex row form-inner" id="generateModel">
+<div class="{% if hide %}opacity-50{% endif %} d-flex row form-inner" id="generateModel">
     <p style="text-align:center;">Captured Data</p>
     {% for k, v in captures.items() %}
     <div class="d-flex align-items-center">
@@ -168,7 +101,7 @@
     </div>
     {% endfor %}
 </div>
-<div class="row edgebtn">
+<div class="{% if hide %}opacity-50{% endif %} row edgebtn">
     <button class="btn btn-primary btn-circle btn-xl" type="button" id="btn_gen_model"
             onclick="callModelGeneration();" data-toggle="tooltip" data-bs-placement="top" title="Build model on data">
         <span class="material-icons-outlined md-36">psychology</span>

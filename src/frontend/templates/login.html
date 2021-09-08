@@ -30,6 +30,27 @@
             <h1><a href="/">GR&#xb2;AM<img class="logo" src="./static/img/lumos_nox.jpeg" alt="LumosNox"></a></h1>
             <span class="caption block">Gesture Recording, Recognition and Application Mapping</span>
         </div>
+        <div class="col text-end mt-2">
+            <div class="row-* pt-3 text-start">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for tag, message in messages %}
+                {% if tag == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% else %} <!-- `tag` is default message -->
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
     </div>
     <hr class="mx-5">
     <div class="d-flex align-items-center justify-content-center px-3 gx-0" style="height: 400px">
@@ -42,8 +63,8 @@
             </div>
             <br>
             <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </div>
         </form>
     </div>
 </div>
