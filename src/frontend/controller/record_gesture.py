@@ -1,6 +1,7 @@
 import json
 import os.path
 import platform
+import re
 from os.path import abspath, dirname
 from pathlib import Path
 
@@ -41,15 +42,36 @@ def get_no_custom_gestures():
     return 0
 
 
+def get_next_custom_gesture_name():
+    """
+    Get next custom gesture name that is free
+    :return: name of next custom gesture
+    """
+    path = get_session_path()
+
+    if os.path.isdir(path) and os.path.isfile(path / 'MetaData.json'):
+        with open(str(path / 'MetaData.json'), 'r') as metafile:
+            content = ''.join(metafile.readlines())
+            content = list(set(result.lower() for result in re.findall(r'gesture_c_cust_\d{0,2}', content)))
+
+        with open("static/js/" + session["username"] + "/all_gestures.json", "r") as jsonFile:
+            all_gestures = json.load(jsonFile)
+            jsonFile.close()
+
+            for gest in list(all_gestures):
+                if gest.startswith("gesture_c_cust_"):
+                    if gest not in content:
+                        return gest
+
+
 @bp.route('/video_feed/<gesture_name>')
 def video_feed(gesture_name: str):
-
     # Handle custom gesture naming
     if gesture_name.startswith("custom_"):
         next_id = get_no_custom_gestures()
         if next_id <= 5:
             ext_name = gesture_name[7:]
-            gesture_name = 'gesture_c_cust_1' + str(next_id)
+            gesture_name = get_next_custom_gesture_name()
 
             all_gestures = None
             with open("static/js/" + session["username"] + "/all_gestures.json", "r") as jsonFile:
@@ -102,8 +124,6 @@ def gesture_progress(gesture_name):
     # FIXME does not currently work with custom gestures
 
     path = get_session_path()
-
-    print(get_no_custom_gestures())
 
     if not os.path.isdir(path):
         return Response(status=404)

@@ -25,7 +25,24 @@ def get_unrecorded_gestures():
         with open("static/js/" + session["username"] + "/captured_gestures.json") as jsonFile:
             captured_gestures = json.load(jsonFile)
             jsonFile.close()
+
     unrecorded_gestures = {key: all_gestures[key] for key in all_gestures if key not in captured_gestures}
+    recorded_cust_gesture_names = list()
+
+    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
+    parent_directory = Path(parent_directory)
+    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username'] / "MetaData.json"
+    if os.path.isfile(path):
+        with open(path, "r") as jsonFile:
+            recorded_gestures_dict = json.load(jsonFile)
+            jsonFile.close()
+
+        recorded_cust_gesture_names = [gest for gest in list(recorded_gestures_dict.keys()) if
+                                       recorded_gestures_dict[gest]["trials"] > 0]
+
+    for k in list(unrecorded_gestures.keys()):
+        if k.startswith('gesture_c_cust') and k not in recorded_cust_gesture_names:
+            del unrecorded_gestures[k]
 
     return unrecorded_gestures
 
