@@ -16,7 +16,7 @@ are not present  in the captured_gestures.json file"""
 
 
 def get_unrecorded_gestures():
-    with open("static/js/all_gestures.json") as jsonFile:
+    with open("static/js/" + session["username"] + "/all_gestures.json") as jsonFile:
         all_gestures = json.load(jsonFile)
         jsonFile.close()
 

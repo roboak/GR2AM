@@ -32,16 +32,18 @@
     <div class="d-flex align-items-center">
         <input type="radio" name="selectGesture" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
         <label style="margin-left: 5px" for="radio_{{ k | lower | replace(' ', '_') }}">{{ v[1] }}</label>
+        {%if v[0] %} <!--TODO change this to smth nicer -->
         <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
               title="{{ v[1] }} Preview" data-content="" data-bs-img="{{ v[0] }}">info</span>
+        {% endif %}
     </div>
     {% endif %}
     {% endfor %}
     <div class="d-flex align-items-center">
-        <input type="radio" name="selectGesture" id="radio_custom" value="custom" disabled>
-        <input type="text" id="custom_gesture" name="custom_gesture" style="margin-left: 5px" disabled>
+        <input type="radio" name="selectGesture" id="radio_custom" value="custom">
+        <input type="text" id="custom_gesture" name="custom_gesture" style="margin-left: 5px">
         <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
-              title="Custom Gesture" data-content="Here you can add a custom gesture">info</span>
+              title="Custom Gesture" data-content="Here you can add a custom gesture (max. 6)">info</span>
     </div>
 </form>
 <div id="tooltipDiv" class="row edgebtn d-inline-block" tabindex="0" data-bs-placement="top" data-toggle="tooltip"
@@ -78,7 +80,38 @@
 {% endblock %}
 {% block script %}
 <script>
-    $(function() {
+    function changeImageURL() {
+        var image = document.getElementById('vid_display');
+        gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+
+        var text = $("input[type='text'][name='custom_gesture']").val()
+        if (gesture_selected === "custom" && text !== "") {
+            gesture_selected = 'custom_' + text;
+        }
+
+        url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
+        new_url = url.replace(/gesture_selected/, gesture_selected);
+        console.log(new_url);
+
+        // Set progressBar
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("GET", "/progress/" + gesture_selected);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4)
+                if (xhr.status === 200) {
+                    let val = xhr.responseText;
+                    $(".progress-bar").css("width", val + "%").text(val + " %");
+                }
+        };
+        xhr.send();
+
+        image.src = new_url;
+
+        $("#rcdBtns :input").attr("disabled", false);
+    }
+
+    $(function () {
         checkProgress();
     });
 </script>

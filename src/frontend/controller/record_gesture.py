@@ -19,18 +19,59 @@ bp = Blueprint("record_gesture", __name__)
 """API to display video in the record gesture webpage."""
 
 
-@bp.route('/video_feed/<gesture_name>')
-def video_feed(gesture_name: str):
-    if gesture_name.startswith("custom_"):
-        gesture_name = 'gesture_c_' + gesture_name[8:] + '_X'
-
+def get_session_path():
     parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
     parent_directory = Path(parent_directory)
     path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    return path
+
+
+def get_no_custom_gestures():
+    """
+    Get the current number of custom gestures in use.
+    :return: Number of custom gestures as int
+    """
+    path = get_session_path()
+
+    if os.path.isdir(path) and os.path.isfile(path / 'MetaData.json'):
+        with open(str(path / 'MetaData.json'), 'r') as metafile:
+            content = ''.join(metafile.readlines())
+            return content.count('gesture_c_cust_') // 2
+
+    return 0
+
+
+@bp.route('/video_feed/<gesture_name>')
+def video_feed(gesture_name: str):
+
+    # Handle custom gesture naming
+    if gesture_name.startswith("custom_"):
+        next_id = get_no_custom_gestures()
+        if next_id <= 5:
+            ext_name = gesture_name[7:]
+            gesture_name = 'gesture_c_cust_1' + str(next_id)
+
+            all_gestures = None
+            with open("static/js/" + session["username"] + "/all_gestures.json", "r") as jsonFile:
+                all_gestures = json.load(jsonFile)
+
+                all_gestures[gesture_name] = ['', ext_name]
+
+                jsonFile.close()
+
+            with open("static/js/" + session["username"] + "/all_gestures.json", "w") as jsonFile:
+                json.dump(all_gestures, jsonFile)
+                jsonFile.close()
+        else:
+            flash("Max number of custom gestures reached")
+            return Response(status=405)
+
+    # Handle new folder -> copy negative classes
+    path = get_session_path()
     if not os.path.isdir(path):
         os.mkdir(path)
 
-        path = path / ".."
+        path = path.parent
 
         # Copy over neg class files
         files = [file for file in os.listdir(path / "NegativeClasses") if str.endswith(file, ".txt")]
@@ -43,6 +84,7 @@ def video_feed(gesture_name: str):
 
         path = path / session['username']
 
+    # Handle gesture recording
     gestureMetaData = GestureMetaData(gesture_name=gesture_name)
 
     # Source: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00
@@ -57,9 +99,12 @@ def video_feed(gesture_name: str):
 
 @bp.route('/progress/<gesture_name>')
 def gesture_progress(gesture_name):
-    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
-    parent_directory = Path(parent_directory)
-    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    # FIXME does not currently work with custom gestures
+
+    path = get_session_path()
+
+    print(get_no_custom_gestures())
+
     if not os.path.isdir(path):
         return Response(status=404)
 
@@ -77,9 +122,9 @@ def gesture_progress(gesture_name):
 
 @bp.route('/remove-gesture/<gesture_id>', methods=['GET'])
 def removeGesture(gesture_id):
-    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
-    parent_directory = Path(parent_directory)
-    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    # FIXME does not currently work with custom gestures
+
+    path = get_session_path()
     if not os.path.isdir(path):
         return Response(status=404)
 
@@ -132,18 +177,16 @@ def redoClick():
 @bp.route('/generate_model')
 def generate_model():
     """API to generate model"""
-    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
-    parent_directory = Path(parent_directory)
-    path = parent_directory / config.GESTURE_FOLDER_NAME
+    path = get_session_path()
 
     try:
-        ml = MachineLearningClassifier(training_data_path=path, training_data_folder=session['username'],
+        ml = MachineLearningClassifier(training_data_path=path.parent, training_data_folder=session['username'],
                                        window_size=30)
-        ml.save_model(save_path=str(path / session['username']) + '/trained_model.joblib')
+        ml.save_model(save_path=str(path) + '/trained_model.joblib')
 
         dl = DeepLearningClassifier(window_size=30, model=None, output_size=18)
-        dl.train_model(model_path=str(path / session['username']), path_to_data=path, folder_name=session['username'],
-                       img_path=str(path / session['username']) + "/")
+        dl.train_model(model_path=str(path), path_to_data=path.parent, folder_name=session['username'],
+                       img_path=str(path) + "/")
     except Exception as e:
         print(e)
         flash("Error generating model", 'error')
@@ -155,9 +198,7 @@ def generate_model():
 
 @bp.route('/matrix')
 def get_image():
-    parent_directory = dirname(dirname(dirname(dirname(abspath(__file__)))))
-    parent_directory = Path(parent_directory)
-    path = parent_directory / config.GESTURE_FOLDER_NAME / session['username']
+    path = get_session_path()
     matrix = path / 'saved_figure.png'
     if os.path.isfile(matrix):
         return send_file(matrix, mimetype='image/png')
