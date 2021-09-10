@@ -14,7 +14,7 @@
   "gesture_c_cust_13": ["", ""],
   "gesture_c_cust_14": ["", ""],
   "gesture_c_cust_15": ["", ""],
-  "gesture_n_still_16": ["", "Negative Still", true],
-  "gesture_n_up_17": ["", "Negative Up", true],
-  "gesture_n_down_18": ["", "Negative Down", true]
+  "gesture_n_still_16": ["./static/img/ns.gif", "Negative Still", true],
+  "gesture_n_up_17": ["./static/img/nu.gif", "Negative Up", true],
+  "gesture_n_down_18": ["./static/img/nd.gif", "Negative Down", true]
 }

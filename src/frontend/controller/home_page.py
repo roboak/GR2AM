@@ -67,8 +67,12 @@ def add_gesture():
         hide = True
 
     unrecorded_gestures = get_unrecorded_gestures()
+
+    cust_gestures = ",".join(list(set(list(unrecorded_gestures.keys()) + list(captures.keys()))))
+    maxUsed = True if cust_gestures.count("gesture_c_cust") == 6 else False
+
     return render_template("generating_model_capturing_data.html", captures=captures, gestures=unrecorded_gestures,
-                           hide=hide)
+                           hide=hide, maxUsed=maxUsed)
 
 
 @bp.route('/gesture_application_mapping', methods=['POST'])

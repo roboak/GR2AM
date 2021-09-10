@@ -38,6 +38,19 @@ function clickNext() {
     i += 10;
     // update progress bar
     $(".progress-bar").css("width", i + "%").text(i + " %");
+
+    if (i === 100) {
+        setTimeout(function () {
+            var xhr2 = new XMLHttpRequest()
+            xhr2.open("GET", "/")
+            xhr2.onreadystatechange = function () {
+                if (this.readyState === this.DONE)
+                    location.reload()
+            }
+            xhr2.send()
+
+        }, 1000)
+    }
 }
 
 function clickRedo() {
