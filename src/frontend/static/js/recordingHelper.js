@@ -78,11 +78,11 @@ function removeCapture(gesture_id) {
     xhr.send()
 }
 
-function callModelGeneration() {
+function callModelGeneration(url) {
     $('.spinner-border').show();
 
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", "{{url_for('record_gesture.generate_model')}}", true);
+    xhr.open("GET", url, true);
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
             $('.spinner-border').hide();

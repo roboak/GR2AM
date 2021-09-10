@@ -147,7 +147,7 @@
 </div>
 <div class="{% if hide %}opacity-50{% endif %} row edgebtn">
     <button class="btn btn-primary btn-circle btn-xl" type="button" id="btn_gen_model"
-            onclick="callModelGeneration();" data-toggle="tooltip" data-bs-placement="top" title="Build model on data">
+            onclick="callModelGeneration(`{{ url_for('record_gesture.generate_model') }}`);" data-toggle="tooltip" data-bs-placement="top" title="Build model on data">
         <span class="material-icons-outlined md-36">psychology</span>
     </button>
 </div>
