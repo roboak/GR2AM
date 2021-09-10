@@ -30,7 +30,7 @@ class DeepLearningClassifier(LearningModel):
 
         return torch.argmax(pred).item(), torch.max(pred).item()  # pred_class, confid
 
-    def train_model(self, model_path, path_to_data="../HandDataset", folder_name="Abdul_Josh", img_path=""):
+    def train_model(self, model_path, path_to_data="../HandDataset", folder_name="Josh2_less", img_path=""):
         """Train the Model
         :param img_path: path for the confusion matrix to be saved
         """
