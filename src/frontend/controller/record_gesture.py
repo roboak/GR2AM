@@ -37,7 +37,8 @@ def get_no_custom_gestures():
     if os.path.isdir(path) and os.path.isfile(path / 'MetaData.json'):
         with open(str(path / 'MetaData.json'), 'r') as metafile:
             content = ''.join(metafile.readlines())
-            return content.count('gesture_c_cust_') // 2
+            content = list(set(result[0].lower() for result in re.findall(r'(gesture_c_cust_\d{2})[0-9,_,\.]*(txt)*', content) if not result[1] == "txt"))
+            return len(content)
 
     return 0
 
