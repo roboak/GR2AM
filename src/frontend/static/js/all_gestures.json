@@ -1,0 +1,20 @@
+{
+  "gesture_t_tap_1": ["./static/img/tt.gif", "Thumb tap"],
+  "gesture_t_up_2": ["./static/img/tu.gif", "Thumb swipe up"],
+  "gesture_t_down_3": ["./static/img/td.gif", "Thumb swipe down"],
+  "gesture_i_tap_4": ["./static/img/it.gif", "Index tap"],
+  "gesture_i_up_5": ["./static/img/iu.gif", "Index swipe up"],
+  "gesture_i_down_6": ["./static/img/id.gif", "Index swipe down"],
+  "gesture_m_tap_7": ["./static/img/mt.gif", "Middle tap"],
+  "gesture_m_up_8": ["./static/img/mu.gif", "Middle swipe up"],
+  "gesture_m_down_9": ["./static/img/md.gif", "Middle swipe down"],
+  "gesture_c_cust_10": ["", ""],
+  "gesture_c_cust_11": ["", ""],
+  "gesture_c_cust_12": ["", ""],
+  "gesture_c_cust_13": ["", ""],
+  "gesture_c_cust_14": ["", ""],
+  "gesture_c_cust_15": ["", ""],
+  "gesture_n_still_16": ["./static/img/ns.gif", "Negative Still", true],
+  "gesture_n_up_17": ["./static/img/nu.gif", "Negative Up", true],
+  "gesture_n_down_18": ["./static/img/nd.gif", "Negative Down", true]
+}

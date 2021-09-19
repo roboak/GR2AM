@@ -1,0 +1,11 @@
+{
+    "light_toggle": ["tungsten", "Toggle Light"],
+    "toggle_play_pause": ["play_arrow", "Play/Pause Media"],
+    "volume_up": ["volume_up", "Volume Up"],
+    "volume_down": ["volume_down", "Volume Down"],
+    "pa": ["campaign", "PA"],
+    "brightness_up": ["brightness_high", "Brightness Up"],
+    "brightness_down": ["brightness_low", "Brightness Down"],
+    "media_prev": ["skip_previous", "Media Prev"],
+    "media_next": ["skip_next", "Media Next"]
+}

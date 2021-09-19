@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block btn %}
+<!--<div class="row pb-3 pt-2">-->
+<!--    <button onclick="window.location.href='{{url_for('index') }}';" class="btn btn-primary btn-lg btn-block"><i-->
+<!--            class="fa fa-home"></i> Home-->
+<!--    </button>-->
+<!--    <br/>-->
+<!--</div>-->
+{% endblock %}
+{% block outcontent %}
+<div class="modal fade" id="matrixModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-lg modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="matrixModalLabel">Generated Model Result</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img src="/matrix" alt="Confusion matrix" class="mx-auto d-block" id="modalImg">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block col1 %}
+<h4>Gesture List</h4>
+<br/>
+<form id="gestures" class="form-inner">
+    {% for k,v in gestures.items() %}
+    {% if not hide or (hide and not v[2]) %}
+    <div class="d-flex align-items-center">
+        <input type="radio" name="selectGesture" id="radio_{{ k | lower | replace(' ', '_') }}" value="{{ k }}">
+        <label style="margin-left: 5px" for="radio_{{ k | lower | replace(' ', '_') }}">{{ v[1] }}</label>
+        {%if v[0] %}
+        <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
+              title="{{ v[1] }} Preview" data-content="" data-bs-img="{{ v[0] }}">info</span>
+        {% else %}
+        <!--<span class="material-icons-outlined md-36 ms-auto">dot</span> To hide the i symbol-->
+        <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
+              title="Custom Gesture" data-content="This is a custom gesture">info</span>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div class="d-flex align-items-center">
+        <input type="radio" name="selectGesture" id="radio_custom" value="custom" {% if maxUsed %} disabled {% endif %}>
+        <input type="text" id="custom_gesture" name="custom_gesture" style="margin-left: 5px" {% if maxUsed %} disabled {% endif %}>
+        <span class="material-icons-outlined md-36 ms-auto" data-bs-toggle="popover" data-bs-trigger="hover focus"
+              title="Custom Gesture" data-content="Here you can add a custom gesture (max. 6)">info</span>
+    </div>
+</form>
+<div id="tooltipDiv" class="row edgebtn d-inline-block" tabindex="0" data-bs-placement="top" data-toggle="tooltip"
+     title="You need to select a gesture to record">
+    <button id="recordStart" type="button" onclick="changeImageURL()" class="btn btn-primary btn-circle btn-xl"
+            disabled><span class="material-icons-outlined md-36">done</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block col2 %}
+<h4>View</h4>
+<div class="row mx-1">
+    <div class="progress my-2 mx-0">
+        <div class="progress-bar progress-bar-striped bg-warning w-0" role="progressbar" aria-valuenow=""
+             aria-valuemin="0" aria-valuemax="100">0%
+        </div>
+    </div>
+</div>
+<div class="row">
+    <img src="static/img/NoCamera.png" id="vid_display" width="100%" height="50%"/>
+</div>
+<div id="rcdBtns" class="btn-group py-3" style="width:100%">
+    <button type="button" onclick="clickRecord()" class="btn btn-danger" data-toggle="tooltip"
+            data-bs-placement="bottom" title="Start recording" disabled><span class="material-icons-outlined md-18">circle</span>
+    </button>
+    <button type="button" onclick="clickNext()" class="btn btn-primary" data-toggle="tooltip"
+            data-bs-placement="bottom" title="Next" disabled><span
+            class="material-icons-outlined md-18">skip_next</span></button>
+    <button type="button" onclick="clickRedo()" class="btn btn-warning" data-toggle="tooltip"
+            data-bs-placement="bottom" title="Redo" disabled><span class="material-icons-outlined md-18">replay</span>
+    </button>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    function changeImageURL() {
+        var image = document.getElementById('vid_display');
+        gesture_selected = $("input[type='radio'][name='selectGesture']:checked").val();
+
+        var text = $("input[type='text'][name='custom_gesture']").val()
+        if (gesture_selected === "custom" && text !== "") {
+            gesture_selected = 'custom_' + text;
+        }
+
+        url = "{{ url_for('record_gesture.video_feed', gesture_name='gesture_selected') }}";
+        new_url = url.replace(/gesture_selected/, gesture_selected);
+        console.log(new_url);
+
+        // Set progressBar
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("GET", "/progress/" + gesture_selected);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4)
+                if (xhr.status === 200) {
+                    let val = xhr.responseText;
+                    $(".progress-bar").css("width", val + "%").text(val + " %");
+                }
+        };
+        xhr.send();
+
+        image.src = new_url;
+
+        $("#rcdBtns :input").attr("disabled", false);
+    }
+
+    $(function () {
+        checkProgress();
+    });
+</script>
+{% endblock %}
+{% block col3 %}
+<h4>Model</h4>
+<br>
+<div class="{% if hide %}opacity-50{% endif %} d-flex row form-inner" id="generateModel">
+    <p style="text-align:center;">Captured Data</p>
+    {% for k, v in captures.items() %}
+    <div class="d-flex align-items-center">
+        <div>
+            <img onclick="removeCapture('{{ k }}')" class="ms-auto del-arrow"
+                 src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Red_X.svg">
+            {{ v[1] }}
+        </div>
+        {%if v[0] %} <!--TODO change this to smth nicer -->
+        <span class="material-icons-outlined md-36 ms-auto" data-bs-placement="left" data-bs-toggle="popover"
+              data-bs-trigger="hover focus"
+              title="{{ v[1] }} Preview" data-content="" data-bs-img="{{ v[0] }}">info</span>
+        {% else %}
+        <!--<span class="material-icons-outlined md-36 ms-auto">dot</span> To hide the i symbol-->
+        <span class="material-icons-outlined md-36 ms-auto" data-bs-placement="left" data-bs-toggle="popover"
+              data-bs-trigger="hover focus"
+              title="Custom Gesture" data-content="This is a custom gesture">info</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+<div class="{% if hide %}opacity-50{% endif %} row edgebtn">
+    <button class="btn btn-primary btn-circle btn-xl" type="button" id="btn_gen_model"
+            onclick="callModelGeneration(`{{ url_for('record_gesture.generate_model') }}`);" data-toggle="tooltip" data-bs-placement="top" title="Build model on data">
+        <span class="material-icons-outlined md-36">psychology</span>
+    </button>
+</div>
+<span class="spinner-border" role="status" aria-hidden="true"
+      style="display: none; position: absolute; color: grey; bottom: 1rem; left: 1rem;"></span>
+{% endblock %}
+

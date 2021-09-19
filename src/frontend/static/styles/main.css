@@ -1,0 +1,177 @@
+body {
+    background-color: #fff;
+    color: #545454;
+}
+
+html, body {
+  margin:0;
+  padding:0;
+  height:100%;
+}
+
+h1, a {
+    color: grey;
+    text-decoration: none!important;
+    color: #393939;
+}
+
+h3 {
+    color: grey;
+}
+
+h4 {
+    text-align: center;
+    color: grey;
+}
+
+p {
+    color: #545454;
+}
+
+img {
+    height: auto;
+    object-fit: contain;
+    /*width: 100%;*/
+}
+
+img.popover-img {
+    height: 200px;
+    width: 200px;
+}
+
+img.logo {
+    height: 100px;
+    margin-top: 5px;
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" viewBox="0 0 100 100" xml:space="preserve"><style type="text/css">.blur{filter:url(%23softedge);}</style><filter id="softedge"><feGaussianBlur stdDeviation="3.5"></feGaussianBlur></filter><g class="blur"><rect x="1" y="1" width="100" height="100"/></g></svg>');
+	-webkit-mask-size: cover;
+}
+
+#header{
+    position: relative;
+}
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
+
+.btn-circle.btn-xl {
+    width: 70px;
+    height: 70px;
+    padding: 10px 16px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1.33;
+}
+
+.cardy {
+    /*z-index: -1;*/
+    position: relative;
+    display: flex;
+    align-items: center;
+    /*justify-content: center;*/
+    border: none !important;
+    overflow: visible;
+}
+
+.cardy .edgebtn{
+    position: absolute;
+    bottom: 1rem;
+    right: 2rem;
+}
+
+.cardy .cdot{
+    z-index: -1;
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    width: 250px;
+    height: 50%;
+    display: block;
+    background: #000;
+    border-radius: 50%;
+    transform-origin: 125px 0;
+    transform: rotate(calc(90deg * var(--i)));
+    filter: blur(80px);
+    opacity: 0.75;
+}
+
+.cardy .cdot:nth-child(1){
+    background: #01b2fe;
+}
+
+.cardy .cdot:nth-child(2){
+    background: #ff008c;
+}
+
+.cardy .cdot:nth-child(3){
+    background: #ffcd00;
+}
+
+.cardy .cdot:nth-child(4){
+    background: #00c456;
+}
+
+.cardy .glass{
+    z-index: 3;
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: rgba(167, 167, 167, 0.6);
+    border-radius: 20px;
+    border: 2px solid #fff;
+    overflow: hidden;
+}
+
+.cardy .glass::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    /*pointer-events: none;*/
+    transform: skewX(345deg);
+
+    z-index: -1;  /* to be below the parent element */
+}
+
+.cardy .glass .form-inner{
+    max-height: 400px;
+    overflow: scroll;
+}
+
+.del-arrow{ /* small red arrow */
+	width: 12px;
+	cursor: pointer;
+	margin-left: 10px;
+}
+
+.gx-9{
+    --bs-gutter-x: 8rem;
+}
+
+/* Rules for sizing the icon. */
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+
+.material-icons-outlined.md-18 { font-size: 18px; }
+.material-icons-outlined.md-24 { font-size: 24px; }
+.material-icons-outlined.md-36 { font-size: 36px; }
+.material-icons-outlined.md-48 { font-size: 48px; }
+
+/* Rules for using icons as black on a light background. */
+.material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+
+/* Rules for using icons as white on a dark background. */
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }

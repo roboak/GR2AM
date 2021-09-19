@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from src.utils import read_data
+from src.utils.gesture_data_related import read_data
 
 
 def format_data(dataset):  # read data in the format of [total_data_size, sequence length, feature_size, feature_dim]
