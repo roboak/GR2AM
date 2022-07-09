@@ -1,6 +1,6 @@
 import torch
 
-from src.utils.neural_network_related import format_data_for_nn
+from utils.neural_network_related import format_data_for_nn
 
 
 class DL_run:

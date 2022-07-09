@@ -6,8 +6,8 @@ from pathlib import Path
 
 from flask import Flask, Response, flash, redirect, render_template, request, session, url_for
 
-from frontend.config import config
-from frontend.controller import home_page, record_gesture
+from src.frontend.config import config
+from src.frontend.controller import home_page, record_gesture
 
 app = Flask(__name__)
 app.register_blueprint(record_gesture.bp)

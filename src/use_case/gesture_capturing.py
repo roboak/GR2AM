@@ -23,7 +23,6 @@ class GestureCapture:
         self.key_capture = None
         self.all_key_points = []
         self.live_frame_size = window_size
-
         self.camera_input_value = camera_input_value
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_hands = mp.solutions.hands
@@ -81,7 +80,7 @@ class GestureCapture:
             self.gesture_dict[self.gestureMetaData.gestureName] = self.gestureMetaData.__dict__
         self.gesture_name = self.gestureMetaData.gestureName + '_' + str(
             self.gesture_dict[self.gestureMetaData.gestureName]["trials"] + 1) + '.txt'
-        self.gesture_path = self.folder_location + '/' + self.gesture_name
+        self.gesture_path = self.folder_location + '/' +self.gesture_name
         # print(self.gesture_name)
 
     def get_frame(self):

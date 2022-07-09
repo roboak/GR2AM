@@ -23,10 +23,13 @@ def main(args):
     logging.basicConfig(filename='log.log', level=logging.DEBUG)
 
     if args[0] == "--record" or args[0] == "-r":
-
+        userId = ''
+        if args[1] != '--user':
+            raise Exception("User flag not specified. Add --user <userID>")
+        userId = args[2]
         parent_directory = dirname(dirname(abspath(__file__)))
         parent_directory = Path(parent_directory)
-        path = parent_directory / "HandDataset" / "Josh2"  # TODO choose your folder
+        path = parent_directory / "HandDataset" / userId  # TODO choose your folder
 
         fnames_old = ['gesture_t_tap_1', 'gesture_t_up_2', 'gesture_t_down_3', 'gesture_i_tap_4', 'gesture_i_up_5',
                       'gesture_i_down_6', 'gesture_m_tap_7', 'gesture_m_up_8', 'gesture_m_down_9', 'gesture_r_tap_10',
@@ -34,11 +37,11 @@ def main(args):
                       'gesture_l_down_15',
                       'gesture_n_still_16', 'gesture_n_up_17', 'gesture_n_down_18']
         fnames_new = ['gesture_t_tap_1', 'gesture_t_up_2', 'gesture_t_down_3', 'gesture_i_tap_4', 'gesture_i_up_5',
-                      'gesture_i_down_6', 'gesture_m_tap_7', 'gesture_m_up_8', 'gesture_m_down_9']
+                      'gesture_i_down_6', 'gesture_m_tap_7', 'gesture_m_up_8', 'gesture_m_down_9', 'gesture_r_tap_10']
         fnames_still = ['gesture_n_still_16', 'gesture_n_up_17', 'gesture_n_down_18']
 
         for fname in fnames_new:
-            gestureMetaData = GestureMetaData(gesture_name=fname)
+            gestureMetaData = GestureMetaData(gesture_name=userId+'_'+fname)
 
             if platform.system() == "Darwin":  # for me on mac input 1 is the camera
                 gesture = GestureCapture(folder_location=str(path), gesture_meta_data=gestureMetaData,
@@ -86,9 +89,9 @@ def main(args):
         startCapture()
 
     elif args[0] == "--train" or args[0] == '-t':  # Train
-        ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Abdul_Josh',
-                                       window_size=WINDOW_SIZE)
-        ml.save_model()
+        # ml = MachineLearningClassifier(training_data_path='../HandDataset', training_data_folder='Abdul_Josh',
+        #                                window_size=WINDOW_SIZE)
+        # ml.save_model()
 
         dl = DeepLearningClassifier(window_size=WINDOW_SIZE, model=None, output_size=18)
         dl.train_model(model_path='../HandDataset/Abdul_Josh')

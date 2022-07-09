@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, Dataset
 
 from src.utils.gesture_data_related.read_data import read_data
 
@@ -19,7 +19,7 @@ def format_batch_data(dataset):
         labels[idx] = data.label
     # Return all data stacked together
     # Shape of data changes from [batch_size,seq_len,input_dim,feature_dims] -> [batch_size,seq_len,input_dim*feature_dims]
-    data_dict["data"] = data_array.reshape(len(data_array), seq_len, num_features * feature_dim).astype(np.float)
+    data_dict["data"] = data_array.reshape(len(data_array), num_features * feature_dim, seq_len).astype(np.float)
     data_dict["labels"] = labels.astype(int)
     num_classes = len(np.unique(data_dict["labels"]))
     return num_classes, data_dict
@@ -124,3 +124,7 @@ def get_data_for_training(batch_size, val_batch_size, test_batch_size, path_to_d
     X_train, X_test, X_val, y_train, y_test, y_val = split_training_test_valid(data_dict)
     train_loader, val_loader, test_loader = get_mini_batches(X_train, X_test, X_val, y_train, y_test, y_val, batch_size, test_batch_size, val_batch_size)
     return train_loader, val_loader, test_loader, seq_len
+
+
+
+
