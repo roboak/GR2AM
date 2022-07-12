@@ -90,7 +90,7 @@ class train_neural_network:
         print_every = 10
         clip = 5
         valid_loss_min = np.Inf
-        # model.train() tells your model that you are training the model. So effectively layers like dropout, batchnorm etc.
+        # model.train() tells your model that you are train the model. So effectively layers like dropout, batchnorm etc.
         # which behave different on the train and test procedures know what is going on and hence can behave accordingly.
         self.model.train()
         for i in range(self.epochs):
@@ -146,7 +146,7 @@ class train_neural_network:
         num_test_mini_batches = 0
         for inputs, labels in self.test_loader:
             num_test_mini_batches += 1
-            # h = tuple([each.data for each in h])  // Required while training lstm
+            # h = tuple([each.data for each in h])  // Required while train lstm
             inputs, labels = inputs.to(self.device), labels.to(self.device)
             output, h = self.model.forward(inputs.float(), h)
             output = output.view(test_batch_size, -1)

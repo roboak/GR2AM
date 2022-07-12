@@ -138,3 +138,11 @@ dmypy.json
 !flask_trial_gestures
 flask_trial_gestures/**/*.txt
 !flask_trial_gestures/NegativeClasses
+/HandDataset/Abdul_New_Data/
+/HandDataset/Josh2_less/
+/HandDataset/Neg_Abdul_Josh/
+/HandDataset/Abdul_Josh/
+/HandDataset/Negative_Classes/
+/HandDataset/NegJosh/
+/HandDataset/raw4.mp4
+/HandDataset/raw4_15.mp4

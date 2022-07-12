@@ -17,7 +17,7 @@ class train_rl_model:
         self.train_episodes = train_episodes
         self.test_episodes = test_episodes
         self.learning_rate = learning_rate
-        # At the time of training the network, this should be equal to all the classes present in the training dataset.
+        # At the time of train the network, this should be equal to all the classes present in the train dataset.
         self.num_classes = 5
         self.sample_num_per_class = 5
         self.batch_num_per_class = 10
@@ -64,7 +64,7 @@ class train_rl_model:
             m.bias.data = torch.ones(m.bias.data.size())
 
     def _load_data(self, train = True):
-        training_data_path = './../../HandDataset/training'
+        training_data_path = './../../HandDataset/train'
         testing_data_path = './../../HandDataset/test'
         data_path = ""
         test_num = 0
@@ -119,7 +119,7 @@ class train_rl_model:
 
 
     def train_model(self):
-        print("training the model")
+        print("train the model")
         last_accuracy = 0.0
         for episode in range(self.train_episodes):
             self.feature_encoder_scheduler.step(episode)
@@ -134,12 +134,12 @@ class train_rl_model:
             batches, batch_labels = batch_dataloader.__iter__().next()
             relations = self._predict_correlation(samples, batches)
             mse = nn.MSELoss().to(self.device)
-            # This method assumes that training set has labels starting from 0 to (num_classes-1)
+            # This method assumes that train set has labels starting from 0 to (num_classes-1)
             one_hot_labels = Variable(
                 torch.zeros(self.batch_num_per_class * self.num_classes, self.num_classes).scatter_(1, batch_labels.view(-1, 1), 1)).to(self.device)
             loss = mse(relations, one_hot_labels)
 
-            # training
+            # train
             self.feature_encoder.zero_grad()
             self.relation_network.zero_grad()
 

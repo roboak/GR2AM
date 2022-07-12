@@ -5,10 +5,10 @@ import random
 from src.utils.gesture_data_related.read_data import read_data
 from src.utils.neural_network_related.format_data_for_nn import format_batch_data
 
-# This class is for a single task generation for both meta training and meta testing.
-# For meta training, we use all 20 samples without valid set (empty here).
-# For meta testing, we use 1 or 5 shot samples for training, while using the same number of samples for validation.
-# If set num_samples = 20 and chracter_folders = metatrain_character_folders, we generate tasks for meta training
+# This class is for a single task generation for both meta train and meta testing.
+# For meta train, we use all 20 samples without valid set (empty here).
+# For meta testing, we use 1 or 5 shot samples for train, while using the same number of samples for validation.
+# If set num_samples = 20 and chracter_folders = metatrain_character_folders, we generate tasks for meta train
 # If set num_samples = 1 or 5 and chracter_folders = metatest_chracter_folders, we generate tasks for meta testing
 
 class HandGestureTask(object):
@@ -20,17 +20,17 @@ class HandGestureTask(object):
 
         # Out of all the classes in the data folder, randomly select the 'req_num_classes'
         randomly_sampled_classes = random.sample(set(data_dict["labels"].tolist()), req_num_classes)
-        # for each class some samples have to be used for training(either during training or in support set)
+        # for each class some samples have to be used for train(either during train or in support set)
         # and some samples have to be used for testing.
 
         # Each cell corresponds to a class. It is assumed
         train_indices = []
         test_indices = []
         for i in randomly_sampled_classes:
-            # for every class select randomly the 'train_num' of indices which will be used for training
+            # for every class select randomly the 'train_num' of indices which will be used for train
             train_indices_per_class = random.sample(label_indices_dict[i], train_num)
             #  for every class select randomly the 'test_num' of indices which will be used for testing. These indices should be disjoint with the
-            # indices selected for training for that particular class.
+            # indices selected for train for that particular class.
             test_indices_per_class = random.sample(set(label_indices_dict[i]).difference(set(train_indices_per_class)), test_num)
             train_indices += train_indices_per_class
             test_indices += test_indices_per_class

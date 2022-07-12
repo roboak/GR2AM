@@ -66,7 +66,7 @@ def read_data(folder_name: str, sub_folder_name: str) -> list:
 # classifier_2 = load("RandomForest.joblib")
 classifier_1 = svm.LinearSVC()  # One Vs. Rest
 classifier_2 = RandomForestClassifier(random_state=0)
-files_training = read_data(folder_name="OneParticipantDataSet", sub_folder_name="training")
+files_training = read_data(folder_name="OneParticipantDataSet", sub_folder_name="train")
 files_testing = read_data(folder_name="OneParticipantDataSet", sub_folder_name="testing")  # TODO here can do it
 feature_class = FeatureExtraction()
 features_training = np.asarray([feature_class.point_wise_extraction(file) for file in files_training])

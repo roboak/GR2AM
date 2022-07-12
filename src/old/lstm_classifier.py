@@ -96,7 +96,7 @@ class train_neural_network:
         print_every = 10
         clip = 5
         valid_loss_min = np.Inf
-        # model.train() tells your model that you are training the model. So effectively layers like dropout, batchnorm etc.
+        # model.train() tells your model that you are train the model. So effectively layers like dropout, batchnorm etc.
         # which behave different on the train and test procedures know what is going on and hence can behave accordingly.
         self.model.train()
         for i in range(self.epochs):
