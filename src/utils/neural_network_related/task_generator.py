@@ -39,11 +39,11 @@ class HandGestureTask(object):
         self.train_roots, self.train_labels = data_dict["data"][train_indices], data_dict["labels"][train_indices]
         self.test_roots, self.test_labels = data_dict["data"][test_indices], data_dict["labels"][test_indices]
 
-        print("train_indices: ", train_indices)
-        print("train_labels: ", self.train_labels)
-
-        print("test_indices ", test_indices)
-        print("test_labels: ", self.test_labels)
+        # print("train_indices: ", train_indices)
+        # print("train_labels: ", self.train_labels)
+        #
+        # print("test_indices ", test_indices)
+        # print("test_labels: ", self.test_labels)
         # self.train_roots, self.train_labels = self.unison_shuffled_copies(data_dict["data"][train_indices], data_dict["labels"][train_indices])
         # self.test_roots, self.test_labels = self.unison_shuffled_copies(data_dict["data"][test_indices], data_dict["labels"][test_indices])
 
@@ -130,5 +130,5 @@ def debug():
     trainDataLoader = get_data_loader(task=task, num_inst=inst_per_class_train, num_classes=req_num_classes, split='train')
 
 
-debug()
+# debug()
 

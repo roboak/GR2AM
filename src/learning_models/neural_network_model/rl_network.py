@@ -7,7 +7,7 @@ import torch.nn as nn
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 from torch.nn import BatchNorm1d, Conv1d, Dropout, Flatten, Linear, Sequential, Softmax, Tanh, MaxPool1d, ReLU, Sigmoid
 import math
-
+import torch.nn.functional as F
 # from torch.utils.tensorboard import SummaryWriter
 # torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True,
 # padding_mode='zeros')
@@ -73,9 +73,9 @@ class CNN1DEncoder(nn.Module):
         )
     def forward(self, input):
         # dimension of signature: (batch_size x 64 x seq_len)
-        print("encoder model input shape: ", input.shape)
-        cnn_out = self.cnn_layers(input)
-        print("encoder model output shape: ", cnn_out.shape)
+        # print("encoder model input shape: ", input.shape)
+        cnn_out = self.cnn_layers(input.float())
+        # print("encoder model output shape: ", cnn_out.shape)
 
         # flat_out = self.flatten(cnn_out)
         # dense_out = self.dense_layers(flat_out)
@@ -87,7 +87,7 @@ class RelationNetwork(nn.Module):
     def __init__(self, seq_len: int, hidden_size: int):
         super(RelationNetwork, self).__init__()
         self.layer1 = nn.Sequential(
-                        nn.Conv1d(64,64,kernel_size=3,padding=1),
+                        nn.Conv1d(128,64,kernel_size=3,padding=1),
                         nn.BatchNorm1d(64, momentum=1, affine=True),
                         nn.ReLU(),
                         nn.MaxPool1d(2))
@@ -99,28 +99,30 @@ class RelationNetwork(nn.Module):
         # batch_size x 64 x seq_len/4
         # input_szie  = 64 x seq_len/4
         input_size = 448
-        self.layer3 = Sequential(
-            nn.Linear(input_size, hidden_size),
-            ReLU(),
-            nn.Linear(hidden_size, 1),
-            Sigmoid()
-        )
-        # self.fc1 = nn.Linear(input_size,hidden_size)
-        # self.fc2 = nn.Linear(hidden_size,1)
+        # self.layer3 = Sequential(
+        #     nn.Linear(input_size, hidden_size),
+        #     # ReLU(),
+        #     nn.Linear(hidden_size, 1)
+        #     # Sigmoid()
+        # )
+
+        self.fc1 = nn.Linear(input_size,hidden_size)
+        self.fc2 = nn.Linear(hidden_size,1)
 
     def forward(self,x):
-        print('cnn input shape {}'.format(x.shape))
+        # print('cnn input shape {}'.format(x.shape))
         out = self.layer1(x)
-        print('cnn 1 output shape {}'.format(out.shape))
+        # print('cnn 1 output shape {}'.format(out.shape))
         out = self.layer2(out)
-        print('cnn 2 output shape {}'.format(out.shape))
+        # print('cnn 2 output shape {}'.format(out.shape))
         out = out.view(out.size(0),-1)
-        print('cnn reshaped output shape {}'.format(out.shape))
-        # out = ReLU(self.fc1(out))
-        # out = Sigmoid(self.fc2(out))
-        out = self.layer3(out)
-        print('fc layer output shape {}'.format(out.shape))
-
+        # print('cnn reshaped output shape {}'.format(out.shape))
+        # print("Type out 1:", type(out))
+        out = F.relu(self.fc1(out))
+        # print("Type out 2:", type(out))
+        out = F.sigmoid(self.fc2(out))
+        # out = self.layer3(out)
+        # print('fc layer output shape {}'.format(out.shape))
         return out
 
 
@@ -154,4 +156,4 @@ def debug():
     out2 = relation_model(embeddings)
     print("done")
 
-debug()
+# debug()

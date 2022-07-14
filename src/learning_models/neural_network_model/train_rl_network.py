@@ -14,26 +14,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 class train_rl_model:
     def __init__(self, seq_len = 30, learning_rate = 0.001, train_episodes = 1000000, test_episodes = 1000):
-        self.train_episodes = train_episodes
-        self.test_episodes = test_episodes
-        self.learning_rate = learning_rate
-        # At the time of train the network, this should be equal to all the classes present in the train dataset.
-        self.num_classes = 5
-        self.sample_num_per_class = 5
-        self.batch_num_per_class = 10
-        self.seq_len = seq_len
-        self.feature_encoder = CNN1DEncoder(seq_len=30).to(self.device)
-        self.relation_network = RelationNetwork(seq_len=30, hidden_size=10).to(self.device)
-        self.feature_encoder.apply(self._weights_init)
-        self.relation_network.apply(self._weights_init)
-        self.feature_encoder_optim = torch.optim.Adam(self.feature_encoder.parameters(), lr= self.learning_rate)
-        self.feature_encoder_scheduler = StepLR(self.feature_encoder_optim, step_size=100000, gamma=0.5)
-        self.relation_network_optim = torch.optim.Adam(self.relation_network.parameters(), lr=self.learning_rate)
-        self.relation_network_scheduler = StepLR(self.relation_network_optim, step_size=100000, gamma=0.5)
-        self.writer = SummaryWriter()
-
-
-        # If we have a GPU available, we'll set our device to GPU. We'll use this device variable later in our code.
         def get_device():
             is_cuda = torch.cuda.is_available()
             device = ""
@@ -45,13 +25,35 @@ class train_rl_model:
                 print("GPU not available, CPU used")
             return device
         self.device = get_device()
+        self.train_episodes = train_episodes
+        self.test_episodes = test_episodes
+        self.learning_rate = learning_rate
+        # At the time of train the network, this should be equal to all the classes present in the train dataset.
+        self.num_classes = 6
+        self.sample_num_per_class = 5
+        self.batch_num_per_class = 5
+        self.seq_len = seq_len
+        self.feature_encoder = CNN1DEncoder(seq_len=30)
+        self.relation_network = RelationNetwork(seq_len=30, hidden_size=10)
+        self.feature_encoder.apply(self._weights_init)
+        self.relation_network.apply(self._weights_init)
+        self.feature_encoder , self.relation_network = self.feature_encoder.to(self.device), self.relation_network.to(self.device)
+        self.feature_encoder_optim = torch.optim.Adam(self.feature_encoder.parameters(), lr= self.learning_rate)
+        self.feature_encoder_scheduler = StepLR(self.feature_encoder_optim, step_size=100000, gamma=0.5)
+        self.relation_network_optim = torch.optim.Adam(self.relation_network.parameters(), lr=self.learning_rate)
+        self.relation_network_scheduler = StepLR(self.relation_network_optim, step_size=100000, gamma=0.5)
+        self.writer = SummaryWriter()
+
+
+        # If we have a GPU available, we'll set our device to GPU. We'll use this device variable later in our code.
+
 
 
     def _weights_init(self, m):
         classname = m.__class__.__name__
         if classname.find('Conv') != -1:
             print(m.kernel_size)
-            n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+            n = m.kernel_size[0] * m.out_channels
             m.weight.data.normal_(0, math.sqrt(2. / n))
             if m.bias is not None:
                 m.bias.data.zero_()
@@ -64,8 +66,8 @@ class train_rl_model:
             m.bias.data = torch.ones(m.bias.data.size())
 
     def _load_data(self, train = True):
-        training_data_path = './../../HandDataset/train'
-        testing_data_path = './../../HandDataset/test'
+        training_data_path = './../../../HandDataset/train'
+        testing_data_path = './../../../HandDataset/test'
         data_path = ""
         test_num = 0
         if(train):
@@ -77,7 +79,7 @@ class train_rl_model:
 
         data_list, _ = read_data(path=data_path, window_size=30)
         total_num_classes, data_dict = format_batch_data(data_list)
-
+        data_dict["labels"] = data_dict["labels"] - 1
         task = HandGestureTask(data_dict=data_dict, req_num_classes=self.num_classes,
                                train_num=self.sample_num_per_class, test_num=test_num)
 
@@ -92,14 +94,14 @@ class train_rl_model:
     def _predict_correlation(self, samples, batches):
         # calculate embedding for support set and query set.
         sample_features = self.feature_encoder(
-            Variable(samples).to(self.device))  # (req_num_classes*num_inst_class)x64x30
+            Variable(samples).to(self.device, dtype=torch.float))  # (req_num_classes*num_inst_class)x64x30
         sample_features = sample_features.view(self.num_classes, self.sample_num_per_class, 64,
                                                30)  # req_num_classes x num_inst_class x 64 x 30
         # All instances of a particular clss are added.
-        # Assumption: All the instaces of a particular class are grouped together.
+        # Assumption: All the instances of a particular class are grouped together.
         sample_features = torch.sum(sample_features, 1).squeeze(1)  # req_num_classes x 64 x 30
         batch_features = self.feature_encoder(
-            Variable(batches).to(self.device))  # inst_per_class_test*req_num_classes x 64 x (seq_len=30)
+            Variable(batches).to(self.device, dtype=torch.float))  # inst_per_class_test*req_num_classes x 64 x (seq_len=30)
 
         # calculate relations
         sample_features_ext = sample_features.unsqueeze(0).repeat(self.batch_num_per_class * self.num_classes, 1, 1, 1)
@@ -112,7 +114,7 @@ class train_rl_model:
         # This would create all_possible pairs of support_set and query_set.
         # dimension = inst_per_class_test*req_num_classes*req_num_classes(num of data in support set) x (64+64) x 30
         relation_pairs = torch.cat((sample_features_ext, batch_features_ext), 2).view(-1, 64 * 2, 30)
-
+        # print('relation_pairs size: {}'.format(relation_pairs.size()))
         # dimension(relations) = (req_num_classes*inst_per_class_test) x 1   ->  inst_per_class_test x req_num_classes
         relations = self.relation_network(relation_pairs).view(-1, self.num_classes)
         return relations
@@ -151,9 +153,9 @@ class train_rl_model:
             self.feature_encoder_optim.step()
             self.relation_network_optim.step()
 
-            if (episode + 1) % 100 == 0:
-                print("episode:", episode + 1, "loss", loss.data[0])
-                self.writer.add_scalar("Loss/train", loss.data[0], episode+1)
+            if (episode + 1) % 2 == 0:
+                print("episode:", episode + 1, "loss", loss.data)
+                self.writer.add_scalar("Loss/train", loss.data, episode+1)
 
             if (episode + 1) % 5000 == 0:
                 # test
@@ -189,3 +191,7 @@ class train_rl_model:
                     last_accuracy = test_accuracy
 
 
+
+
+network_trainer = train_rl_model()
+network_trainer.train_model()
