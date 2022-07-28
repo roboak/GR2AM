@@ -26,8 +26,8 @@ class CNN1D(nn.Module):
 
         self.cnn_layers = Sequential(
             # out_channel = number of filters in the CNN
-            Conv1d(in_channels=self.seq_len, out_channels=self.n_cnn_filter_1,
-                   kernel_size=self.cnn_kernel_size_1, stride=self.cnn_stride_1),
+            Conv1d(in_channels=63, out_channels=self.n_cnn_filter_1,
+                   kernel_size=3, padding=1),
             BatchNorm1d(self.n_cnn_filter_1),
             # ReLU(),
             Tanh(),
@@ -35,7 +35,7 @@ class CNN1D(nn.Module):
             # MaxPool1d(2),
             # len_output_features_per_frame = int((input_features_per_frame - kernel_size)/stride) + 1
             Conv1d(in_channels=self.n_cnn_filter_1, out_channels=self.n_cnn_filter_2,
-                   kernel_size=self.cnn_kernel_size_2, stride=self.cnn_stride_2),
+                   kernel_size=3, padding=1),
             BatchNorm1d(self.n_cnn_filter_2),
             # ReLU(),
             Tanh(),
@@ -45,12 +45,12 @@ class CNN1D(nn.Module):
 
         )
         self.flatten = Flatten()
-        cnn_output1 = (63 - self.cnn_kernel_size_1) // self.cnn_stride_1 + 1
-        max_pool1 = cnn_output1 // 1
-        cnn_output2 = (max_pool1 - self.cnn_kernel_size_2) // self.cnn_stride_2 + 1
-        max_pool2 = cnn_output2 // 1
+        # cnn_output1 = (63 - self.cnn_kernel_size_1) // self.cnn_stride_1 + 1
+        # max_pool1 = cnn_output1 // 1
+        # cnn_output2 = (max_pool1 - self.cnn_kernel_size_2) // self.cnn_stride_2 + 1
+        # max_pool2 = cnn_output2 // 1
         self.dense_layers = Sequential(
-            Linear(self.n_cnn_filter_2 * max_pool2, self.output_size),
+            Linear(self.n_cnn_filter_2 * self.seq_len, self.output_size),
             Softmax()
         )
 

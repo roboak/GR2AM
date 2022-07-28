@@ -53,4 +53,4 @@ def plot_data(file_path, image_shape):
     cv2.destroyAllWindows()
 
 
-plot_data("/home/akash/Documents/HLCV_Project/GR2AM/HandDataset/u1/u1_gesture_t_tap_1_1.txt", (720, 1280))
+plot_data("/home/akash/Documents/HLCV_Project/GR2AM/HandDataset/train/u1_gesture_i_tap_4_1.txt", (720, 1280))

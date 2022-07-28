@@ -30,7 +30,7 @@ class DeepLearningClassifier(LearningModel):
 
         return torch.argmax(pred).item(), torch.max(pred).item()  # pred_class, confid
 
-    def train_model(self, model_path, path_to_data="../HandDataset", folder_name="Josh2_less", img_path=""):
+    def train_model(self, model_path, path_to_data="./../../../HandDataset", folder_name="train", img_path=""):
         """Train the Model
         :param img_path: path for the confusion matrix to be saved
         """
@@ -41,8 +41,8 @@ class DeepLearningClassifier(LearningModel):
 
 
 if __name__ == '__main__':
-    dl_model = DeepLearningClassifier()
-    # dl_model.train_model()
-    test_data = rd.read_data("../../../HandDataset/TrainingData", "Josh", window_size=dl_model.window_size)
-    print("prediction: ", dl_model.predict_data(test_data[0][1].data))
-    print("label: ", test_data[0][1].label)
+    dl_model = DeepLearningClassifier(window_size=30, model=None)
+    dl_model.train_model(model_path = "/home/akash/Documents/HLCV_Project/GR2AM/src/saved_models")
+    # test_data = rd.read_data("../../../HandDataset", "Josh", window_size=dl_model.window_size)
+    # print("prediction: ", dl_model.predict_data(test_data[0][1].data))
+    # print("label: ", test_data[0][1].label)

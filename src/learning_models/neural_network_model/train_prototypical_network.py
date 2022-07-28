@@ -7,23 +7,22 @@ from torch import nn
 from torch.autograd import Variable
 from torch.optim.lr_scheduler import StepLR
 
-from learning_models.neural_network_model.rl_network import CNN1DEncoder, RelationNetwork
+from learning_models.neural_network_model.prototypical_network import CNN1DEncoder
 from utils.gesture_data_related.read_data import read_data
 from utils.neural_network_related.format_data_for_nn import format_batch_data
 from utils.neural_network_related.task_generator import HandGestureTask, get_data_loader
 from torch.utils.tensorboard import SummaryWriter
-
+from torch.nn import functional as F
 
 
 parser = argparse.ArgumentParser(description="One Shot Gesture Recognition")
 parser.add_argument("-f","--feature_dim",type = int, default = 64)
 parser.add_argument("-w","--class_num",type = int, default = 6)
 parser.add_argument("-s","--sample_num_per_class",type = int, default = 3)
-parser.add_argument("-b","--batch_num_per_class",type = int, default = 2)
+parser.add_argument("-b","--batch_num_per_class",type = int, default = 9)
 parser.add_argument("-e","--episode",type = int, default= 1000) #initially : 1000000
 parser.add_argument("-t","--test_episode", type = int, default = 10) # initially: 1000
-parser.add_argument("-l","--learning_rate", type = float, default = 0.001)
-parser.add_argument("-g","--gpu",type=int, default=0)
+parser.add_argument("-l","--learning_rate", type = float, default = 0.002)
 parser.add_argument("-u","--hidden_unit",type=int,default=8)
 args = parser.parse_args()
 
@@ -36,7 +35,6 @@ BATCH_NUM_PER_CLASS = args.batch_num_per_class
 EPISODE = args.episode
 TEST_EPISODE = args.test_episode
 LEARNING_RATE = args.learning_rate
-GPU = args.gpu
 HIDDEN_UNIT = args.hidden_unit
 
 
@@ -64,15 +62,11 @@ class train_rl_model:
         self.seq_len = seq_len
         self.feature_encoder = CNN1DEncoder(seq_len=self.seq_len, feature_dim=self.embedding_dim)
         print(self.feature_encoder)
-        self.relation_network = RelationNetwork(seq_len=self.seq_len, hidden_size=HIDDEN_UNIT, feature_dim=self.embedding_dim)
-        print(self.relation_network)
         # self.feature_encoder.apply(self._weights_init)
         # self.relation_network.apply(self._weights_init)
-        self.feature_encoder , self.relation_network = self.feature_encoder.to(self.device), self.relation_network.to(self.device)
+        self.feature_encoder  = self.feature_encoder.to(self.device)
         self.feature_encoder_optim = torch.optim.Adam(self.feature_encoder.parameters(), lr= self.learning_rate)
-        self.feature_encoder_scheduler = StepLR(self.feature_encoder_optim, step_size=EPISODE/10, gamma=0.1)
-        self.relation_network_optim = torch.optim.Adam(self.relation_network.parameters(), lr=self.learning_rate)
-        self.relation_network_scheduler = StepLR(self.relation_network_optim, step_size=EPISODE/10, gamma=0.1)
+        self.feature_encoder_scheduler = StepLR(self.feature_encoder_optim, step_size=EPISODE/10, gamma=0.5)
         self.writer = SummaryWriter()
 
 
@@ -122,16 +116,23 @@ class train_rl_model:
         return trainDataLoader, testDataLoader
 
 # debugging notes: couple with sample data rather than batch; auto-encoders; increasing the dataset; prune the relation network
-
-    def _predict_correlation(self, samples, batches):
+    def _euclidean_dist(self, x, y):
+        '''
+        Compute euclidean distance between two tensors
+        '''
+        # x: num_class*num_class*num_inst_per_class_test x feature_dim * seq_len
+        # y: num_class*num_class*num_inst_per_class_test x feature_dim * seq_len
+        return torch.pow(x - y, 2).sum(1)
+    def _forward_pass(self, samples, batches, batch_labels):
         # calculate embedding for support set and query set.
         sample_features = self.feature_encoder(
             Variable(samples).to(self.device, dtype=torch.float))  # (req_num_classes*num_inst_class)x64x30
         sample_features = sample_features.view(self.num_classes, self.sample_num_per_class, self.embedding_dim,
                                                self.seq_len)  # req_num_classes x num_inst_class x 64 x 30
         # All instances of a particular clss are added.
-        # Assumption: All the instances of a particular class are grouped together.
-        sample_features = torch.sum(sample_features, 1).squeeze(1)  # req_num_classes x 64 x 30
+        # Assumption: All the instances of a particular class are grouped together. The following line of code
+        # calculates the average of all the samples of a particular class.
+        sample_features = torch.sum(sample_features, 1).squeeze(1) / self.sample_num_per_class # req_num_classes x 64 x 30
         batch_features = self.feature_encoder(
             Variable(batches).to(self.device, dtype=torch.float))  # inst_per_class_test*req_num_classes x 64 x (seq_len=30)
 
@@ -145,12 +146,18 @@ class train_rl_model:
 
         # This would create all_possible pairs of support_set and query_set.
         # dimension = inst_per_class_test*req_num_classes*req_num_classes(num of data in support set) x (64+64) x 30
-        relation_pairs = torch.cat((sample_features_ext, sample_features_ext), 2).view(-1, self.embedding_dim * 2, 30)
-        # print('relation_pairs size: {}'.format(relation_pairs.size()))
-        # dimension(relations) = (req_num_classes*req_num_classes*inst_per_class_test) x 1   ->  req_num_classes*inst_per_class_test x req_num_classes
-        relations = self.relation_network(relation_pairs)
-        relations = relations.view(-1, self.num_classes)
-        return relations
+        relation_pairs = torch.cat((batch_features_ext, sample_features_ext), 2).view(-1, self.embedding_dim * 2, 30)
+        #dists dimension = inst_per_class_test*req_num_classes*req_num_classes x 1
+        dists = self._euclidean_dist(relation_pairs[:, 0:self.embedding_dim, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1),
+                                     relation_pairs[:, self.embedding_dim:, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1))
+        #dists dimension = inst_per_class_test*req_num_classes x req_num_classes
+        dists = dists.view(-1, self.num_classes)
+        log_p_y = F.log_softmax(-1*dists, dim=1)
+        _, predicted_label = log_p_y.max(1)
+        acc = torch.eq(predicted_label, batch_labels.to(self.device)).float().mean()
+        one_hot_labels = torch.zeros(self.batch_num_per_class * self.num_classes, self.num_classes).scatter_(1, batch_labels.view(-1, 1), 1).to(self.device)
+        loss = (-1 * log_p_y * one_hot_labels).squeeze().mean()
+        return loss, acc, predicted_label, F.softmax(-1*dists, dim = 1)
 
 
     def train_model(self):
@@ -158,7 +165,6 @@ class train_rl_model:
         last_accuracy = 0.0
         for episode in range(self.train_episodes):
             self.feature_encoder_scheduler.step(episode)
-            self.relation_network_scheduler.step(episode)
 
             # init dataset
             # sample_dataloader is used for support set
@@ -167,25 +173,18 @@ class train_rl_model:
             # sample datas
             samples, sample_labels = sample_dataloader.__iter__().next()
             batches, batch_labels = batch_dataloader.__iter__().next()
-            relations = self._predict_correlation(samples, batches)
-
-            mse = nn.MSELoss().to(self.device)
-            # This method assumes that train set has labels starting from 0 to (num_classes-1)
-            one_hot_labels = Variable(
-                torch.zeros(self.batch_num_per_class * self.num_classes, self.num_classes).scatter_(1, batch_labels.view(-1, 1), 1)).to(self.device)
-            loss = mse(relations, one_hot_labels)
+            loss, acc, predict_labels, prob = self._forward_pass(samples, batches, batch_labels)
 
             # train
             self.feature_encoder.zero_grad()
-            self.relation_network.zero_grad()
-
             loss.backward()
+            self.writer.add_scalar("Training/loss", loss.data, episode + 1)
+            self.writer.add_scalar("Training/accuracy", acc.data, episode + 1)
 
-            torch.nn.utils.clip_grad_norm(self.feature_encoder.parameters(), 2)
-            torch.nn.utils.clip_grad_norm(self.relation_network.parameters(), 2)
+            # torch.nn.utils.clip_grad_norm(self.feature_encoder.parameters(), 2)
+            # torch.nn.utils.clip_grad_norm(self.relation_network.parameters(), 2)
 
             self.feature_encoder_optim.step()
-            self.relation_network_optim.step()
 
             # DEBUG: Logging in the parameters of the network
 
@@ -193,59 +192,58 @@ class train_rl_model:
                 self.writer.add_histogram(name, weight, episode)
                 self.writer.add_histogram(f'{name}.grad', weight.grad, episode)
 
-            for name, weight in self.relation_network.named_parameters():
-                self.writer.add_histogram(name, weight, episode)
-                self.writer.add_histogram(f'{name}.grad', weight.grad, episode)
 
-            if (episode + 1) % 2 == 0:
-                print("episode:", episode + 1, "loss", loss.data)
+            if (episode + 1) % 5 == 0:
+                print("episode_________________________:", episode + 1, "loss", loss.data)
                 # print("sample_labels: ",sample_labels)
                 print("batch_labels: ",batch_labels)
                 # print("batch_labels_one_hot: ", one_hot_labels)
-                print("relations obtained: ", relations)
-                _, predict_labels = torch.max(relations.data, 1)
+                # print("relations obtained: ", relations)
+                # _, predict_labels = torch.max(relations.data, 1)
                 print("predicted labels:", predict_labels)
-                rewards = [1 if predict_labels[j] == batch_labels[j] else 0 for j in
-                           range(self.num_classes * self.batch_num_per_class)]
-                total_rewards = np.sum(rewards)
-                train_accuracy = total_rewards / (self.num_classes*self.batch_num_per_class)
-                print("episode:", episode + 1, "training accuracy", train_accuracy)
+                # rewards = [1 if predict_labels[j] == batch_labels[j] else 0 for j in
+                #            range(self.num_classes * self.batch_num_per_class)]
+                # total_rewards = np.sum(rewards)
+                # train_accuracy = total_rewards / (self.num_classes*self.batch_num_per_class)
+                print("training accuracy", acc)
+                print("probabilities: ", prob)
                 # self.writer.add_scalar("Loss/train", loss.data, episode+1)
 
             if (episode + 1) % 20 == 0:
                 # test
                 print("Testing...")
-                total_rewards = 0
+                test_accuracy = 0
                 for i in range(self.test_episodes):
                     sample_dataloader, test_dataloader = self._load_data(train=False)
                     sample_images, sample_labels = sample_dataloader.__iter__().next()
                     test_images, test_labels = test_dataloader.__iter__().next()
-                    relations = self._predict_correlation(sample_images, test_images)
-                    _, predict_labels = torch.max(relations.data, 1)
+                    loss, acc, predict_labels,_ = self._forward_pass(sample_images, test_images, test_labels)
+                    # relations = self._forward_pass(sample_images, test_images)
+                    # _, predict_labels = torch.max(relations.data, 1)
+                    #
+                    # rewards = [1 if predict_labels[j] == test_labels[j] else 0 for j in
+                    #            range(self.num_classes * self.batch_num_per_class)]
+                    #
+                    # total_rewards += np.sum(rewards)
+                    test_accuracy += acc
 
-                    rewards = [1 if predict_labels[j] == test_labels[j] else 0 for j in
-                               range(self.num_classes * self.batch_num_per_class)]
-
-                    total_rewards += np.sum(rewards)
-
-                test_accuracy = total_rewards / 1.0 / self.num_classes / self.batch_num_per_class / self.test_episodes
+                test_accuracy = test_accuracy / self.test_episodes
 
                 print("test accuracy:", test_accuracy)
+                self.writer.add_scalar("Testing/acc", test_accuracy.data, (episode + 1) % 20)
 
                 if test_accuracy > last_accuracy:
                     # save networks
                     torch.save(self.feature_encoder.state_dict(),
                                str("./../../saved_models/hand_feature_encoder_" + str(self.num_classes) + "way_" + str(
                                    self.sample_num_per_class) + "shot.pkl"))
-                    torch.save(self.relation_network.state_dict(),
-                               str("./../../saved_models/hand_relation_network_" + str(self.num_classes) + "way_" + str(
-                                   self.sample_num_per_class) + "shot.pkl"))
+                    # torch.save(self.relation_network.state_dict(),
+                    #            str("./../../saved_models/hand_relation_network_" + str(self.num_classes) + "way_" + str(
+                    #                self.sample_num_per_class) + "shot.pkl"))
 
                     print("save networks for episode:", episode)
 
                     last_accuracy = test_accuracy
-
-
 
 
 network_trainer = train_rl_model()

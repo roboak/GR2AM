@@ -61,50 +61,6 @@ class CNN1DEncoder(nn.Module):
 
         return cnn_out
 
-class RelationNetwork(nn.Module):
-    """docstring for RelationNetwork"""
-    def __init__(self, seq_len: int, hidden_size: int, feature_dim: int):
-        super(RelationNetwork, self).__init__()
-        self.rn_layer1 = nn.Sequential(
-                        nn.Conv1d(2*feature_dim,64,kernel_size=3,padding=1),
-                        nn.BatchNorm1d(64, momentum=1, affine=True),
-                        nn.ReLU(),
-                        nn.MaxPool1d(2))
-        self.rn_layer2 = nn.Sequential(
-                        nn.Conv1d(64,64,kernel_size=3,padding=1),
-                        nn.BatchNorm1d(64, momentum=1, affine=True),
-                        nn.ReLU(),
-                        nn.MaxPool1d(2))
-        # batch_size x 64 x seq_len/4
-        # input_szie  = 64 x seq_len/4
-        input_size = 64 * int(seq_len /2 /2)
-        # self.layer3 = Sequential(
-        #     nn.Linear(input_size, hidden_size),
-        #     # ReLU(),
-        #     nn.Linear(hidden_size, 1)
-        #     # Sigmoid()
-        # )
-
-        self.rn_fc1 = nn.Linear(input_size, hidden_size)
-        self.rn_fc2 = nn.Linear(hidden_size, 1)
-
-    def forward(self,x):
-        # print('cnn input shape {}'.format(x.shape))
-        out = self.rn_layer1(x)
-        # print('cnn 1 output shape {}'.format(out.shape))
-        out = self.rn_layer2(out)
-        # print('cnn 2 output shape {}'.format(out.shape))
-        out = out.view(out.size(0),-1)
-        # print('cnn reshaped output shape {}'.format(out.shape))
-        # print("Type out 1:", type(out))
-        out = F.relu(self.rn_fc1(out))
-        # print("Type out 2:", type(out))
-        out = F.sigmoid(self.rn_fc2(out))
-        # out = self.layer3(out)
-        # print('fc layer output shape {}'.format(out.shape))
-        return out
-
-
 
 
 def debug():
@@ -130,9 +86,9 @@ def debug():
     samples,sample_labels = trainDataLoader.__iter__().next()
     samples,sample_labels = samples.to(device).float(), sample_labels.to(device)
     encoder_model = CNN1DEncoder(seq_len=30).to(device)
-    relation_model = RelationNetwork(seq_len=30, hidden_size=10).to(device)
-    embeddings = encoder_model(samples)
-    out2 = relation_model(embeddings)
+    # relation_model = RelationNetwork(seq_len=30, hidden_size=10).to(device)
+    # embeddings = encoder_model(samples)
+    # out2 = relation_model(embeddings)
     print("done")
 
 # debug()

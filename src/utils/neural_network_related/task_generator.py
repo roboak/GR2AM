@@ -10,12 +10,24 @@ from src.utils.neural_network_related.format_data_for_nn import format_batch_dat
 # For meta testing, we use 1 or 5 shot samples for train, while using the same number of samples for validation.
 # If set num_samples = 20 and chracter_folders = metatrain_character_folders, we generate tasks for meta train
 # If set num_samples = 1 or 5 and chracter_folders = metatest_chracter_folders, we generate tasks for meta testing
+def check_if_exactly_equal(list_1, list_2):
+    # check if both the lists are of same size
+    if len(list_1) != len(list_2):
+        return False
+    # create a zipped object from 2lists
+    final_list = zip(list_1, list_2)
+    # iterate over the zipped object
+    for elem in final_list:
+        if elem[0] != elem[1]:
+            return False
+    return True
 
 class HandGestureTask(object):
     def __init__(self, data_dict, req_num_classes, train_num, test_num):
         self.req_num_classes= req_num_classes
         # get indices of samples for a particular class. For example, if label = [1,2,1,1,2,3]
         # dict_label = {'1'= [0, 2, 3]; '2' = [1, 4]; 3= [5]}
+        # print("data_labels:", data_dict["labels"])
         label_indices_dict = self.get_pos_for_each_label(data_dict["labels"])
 
         # Out of all the classes in the data folder, randomly select the 'req_num_classes'
@@ -38,6 +50,10 @@ class HandGestureTask(object):
 
         self.train_roots, self.train_labels = data_dict["data"][train_indices], data_dict["labels"][train_indices]
         self.test_roots, self.test_labels = data_dict["data"][test_indices], data_dict["labels"][test_indices]
+        self.test_roots, self.test_labels = self.unison_shuffled_copies(data_dict["data"][test_indices], data_dict["labels"][test_indices])
+
+        # print(check_if_exactly_equal(data_dict["labels"][train_indices], self.train_labels))
+        # print(check_if_exactly_equal(data_dict["labels"][test_indices], self.test_labels))
 
         # print("train_indices: ", train_indices)
         # print("train_labels: ", self.train_labels)
@@ -104,13 +120,13 @@ class ClassBalancedSampler(Sampler):
 
     def __len__(self):
         return 1
-def debug():
-    data_list, _ = read_data(path='./../../../HandDataset/Abdul_New_Data', window_size=30)
-    total_num_classes, data_dict = format_batch_data(data_list)
-    task = HandGestureTask(data_dict = data_dict, req_num_classes=5,
-                           train_num=1, test_num=5)
-    train_hand_dataset = HandGestureDataSet(task=task, split='train') #dimensions = batch_size(req_num_classes) x seq_len(30) x num_channels(63)
-    test_hand_dataset = HandGestureDataSet(task=task, split='test')
+# def debug():
+#     data_list, _ = read_data(path='./../../../HandDataset/Abdul_New_Data', window_size=30)
+#     total_num_classes, data_dict = format_batch_data(data_list)
+#     task = HandGestureTask(data_dict = data_dict, req_num_classes=5,
+#                            train_num=1, test_num=5)
+#     train_hand_dataset = HandGestureDataSet(task=task, split='train') #dimensions = batch_size(req_num_classes) x seq_len(30) x num_channels(63)
+#     test_hand_dataset = HandGestureDataSet(task=task, split='test')
 
 def get_data_loader(task, num_inst, num_classes, split='train'):
 
@@ -130,5 +146,5 @@ def debug():
     trainDataLoader = get_data_loader(task=task, num_inst=inst_per_class_train, num_classes=req_num_classes, split='train')
 
 
-# debug()
+debug()
 
