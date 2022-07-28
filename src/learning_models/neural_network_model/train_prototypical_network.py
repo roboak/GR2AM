@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description="One Shot Gesture Recognition")
 parser.add_argument("-f","--feature_dim",type = int, default = 64)
 parser.add_argument("-w","--class_num",type = int, default = 6)
 parser.add_argument("-s","--sample_num_per_class",type = int, default = 3)
-parser.add_argument("-b","--batch_num_per_class",type = int, default = 9)
+parser.add_argument("-b","--batch_num_per_class",type = int, default = 19)
 parser.add_argument("-e","--episode",type = int, default= 1000) #initially : 1000000
 parser.add_argument("-t","--test_episode", type = int, default = 10) # initially: 1000
 parser.add_argument("-l","--learning_rate", type = float, default = 0.002)
@@ -92,7 +92,7 @@ class train_rl_model:
 
     def _load_data(self, train = True):
         training_data_path = './../../../HandDataset/train'
-        testing_data_path = './../../../HandDataset/test'
+        testing_data_path = './../../../HandDataset/train'
         data_path = ""
         test_num = self.batch_num_per_class
         if(train):
