@@ -17,12 +17,12 @@ from torch.nn import functional as F
 
 parser = argparse.ArgumentParser(description="One Shot Gesture Recognition")
 parser.add_argument("-f","--feature_dim",type = int, default = 64)
-parser.add_argument("-w","--class_num",type = int, default = 6)
-parser.add_argument("-s","--sample_num_per_class",type = int, default = 3)
-parser.add_argument("-b","--batch_num_per_class",type = int, default = 19)
-parser.add_argument("-e","--episode",type = int, default= 1000) #initially : 1000000
+parser.add_argument("-w","--class_num",type = int, default = 3)
+parser.add_argument("-s","--sample_num_per_class",type = int, default = 5)
+parser.add_argument("-b","--batch_num_per_class",type = int, default = 17)
+parser.add_argument("-e","--episode",type = int, default= 1500) #initially : 1000000
 parser.add_argument("-t","--test_episode", type = int, default = 10) # initially: 1000
-parser.add_argument("-l","--learning_rate", type = float, default = 0.002)
+parser.add_argument("-l","--learning_rate", type = float, default = 0.005)
 parser.add_argument("-u","--hidden_unit",type=int,default=8)
 args = parser.parse_args()
 
@@ -38,7 +38,7 @@ LEARNING_RATE = args.learning_rate
 HIDDEN_UNIT = args.hidden_unit
 
 
-class train_rl_model:
+class train_proto_model:
     def __init__(self, seq_len = 30, learning_rate = LEARNING_RATE, train_episodes = EPISODE, test_episodes = TEST_EPISODE, embedding_dim = FEATURE_DIM):
         def get_device():
             is_cuda = torch.cuda.is_available()
@@ -91,8 +91,8 @@ class train_rl_model:
             m.bias.data = torch.ones(m.bias.data.size())
 
     def _load_data(self, train = True):
-        training_data_path = './../../../HandDataset/train'
-        testing_data_path = './../../../HandDataset/train'
+        training_data_path = './../../../HandDataset/train_sim_red'
+        testing_data_path = './../../../HandDataset/train_sim_red'
         data_path = ""
         test_num = self.batch_num_per_class
         if(train):
@@ -122,13 +122,25 @@ class train_rl_model:
         '''
         # x: num_class*num_class*num_inst_per_class_test x feature_dim * seq_len
         # y: num_class*num_class*num_inst_per_class_test x feature_dim * seq_len
-        return torch.pow(x - y, 2).sum(1)
+        return torch.sqrt(torch.pow(x - y, 2).sum(1))
+
+    def _cosine_dist(self, x, y):
+        '''
+        Compute euclidean distance between two tensors
+        '''
+        # x: num_class*num_class*num_inst_per_class_test x feature_dim * seq_len
+        # y: num_class*num_class*num_inst_per_class_test x feature_dim * seq_len
+        cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+        return cos(x,y)
+
+    # def _calculate_correlation(self, x, y):
+
     def _forward_pass(self, samples, batches, batch_labels):
         # calculate embedding for support set and query set.
         sample_features = self.feature_encoder(
             Variable(samples).to(self.device, dtype=torch.float))  # (req_num_classes*num_inst_class)x64x30
         sample_features = sample_features.view(self.num_classes, self.sample_num_per_class, self.embedding_dim,
-                                               self.seq_len)  # req_num_classes x num_inst_class x 64 x 30
+                                               -1)  # req_num_classes x num_inst_class x 64 x 30
         # All instances of a particular clss are added.
         # Assumption: All the instances of a particular class are grouped together. The following line of code
         # calculates the average of all the samples of a particular class.
@@ -146,17 +158,34 @@ class train_rl_model:
 
         # This would create all_possible pairs of support_set and query_set.
         # dimension = inst_per_class_test*req_num_classes*req_num_classes(num of data in support set) x (64+64) x 30
-        relation_pairs = torch.cat((batch_features_ext, sample_features_ext), 2).view(-1, self.embedding_dim * 2, 30)
+        relation_pairs = torch.cat((batch_features_ext, sample_features_ext), 2).view(-1, self.embedding_dim * 2, sample_features.shape[2])
         #dists dimension = inst_per_class_test*req_num_classes*req_num_classes x 1
-        dists = self._euclidean_dist(relation_pairs[:, 0:self.embedding_dim, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1),
+
+        dists_cosine = self._cosine_dist(relation_pairs[:, 0:self.embedding_dim, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1),
                                      relation_pairs[:, self.embedding_dim:, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1))
         #dists dimension = inst_per_class_test*req_num_classes x req_num_classes
-        dists = dists.view(-1, self.num_classes)
+        dists_cosine = dists_cosine.view(-1, self.num_classes)
+
+        dists_euc = self._euclidean_dist(relation_pairs[:, 0:self.embedding_dim, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1),
+                                     relation_pairs[:, self.embedding_dim:, :].view(self.num_classes*self.num_classes*self.batch_num_per_class, -1))
+        #dists dimension = inst_per_class_test*req_num_classes x req_num_classes
+        dists_euc = dists_euc.view(-1, self.num_classes)
+
+        dists =  dists_euc #- dists_cosine
+        norm_dists = (dists - dists.min(1, True).values)/(dists.max(1, True).values - dists.min(1, True).values)
+        # print("dists:", dists)
         log_p_y = F.log_softmax(-1*dists, dim=1)
-        _, predicted_label = log_p_y.max(1)
+        _, predicted_label = norm_dists.min(1)
         acc = torch.eq(predicted_label, batch_labels.to(self.device)).float().mean()
         one_hot_labels = torch.zeros(self.batch_num_per_class * self.num_classes, self.num_classes).scatter_(1, batch_labels.view(-1, 1), 1).to(self.device)
-        loss = (-1 * log_p_y * one_hot_labels).squeeze().mean()
+        one_hot_inv_labels = torch.ones(self.batch_num_per_class * self.num_classes, self.num_classes).scatter_(1, batch_labels.view(-1, 1), 0).to(self.device)
+        # reg = (dists.sum(1) - (dists*one_hot_labels).sum(1)).sum().squeeze()
+        # reg = 1/reg
+        lam = 0.3
+        loss_correct = (-1 * log_p_y * one_hot_labels).sum(1).squeeze().mean()
+        mse = nn.MSELoss().to(self.device)
+        loss_mse = mse(norm_dists, one_hot_inv_labels)
+        loss = loss_mse #+ 0.01*loss_correct
         return loss, acc, predicted_label, F.softmax(-1*dists, dim = 1)
 
 
@@ -213,6 +242,7 @@ class train_rl_model:
                 # test
                 print("Testing...")
                 test_accuracy = 0
+                self.feature_encoder.eval()
                 for i in range(self.test_episodes):
                     sample_dataloader, test_dataloader = self._load_data(train=False)
                     sample_images, sample_labels = sample_dataloader.__iter__().next()
@@ -226,7 +256,7 @@ class train_rl_model:
                     #
                     # total_rewards += np.sum(rewards)
                     test_accuracy += acc
-
+                self.feature_encoder.train()
                 test_accuracy = test_accuracy / self.test_episodes
 
                 print("test accuracy:", test_accuracy)
@@ -246,5 +276,5 @@ class train_rl_model:
                     last_accuracy = test_accuracy
 
 
-network_trainer = train_rl_model()
+network_trainer = train_proto_model()
 network_trainer.train_model()

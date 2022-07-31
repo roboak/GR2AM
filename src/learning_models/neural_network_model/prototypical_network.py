@@ -27,26 +27,33 @@ class CNN1DEncoder(nn.Module):
 
         self.cnn_layers = Sequential(
             # out_channel = number of filters in the CNN
-            Conv1d(in_channels=self.input_channels, out_channels=128,
+            Conv1d(in_channels=self.input_channels, out_channels=64,
                    kernel_size=3,padding=1),
-            BatchNorm1d(128),
-            ReLU(),
-            # Dropout(0.15),
-            # MaxPool1d(2),
-            Conv1d(in_channels=128, out_channels=128,
-                   kernel_size=3,padding=1),
-            BatchNorm1d(128),
-            ReLU(),
-
-            Conv1d(in_channels=128, out_channels=64,
-                   kernel_size=3, padding=1),
             BatchNorm1d(64),
             ReLU(),
+            Dropout(0.15),
+            MaxPool1d(2),
 
-            Conv1d(in_channels=64, out_channels=feature_dim,
+            Conv1d(in_channels=64, out_channels=128,
+                   kernel_size=3,padding=1),
+            BatchNorm1d(128),
+            ReLU(),
+            Dropout(0.10),
+            MaxPool1d(2),
+
+            Conv1d(in_channels=128, out_channels=256,
+                   kernel_size=3, padding=1),
+            BatchNorm1d(256),
+            ReLU(),
+            Dropout(0.10),
+            MaxPool1d(2),
+
+            Conv1d(in_channels=256, out_channels=feature_dim,
                    kernel_size=3, padding=1),
             BatchNorm1d(feature_dim),
             ReLU(),
+            MaxPool1d(2),
+
             # Dropout(0.10),
             # MaxPool1d(2),
 
