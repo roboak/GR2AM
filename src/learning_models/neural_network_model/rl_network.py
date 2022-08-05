@@ -19,12 +19,12 @@ from utils.neural_network_related.task_generator import HandGestureTask, HandGes
 # input size (N,Cin,Lin) and output (N,Cout,Lout)
 
 class CNN1DEncoder(nn.Module):
-    def __init__(self, seq_len, feature_dim):
+    def __init__(self, seq_len, feature_dim, fc_input=None):
         super(CNN1DEncoder, self).__init__()
         # self.device = device
         self.seq_len = seq_len
         self.input_channels = 63
-
+        self.fc_input = fc_input
         self.cnn_layers = Sequential(
             # out_channel = number of filters in the CNN
             Conv1d(in_channels=self.input_channels, out_channels=128,
@@ -68,20 +68,21 @@ class RelationNetwork(nn.Module):
         self.rn_layer1 = nn.Sequential(
                         nn.Conv1d(2*feature_dim,64,kernel_size=3,padding=1),
                         nn.BatchNorm1d(64, momentum=1, affine=True),
-                        nn.ReLU(),
-                        nn.MaxPool1d(2))
+                        nn.ReLU(),)
+                        # nn.MaxPool1d(2))
         self.rn_layer2 = nn.Sequential(
                         nn.Conv1d(64,64,kernel_size=3,padding=1),
                         nn.BatchNorm1d(64, momentum=1, affine=True),
-                        nn.ReLU(),
-                        nn.MaxPool1d(2))
+                        nn.ReLU(),)
+                        # nn.MaxPool1d(2))
         # batch_size x 64 x seq_len/4
         # input_szie  = 64 x seq_len/4
-        input_size = 64 * int(seq_len /2 /2)
+        input_size = 64 * 1
         # self.layer3 = Sequential(
         #     nn.Linear(input_size, hidden_size),
         #     # ReLU(),
         #     nn.Linear(hidden_size, 1)
+
         #     # Sigmoid()
         # )
 

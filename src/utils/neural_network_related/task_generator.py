@@ -146,5 +146,4 @@ def debug():
     trainDataLoader = get_data_loader(task=task, num_inst=inst_per_class_train, num_classes=req_num_classes, split='train')
 
 
-debug()
 

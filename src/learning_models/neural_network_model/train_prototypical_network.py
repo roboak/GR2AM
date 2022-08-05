@@ -16,7 +16,7 @@ from torch.nn import functional as F
 
 
 parser = argparse.ArgumentParser(description="One Shot Gesture Recognition")
-parser.add_argument("-f","--feature_dim",type = int, default = 64)
+parser.add_argument("-f","--feature_dim",type = int, default = 256)
 parser.add_argument("-w","--class_num",type = int, default = 3)
 parser.add_argument("-s","--sample_num_per_class",type = int, default = 5)
 parser.add_argument("-b","--batch_num_per_class",type = int, default = 17)
@@ -185,7 +185,7 @@ class train_proto_model:
         loss_correct = (-1 * log_p_y * one_hot_labels).sum(1).squeeze().mean()
         mse = nn.MSELoss().to(self.device)
         loss_mse = mse(norm_dists, one_hot_inv_labels)
-        loss = loss_mse #+ 0.01*loss_correct
+        loss = loss_mse + 0.01*loss_correct
         return loss, acc, predicted_label, F.softmax(-1*dists, dim = 1)
 
 
