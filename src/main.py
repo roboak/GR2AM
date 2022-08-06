@@ -49,7 +49,7 @@ def main(args):
                       'gesture_r_down_6']
         fnames = []
         if args[3] == '--train_data':
-            folder = "train"
+            folder = "support"
             fnames = fnames_training
             print("Recording training data")
         if args[3] == '--eval_data':
