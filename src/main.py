@@ -40,9 +40,11 @@ def main(args):
         # fnames_new = ['gesture_t_tap_1', 'gesture_t_up_2', 'gesture_t_down_3', 'gesture_i_tap_4', 'gesture_i_up_5',
         #               'gesture_i_down_6', 'gesture_m_tap_7', 'gesture_m_up_8', 'gesture_m_down_9', 'gesture_r_tap_10']
         fnames_still = ['gesture_n_still_16', 'gesture_n_up_17', 'gesture_n_down_18']
-
+# pt = palm touch
+        # co = count
         fnames_training = ['gesture_t_tap_1', 'gesture_t_up_2', 'gesture_t_down_3', 'gesture_i_tap_4', 'gesture_i_up_5',
-                      'gesture_i_down_6']
+                      'gesture_i_down_6', 'gesture_t_pt_7', 'gesture_i_pt_8', 'gesture_m_pt_9', 'gesture_r_pt_10', 'gesture_l_pt_11', 'gesture_all_pt_12', 'gesture_co_i_13'
+                           , 'gesture_co_im_14', 'gesture_co_imr_15', 'gesture_co_imrl_16', 'gesture_co_imrlf_17', 'gesture_co_t_18']
         fnames_testing = ['gesture_m_tap_1', 'gesture_m_up_2', 'gesture_m_down_3', 'gesture_r_tap_4', 'gesture_r_up_5',
                       'gesture_r_down_6']
         fnames = []
